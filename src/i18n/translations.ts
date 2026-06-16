@@ -2,7 +2,7 @@ export type Language = 'ar' | 'en';
 
 export const STRINGS = {
   appNameArabic: { ar: 'وَحْيُ الرَّحْمَن', en: 'وَحْيُ الرَّحْمَن' },
-  appNameEnglish: { ar: "Wahio Arr'ah", en: "Wahio Arr'ah" },
+  appNameEnglish: { ar: "Wahio Arr'ah'maan", en: "Wahio Arr'ah'maan" },
   home: { ar: 'الرئيسية', en: 'Home' },
   surahs: { ar: 'السور', en: 'Surahs' },
   search: { ar: 'بحث', en: 'Search' },

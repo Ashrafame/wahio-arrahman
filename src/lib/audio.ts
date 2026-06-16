@@ -6,6 +6,9 @@ type PlaybackListener = (key: string | null, isPlaying: boolean) => void;
 let player: AudioPlayer | null = null;
 let currentKey: string | null = null;
 const listeners = new Set<PlaybackListener>();
+let _seqItems: { key: string; url: string }[] = [];
+let _seqIdx = 0;
+let _seqId: string | null = null;
 
 function notify(isPlaying: boolean) {
   for (const listener of listeners) listener(currentKey, isPlaying);
@@ -16,8 +19,19 @@ function ensurePlayer(): AudioPlayer {
     player = createAudioPlayer(null);
     player.addListener('playbackStatusUpdate', (status) => {
       if (status.didJustFinish) {
-        currentKey = null;
-        notify(false);
+        if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
+          _seqIdx++;
+          currentKey = _seqItems[_seqIdx].key;
+          player!.replace({ uri: _seqItems[_seqIdx].url });
+          player!.play();
+          notify(true);
+        } else {
+          _seqItems = [];
+          _seqIdx = 0;
+          _seqId = null;
+          currentKey = null;
+          notify(false);
+        }
       }
     });
   }
@@ -26,6 +40,9 @@ function ensurePlayer(): AudioPlayer {
 
 /** Plays the given url; `key` identifies the playable item (e.g. an ayah key) so the UI can show which one is active. */
 export function playAudio(key: string, url: string) {
+  _seqItems = [];
+  _seqIdx = 0;
+  _seqId = null;
   const p = ensurePlayer();
   if (currentKey === key && p.playing) {
     p.pause();
@@ -38,7 +55,23 @@ export function playAudio(key: string, url: string) {
   notify(true);
 }
 
+/** Plays a sequence of items one by one. `seqId` uniquely identifies this sequence so UI can track it. */
+export function playSequence(seqId: string, items: { key: string; url: string }[]) {
+  if (!items.length) return;
+  _seqItems = items;
+  _seqIdx = 0;
+  _seqId = seqId;
+  const p = ensurePlayer();
+  currentKey = items[0].key;
+  p.replace({ uri: items[0].url });
+  p.play();
+  notify(true);
+}
+
 export function stopAudio() {
+  _seqItems = [];
+  _seqIdx = 0;
+  _seqId = null;
   if (!player) return;
   player.pause();
   currentKey = null;
@@ -47,6 +80,10 @@ export function stopAudio() {
 
 export function getCurrentAudioKey(): string | null {
   return currentKey;
+}
+
+export function getCurrentSequenceId(): string | null {
+  return _seqId;
 }
 
 export function subscribeAudio(listener: PlaybackListener): () => void {

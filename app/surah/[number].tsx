@@ -17,7 +17,7 @@ import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
 import { AyahCard } from '../../src/components/AyahCard';
 import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
-import { getCurrentAudioKey, playAudio, subscribeAudio } from '../../src/lib/audio';
+import { getCurrentAudioKey, getCurrentSequenceId, playAudio, playSequence, stopAudio, subscribeAudio } from '../../src/lib/audio';
 
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
@@ -56,6 +56,7 @@ export default function SurahScreen() {
   const [reciterPickerOpen, setReciterPickerOpen] = useState(false);
   const [highlightVerse, setHighlightVerse] = useState<number | undefined>(targetVerse);
   const [playingKey, setPlayingKey] = useState<string | null>(getCurrentAudioKey());
+  const [currentSeqId, setCurrentSeqId] = useState<string | null>(getCurrentSequenceId());
   const [lastTappedVerse, setLastTappedVerse] = useState<number | null>(null);
 
   const reciterId = qiraah === 'hafs' ? hafsReciter : qaloonReciter;
@@ -63,7 +64,10 @@ export default function SurahScreen() {
   const reciterOptions = getRecitersForQiraah(qiraah);
 
   useEffect(() => {
-    return subscribeAudio((key) => setPlayingKey(key));
+    return subscribeAudio((key, isPlaying) => {
+      setPlayingKey(key);
+      setCurrentSeqId(isPlaying ? getCurrentSequenceId() : null);
+    });
   }, []);
 
   useEffect(() => {
@@ -137,6 +141,24 @@ export default function SurahScreen() {
     return reciter ? (lang === 'ar' ? reciter.nameAr : reciter.nameEn) : '';
   };
 
+  const surahSeqId = `surah:${chapterNumber}:hafs:${hafsReciter}`;
+  const surahIsPlaying = currentSeqId === surahSeqId;
+
+  const handlePlaySurah = () => {
+    if (surahIsPlaying) {
+      stopAudio();
+      return;
+    }
+    const items = ayahs
+      .map((a) => {
+        const audio = getAyahAudioUrl(chapterNumber, a.verse, 'hafs', hafsReciter);
+        if (!audio) return null;
+        return { key: `${chapterNumber}:${a.verse}:${hafsReciter}`, url: audio.url };
+      })
+      .filter((x): x is { key: string; url: string } => x !== null);
+    playSequence(surahSeqId, items);
+  };
+
   const handlePlayAyah = (verse: number) => {
     const audio = getAyahAudioUrl(chapterNumber, verse, qiraah, reciterId);
     if (!audio) return;
@@ -167,7 +189,13 @@ export default function SurahScreen() {
             {chapter.nameTranslationEn} · {chapter.versesCount} {t('verses')}
           </Text>
         </View>
-        <View style={{ width: 32 }} />
+        {qiraah === 'hafs' ? (
+          <Pressable onPress={handlePlaySurah} style={styles.iconButton} hitSlop={8}>
+            <Ionicons name={surahIsPlaying ? 'pause' : 'play'} size={24} color={palette.primaryText} />
+          </Pressable>
+        ) : (
+          <View style={{ width: 32 }} />
+        )}
       </View>
 
       <ScrollView

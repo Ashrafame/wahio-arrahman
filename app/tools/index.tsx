@@ -36,9 +36,9 @@ export default function ToolsScreen() {
           <Pressable
             key={tool.route}
             onPress={() => router.push(tool.route as any)}
-            style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
+            style={styles.card}
           >
-            <Ionicons name={tool.icon} size={32} color={tool.color} />
+            <Ionicons name={tool.icon} size={40} color={tool.color} />
             <Text style={[styles.cardLabel, { color: palette.text, fontSize: scaleFont(14) }]}>{t(tool.titleKey)}</Text>
           </Pressable>
         ))}
@@ -61,8 +61,6 @@ const styles = StyleSheet.create({
   card: {
     width: '46%',
     aspectRatio: 1,
-    borderWidth: 1,
-    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
