@@ -22,9 +22,15 @@ function ensurePlayer(): AudioPlayer {
         if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
           _seqIdx++;
           currentKey = _seqItems[_seqIdx].key;
-          player!.replace({ uri: _seqItems[_seqIdx].url });
-          player!.play();
           notify(true);
+          // Delay replace+play so the event loop clears before loading the next track
+          const nextUrl = _seqItems[_seqIdx].url;
+          setTimeout(() => {
+            if (_seqItems.length > 0) {
+              player!.replace({ uri: nextUrl });
+              player!.play();
+            }
+          }, 200);
         } else {
           _seqItems = [];
           _seqIdx = 0;

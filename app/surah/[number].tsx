@@ -182,20 +182,23 @@ export default function SurahScreen() {
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />
         </Pressable>
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={[styles.headerTitle, { color: palette.primaryText, fontFamily: 'Amiri-Bold' }]}>
-            {chapter.nameArabic}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Text style={[styles.headerTitle, { color: palette.primaryText, fontFamily: 'Amiri-Bold' }]}>
+              {chapter.nameArabic}
+            </Text>
+            {qiraah === 'hafs' ? (
+              <Pressable onPress={handlePlaySurah} hitSlop={8}>
+                <Ionicons name={surahIsPlaying ? 'pause-circle' : 'play-circle'} size={22} color={palette.primaryText} />
+              </Pressable>
+            ) : null}
+          </View>
           <Text style={[styles.headerSubtitle, { color: palette.primaryText }]}>
             {chapter.nameTranslationEn} · {chapter.versesCount} {t('verses')}
           </Text>
         </View>
-        {qiraah === 'hafs' ? (
-          <Pressable onPress={handlePlaySurah} style={styles.iconButton} hitSlop={8}>
-            <Ionicons name={surahIsPlaying ? 'pause' : 'play'} size={24} color={palette.primaryText} />
-          </Pressable>
-        ) : (
-          <View style={{ width: 32 }} />
-        )}
+        <Pressable onPress={() => router.push('/settings')} style={styles.iconButton} hitSlop={8}>
+          <Ionicons name="settings-outline" size={22} color={palette.primaryText} />
+        </Pressable>
       </View>
 
       <ScrollView

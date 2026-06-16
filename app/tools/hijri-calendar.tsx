@@ -38,7 +38,9 @@ export default function HijriCalendarScreen() {
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />
         </Pressable>
         <Text style={[styles.headerTitle, { color: palette.primaryText }]}>{t('hijriCalendar')}</Text>
-        <View style={{ width: 32 }} />
+        <Pressable onPress={() => router.push('/settings')} style={styles.iconButton} hitSlop={8}>
+          <Ionicons name="settings-outline" size={22} color={palette.primaryText} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
