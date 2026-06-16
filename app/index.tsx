@@ -60,6 +60,9 @@ export default function HomeScreen() {
         <Pressable onPress={() => router.push('/search')} style={styles.iconButton} hitSlop={8}>
           <Ionicons name="search" size={24} color={palette.primaryText} />
         </Pressable>
+        <Pressable onPress={() => router.push('/tools')} style={styles.iconButton} hitSlop={8}>
+          <Ionicons name="grid-outline" size={24} color={palette.primaryText} />
+        </Pressable>
         <Pressable onPress={() => router.push('/settings')} style={styles.iconButton} hitSlop={8}>
           <Ionicons name="settings-sharp" size={24} color={palette.primaryText} />
         </Pressable>

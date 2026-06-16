@@ -4,6 +4,7 @@ import * as Localization from 'expo-localization';
 import { Language, StringKey, translate } from '../i18n/translations';
 import { Qiraah } from '../lib/quranData';
 import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
+import { CalculationMethodId, DEFAULT_CALCULATION_METHOD } from '../lib/prayerTimes';
 
 export type FontFamilyId = 'amiri' | 'scheherazade';
 export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
@@ -19,6 +20,7 @@ interface Settings {
   theme: ThemeId;
   hafsReciter: string;
   qaloonReciter: string;
+  calculationMethod: CalculationMethodId;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -31,6 +33,7 @@ const DEFAULT_SETTINGS: Settings = {
   theme: 'light',
   hafsReciter: DEFAULT_HAFS_RECITER_ID,
   qaloonReciter: DEFAULT_QALOON_RECITER_ID,
+  calculationMethod: DEFAULT_CALCULATION_METHOD,
 };
 
 const STORAGE_KEY = 'wahio-arrahman:settings';
@@ -47,6 +50,7 @@ interface SettingsContextValue extends Settings {
   setTheme: (theme: ThemeId) => void;
   setHafsReciter: (id: string) => void;
   setQaloonReciter: (id: string) => void;
+  setCalculationMethod: (id: CalculationMethodId) => void;
   ready: boolean;
 }
 
@@ -107,6 +111,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setTheme: (theme) => setSettings((s) => ({ ...s, theme })),
       setHafsReciter: (hafsReciter) => setSettings((s) => ({ ...s, hafsReciter })),
       setQaloonReciter: (qaloonReciter) => setSettings((s) => ({ ...s, qaloonReciter })),
+      setCalculationMethod: (calculationMethod) => setSettings((s) => ({ ...s, calculationMethod })),
     };
   }, [settings, ready]);
 

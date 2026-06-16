@@ -38,6 +38,14 @@ function RootStack() {
         <Stack.Screen name="surah/[number]" options={{ headerShown: false }} />
         <Stack.Screen name="search" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
+        <Stack.Screen name="tools/index" options={{ headerShown: false }} />
+        <Stack.Screen name="tools/prayer-times" options={{ headerShown: false }} />
+        <Stack.Screen name="tools/qibla" options={{ headerShown: false }} />
+        <Stack.Screen name="tools/tasbih" options={{ headerShown: false }} />
+        <Stack.Screen name="tools/azkar/index" options={{ headerShown: false }} />
+        <Stack.Screen name="tools/azkar/[category]" options={{ headerShown: false }} />
+        <Stack.Screen name="tools/hijri-calendar" options={{ headerShown: false }} />
+        <Stack.Screen name="tools/riwayat" options={{ headerShown: false }} />
       </Stack>
     </>
   );
