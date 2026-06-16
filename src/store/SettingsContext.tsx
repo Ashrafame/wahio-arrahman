@@ -1,0 +1,111 @@
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
+import { Language, StringKey, translate } from '../i18n/translations';
+import { Qiraah } from '../lib/quranData';
+
+export type FontFamilyId = 'amiri' | 'scheherazade';
+export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
+export type ThemeId = 'light' | 'dark';
+
+interface Settings {
+  language: Language;
+  qiraah: Qiraah;
+  fontFamily: FontFamilyId;
+  fontSize: FontSizeId;
+  showTranslation: boolean;
+  tafsirEdition: string;
+  theme: ThemeId;
+}
+
+const DEFAULT_SETTINGS: Settings = {
+  language: 'ar',
+  qiraah: 'hafs',
+  fontFamily: 'amiri',
+  fontSize: 'medium',
+  showTranslation: false,
+  tafsirEdition: 'muyassar',
+  theme: 'light',
+};
+
+const STORAGE_KEY = 'wahio-arrahman:settings';
+
+interface SettingsContextValue extends Settings {
+  isRTL: boolean;
+  t: (key: StringKey) => string;
+  setLanguage: (language: Language) => void;
+  setQiraah: (qiraah: Qiraah) => void;
+  setFontFamily: (font: FontFamilyId) => void;
+  setFontSize: (size: FontSizeId) => void;
+  setShowTranslation: (show: boolean) => void;
+  setTafsirEdition: (id: string) => void;
+  setTheme: (theme: ThemeId) => void;
+  ready: boolean;
+}
+
+const SettingsContext = createContext<SettingsContextValue | null>(null);
+
+export const FONT_FAMILY_MAP: Record<FontFamilyId, string> = {
+  amiri: 'Amiri-Regular',
+  scheherazade: 'ScheherazadeNew-Regular',
+};
+
+export const FONT_SIZE_MAP: Record<FontSizeId, number> = {
+  small: 22,
+  medium: 28,
+  large: 34,
+  xlarge: 42,
+};
+
+export function SettingsProvider({ children }: { children: React.ReactNode }) {
+  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
+        } else {
+          const deviceLang = Localization.getLocales()[0]?.languageCode;
+          if (deviceLang && deviceLang !== 'ar') {
+            setSettings((s) => ({ ...s, language: 'en' }));
+          }
+        }
+      } finally {
+        setReady(true);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (ready) {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(settings)).catch(() => {});
+    }
+  }, [settings, ready]);
+
+  const value = useMemo<SettingsContextValue>(() => {
+    return {
+      ...settings,
+      isRTL: settings.language === 'ar',
+      ready,
+      t: (key: StringKey) => translate(key, settings.language),
+      setLanguage: (language) => setSettings((s) => ({ ...s, language })),
+      setQiraah: (qiraah) => setSettings((s) => ({ ...s, qiraah })),
+      setFontFamily: (fontFamily) => setSettings((s) => ({ ...s, fontFamily })),
+      setFontSize: (fontSize) => setSettings((s) => ({ ...s, fontSize })),
+      setShowTranslation: (showTranslation) => setSettings((s) => ({ ...s, showTranslation })),
+      setTafsirEdition: (tafsirEdition) => setSettings((s) => ({ ...s, tafsirEdition })),
+      setTheme: (theme) => setSettings((s) => ({ ...s, theme })),
+    };
+  }, [settings, ready]);
+
+  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
+}
+
+export function useSettings(): SettingsContextValue {
+  const ctx = useContext(SettingsContext);
+  if (!ctx) throw new Error('useSettings must be used within SettingsProvider');
+  return ctx;
+}
