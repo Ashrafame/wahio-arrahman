@@ -5,15 +5,6 @@ import { Ayah } from '../lib/quranData';
 import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
 import { getPalette } from '../theme/colors';
 
-const ARABIC_INDIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-
-function toArabicNumber(n: number): string {
-  return String(n)
-    .split('')
-    .map((d) => ARABIC_INDIC_DIGITS[Number(d)] ?? d)
-    .join('');
-}
-
 interface Props {
   ayah: Ayah;
   highlighted?: boolean;
@@ -37,7 +28,7 @@ export function AyahCard({
   isPlaying,
   onPlayAudio,
 }: Props) {
-  const { language, isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation } = useSettings();
+  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation } = useSettings();
   const palette = getPalette(theme);
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
 
@@ -53,9 +44,7 @@ export function AyahCard({
     >
       <View style={[styles.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <View style={[styles.numberBadge, { backgroundColor: palette.primary }]}>
-          <Text style={{ color: palette.primaryText, fontSize: 12, fontWeight: '700' }}>
-            {language === 'ar' ? toArabicNumber(ayah.verse) : ayah.verse}
-          </Text>
+          <Text style={{ color: palette.primaryText, fontSize: 12, fontWeight: '700' }}>{ayah.verse}</Text>
         </View>
         <View style={[styles.actionsRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           {onPlayAudio ? (

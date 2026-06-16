@@ -8,11 +8,6 @@ import { getPalette } from '../../src/theme/colors';
 import { gregorianToHijri, hijriToGregorian, HIJRI_MONTH_NAMES_AR, HIJRI_MONTH_NAMES_EN } from '../../src/lib/hijri';
 import { HIJRI_EVENTS } from '../../src/data/hijriEvents';
 
-const ARABIC_INDIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-function toArabicNumber(n: number): string {
-  return String(n).split('').map((d) => ARABIC_INDIC_DIGITS[Number(d)] ?? d).join('');
-}
-
 export default function HijriCalendarScreen() {
   const { isRTL, t, theme, language } = useSettings();
   const palette = getPalette(theme);
@@ -34,7 +29,7 @@ export default function HijriCalendarScreen() {
   }, [hijriToday, today]);
 
   const monthNames = language === 'ar' ? HIJRI_MONTH_NAMES_AR : HIJRI_MONTH_NAMES_EN;
-  const formatNumber = (n: number) => (language === 'ar' ? toArabicNumber(n) : String(n));
+  const formatNumber = (n: number) => String(n);
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>

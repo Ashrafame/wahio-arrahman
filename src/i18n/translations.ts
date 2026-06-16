@@ -7,7 +7,7 @@ export const STRINGS = {
   surahs: { ar: 'السور', en: 'Surahs' },
   search: { ar: 'بحث', en: 'Search' },
   searchPlaceholder: {
-    ar: 'ابحث عن سورة، آية (٢:٢٥٥) أو كلمة...',
+    ar: 'ابحث عن سورة، آية (2:255) أو كلمة...',
     en: 'Search a surah, verse (2:255) or word...',
   },
   settings: { ar: 'الإعدادات', en: 'Settings' },
