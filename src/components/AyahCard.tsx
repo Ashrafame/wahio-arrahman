@@ -22,6 +22,8 @@ interface Props {
   tafsirError?: boolean;
   showTafsir: boolean;
   onToggleTafsir: () => void;
+  isPlaying?: boolean;
+  onPlayAudio?: () => void;
 }
 
 export function AyahCard({
@@ -32,6 +34,8 @@ export function AyahCard({
   tafsirError,
   showTafsir,
   onToggleTafsir,
+  isPlaying,
+  onPlayAudio,
 }: Props) {
   const { language, isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation } = useSettings();
   const palette = getPalette(theme);
@@ -53,13 +57,24 @@ export function AyahCard({
             {language === 'ar' ? toArabicNumber(ayah.verse) : ayah.verse}
           </Text>
         </View>
-        <Pressable onPress={onToggleTafsir} style={styles.tafsirButton} hitSlop={8}>
-          <Ionicons
-            name={showTafsir ? 'book' : 'book-outline'}
-            size={18}
-            color={showTafsir ? palette.accent : palette.textMuted}
-          />
-        </Pressable>
+        <View style={[styles.actionsRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          {onPlayAudio ? (
+            <Pressable onPress={onPlayAudio} style={styles.tafsirButton} hitSlop={8}>
+              <Ionicons
+                name={isPlaying ? 'pause-circle' : 'play-circle-outline'}
+                size={20}
+                color={isPlaying ? palette.accent : palette.textMuted}
+              />
+            </Pressable>
+          ) : null}
+          <Pressable onPress={onToggleTafsir} style={styles.tafsirButton} hitSlop={8}>
+            <Ionicons
+              name={showTafsir ? 'book' : 'book-outline'}
+              size={18}
+              color={showTafsir ? palette.accent : palette.textMuted}
+            />
+          </Pressable>
+        </View>
       </View>
 
       <Text
@@ -123,6 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  actionsRow: { alignItems: 'center', gap: 6 },
   tafsirButton: { padding: 4 },
   arabicText: {
     writingDirection: 'rtl',

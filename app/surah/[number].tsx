@@ -16,6 +16,8 @@ import { fetchSurahTafsir, TAFSIR_EDITIONS } from '../../src/lib/tafsirRemote';
 import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
 import { AyahCard } from '../../src/components/AyahCard';
+import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
+import { getCurrentAudioKey, playAudio, subscribeAudio } from '../../src/lib/audio';
 
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
@@ -24,8 +26,21 @@ export default function SurahScreen() {
   const chapterNumber = Number(params.number);
   const targetVerse = params.verse ? Number(params.verse) : undefined;
 
-  const { isRTL, t, theme, qiraah, setQiraah, showTranslation, setShowTranslation, tafsirEdition, setTafsirEdition } =
-    useSettings();
+  const {
+    isRTL,
+    t,
+    theme,
+    qiraah,
+    setQiraah,
+    showTranslation,
+    setShowTranslation,
+    tafsirEdition,
+    setTafsirEdition,
+    hafsReciter,
+    qaloonReciter,
+    setHafsReciter,
+    setQaloonReciter,
+  } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<Ayah>>(null);
@@ -38,7 +53,18 @@ export default function SurahScreen() {
   const [tafsirLoading, setTafsirLoading] = useState(false);
   const [tafsirError, setTafsirError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [reciterPickerOpen, setReciterPickerOpen] = useState(false);
   const [highlightVerse, setHighlightVerse] = useState<number | undefined>(targetVerse);
+  const [playingKey, setPlayingKey] = useState<string | null>(getCurrentAudioKey());
+  const [lastTappedVerse, setLastTappedVerse] = useState<number | null>(null);
+
+  const reciterId = qiraah === 'hafs' ? hafsReciter : qaloonReciter;
+  const setReciterId = qiraah === 'hafs' ? setHafsReciter : setQaloonReciter;
+  const reciterOptions = getRecitersForQiraah(qiraah);
+
+  useEffect(() => {
+    return subscribeAudio((key) => setPlayingKey(key));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -106,6 +132,27 @@ export default function SurahScreen() {
     return edition ? (lang === 'ar' ? edition.nameArabic : edition.nameEnglish) : '';
   };
 
+  const currentReciterName = (lang: 'ar' | 'en') => {
+    const reciter = reciterOptions.find((r) => r.id === reciterId);
+    return reciter ? (lang === 'ar' ? reciter.nameAr : reciter.nameEn) : '';
+  };
+
+  const handlePlayAyah = (verse: number) => {
+    const audio = getAyahAudioUrl(chapterNumber, verse, qiraah, reciterId);
+    if (!audio) return;
+    const key = audio.granularity === 'ayah' ? `${chapterNumber}:${verse}:${reciterId}` : `${chapterNumber}:${reciterId}`;
+    setLastTappedVerse(verse);
+    playAudio(key, audio.url);
+  };
+
+  const isAyahPlaying = (verse: number) => {
+    if (!playingKey) return false;
+    const audio = getAyahAudioUrl(chapterNumber, verse, qiraah, reciterId);
+    if (!audio) return false;
+    if (audio.granularity === 'ayah') return playingKey === `${chapterNumber}:${verse}:${reciterId}`;
+    return playingKey === `${chapterNumber}:${reciterId}` && lastTappedVerse === verse;
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -153,6 +200,13 @@ export default function SurahScreen() {
           palette={palette}
         />
         <ToolbarChip
+          icon="mic-outline"
+          active={false}
+          label={currentReciterName(isRTL ? 'ar' : 'en')}
+          onPress={() => setReciterPickerOpen(true)}
+          palette={palette}
+        />
+        <ToolbarChip
           icon="options-outline"
           active={false}
           label={t('fontSize')}
@@ -160,6 +214,14 @@ export default function SurahScreen() {
           palette={palette}
         />
       </ScrollView>
+
+      {qiraah === 'qaloon' ? (
+        <View style={[styles.noticeBanner, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+          <Text style={{ color: palette.textMuted, fontSize: 12, textAlign: isRTL ? 'right' : 'left' }}>
+            {t('qaloonSurahOnlyNotice')}
+          </Text>
+        </View>
+      ) : null}
 
       <FlatList
         ref={listRef}
@@ -180,6 +242,8 @@ export default function SurahScreen() {
             tafsirText={tafsirMap[item.verse]}
             tafsirLoading={tafsirLoading}
             tafsirError={tafsirError}
+            isPlaying={isAyahPlaying(item.verse)}
+            onPlayAudio={() => handlePlayAyah(item.verse)}
           />
         )}
         onScrollToIndexFailed={(info) => {
@@ -216,6 +280,39 @@ export default function SurahScreen() {
                 )}
                 <Text style={{ color: palette.text, fontSize: 15 }}>
                   {isRTL ? edition.nameArabic : edition.nameEnglish}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal visible={reciterPickerOpen} transparent animationType="fade" onRequestClose={() => setReciterPickerOpen(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setReciterPickerOpen(false)}>
+          <View style={[styles.modalCard, { backgroundColor: palette.surface }]}>
+            <Text style={[styles.modalTitle, { color: palette.text }]}>{t('selectReciter')}</Text>
+            {reciterOptions.map((reciter) => (
+              <Pressable
+                key={reciter.id}
+                onPress={() => {
+                  setReciterId(reciter.id);
+                  setReciterPickerOpen(false);
+                }}
+                style={[
+                  styles.modalRow,
+                  {
+                    backgroundColor: reciterId === reciter.id ? palette.surfaceAlt : 'transparent',
+                    flexDirection: isRTL ? 'row-reverse' : 'row',
+                  },
+                ]}
+              >
+                {reciterId === reciter.id ? (
+                  <Ionicons name="checkmark-circle" size={18} color={palette.primary} />
+                ) : (
+                  <View style={{ width: 18 }} />
+                )}
+                <Text style={{ color: palette.text, fontSize: 15 }}>
+                  {isRTL ? reciter.nameAr : reciter.nameEn}
                 </Text>
               </Pressable>
             ))}
@@ -319,6 +416,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 26,
     marginVertical: 16,
+  },
+  noticeBanner: {
+    borderBottomWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
   },
   modalOverlay: {
     flex: 1,

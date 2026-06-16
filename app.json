@@ -18,6 +18,12 @@
           "image": "./assets/icon.png",
           "imageWidth": 160
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "يستخدم التطبيق موقعك الحالي لتحديد اتجاه القبلة ومواقيت الصلاة بدقة."
+        }
       ]
     ],
     "ios": {

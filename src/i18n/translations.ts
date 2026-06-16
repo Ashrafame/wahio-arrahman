@@ -44,6 +44,12 @@ export const STRINGS = {
     ar: 'النص القرآني من مصدر تنزيل (tanzil.net)، والتفاسير من مصادر موثوقة.',
     en: 'Quran text sourced from Tanzil (tanzil.net); tafsir from trusted sources.',
   },
+  reciter: { ar: 'القارئ', en: 'Reciter' },
+  selectReciter: { ar: 'اختر القارئ', en: 'Select Reciter' },
+  qaloonSurahOnlyNotice: {
+    ar: 'تنبيه: تسجيلات رواية قالون المتوفرة هي للسورة كاملة فقط، وستبدأ القراءة من أول السورة عند الضغط على أي آية.',
+    en: 'Note: available Qaloon recordings cover the full surah only; playback starts from the beginning of the surah when you tap any ayah.',
+  },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;

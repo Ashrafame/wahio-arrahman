@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import { Language, StringKey, translate } from '../i18n/translations';
 import { Qiraah } from '../lib/quranData';
+import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
 
 export type FontFamilyId = 'amiri' | 'scheherazade';
 export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
@@ -16,6 +17,8 @@ interface Settings {
   showTranslation: boolean;
   tafsirEdition: string;
   theme: ThemeId;
+  hafsReciter: string;
+  qaloonReciter: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -26,6 +29,8 @@ const DEFAULT_SETTINGS: Settings = {
   showTranslation: false,
   tafsirEdition: 'muyassar',
   theme: 'light',
+  hafsReciter: DEFAULT_HAFS_RECITER_ID,
+  qaloonReciter: DEFAULT_QALOON_RECITER_ID,
 };
 
 const STORAGE_KEY = 'wahio-arrahman:settings';
@@ -40,6 +45,8 @@ interface SettingsContextValue extends Settings {
   setShowTranslation: (show: boolean) => void;
   setTafsirEdition: (id: string) => void;
   setTheme: (theme: ThemeId) => void;
+  setHafsReciter: (id: string) => void;
+  setQaloonReciter: (id: string) => void;
   ready: boolean;
 }
 
@@ -98,6 +105,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setShowTranslation: (showTranslation) => setSettings((s) => ({ ...s, showTranslation })),
       setTafsirEdition: (tafsirEdition) => setSettings((s) => ({ ...s, tafsirEdition })),
       setTheme: (theme) => setSettings((s) => ({ ...s, theme })),
+      setHafsReciter: (hafsReciter) => setSettings((s) => ({ ...s, hafsReciter })),
+      setQaloonReciter: (qaloonReciter) => setSettings((s) => ({ ...s, qaloonReciter })),
     };
   }, [settings, ready]);
 
