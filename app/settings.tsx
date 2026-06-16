@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +27,8 @@ export default function SettingsScreen() {
     setFontFamily,
     fontSize,
     setFontSize,
+    uiFontScale,
+    setUiFontScale,
     showTranslation,
     setShowTranslation,
   } = useSettings();
@@ -95,6 +98,23 @@ export default function SettingsScreen() {
             palette={palette}
             isRTL={isRTL}
           />
+        </Section>
+
+        <Section title={t('uiFontSize')} palette={palette} isRTL={isRTL}>
+          <View style={[styles.sliderRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Ionicons name="text" size={14} color={palette.textMuted} />
+            <Slider
+              style={{ flex: 1 }}
+              minimumValue={0}
+              maximumValue={1}
+              value={uiFontScale}
+              onValueChange={setUiFontScale}
+              minimumTrackTintColor={palette.primary}
+              maximumTrackTintColor={palette.border}
+              thumbTintColor={palette.primary}
+            />
+            <Ionicons name="text" size={22} color={palette.textMuted} />
+          </View>
         </Section>
 
         <Section title={t('theme')} palette={palette} isRTL={isRTL}>
@@ -193,6 +213,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '700', marginBottom: 8, opacity: 0.8 },
   optionRow: { flexWrap: 'wrap', gap: 8 },
   optionChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, borderWidth: 1 },
+  sliderRow: { alignItems: 'center', gap: 8 },
   switchRow: {
     alignItems: 'center',
     justifyContent: 'space-between',

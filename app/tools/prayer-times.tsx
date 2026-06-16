@@ -21,7 +21,7 @@ const PRAYER_KEYS: { key: keyof Omit<DayPrayerTimes, 'date'>; labelKey: StringKe
 ];
 
 export default function PrayerTimesScreen() {
-  const { isRTL, t, theme, language, calculationMethod, setCalculationMethod } = useSettings();
+  const { isRTL, t, theme, language, calculationMethod, setCalculationMethod, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
 
@@ -75,7 +75,7 @@ export default function PrayerTimesScreen() {
         style={[styles.methodChip, { borderColor: palette.border, backgroundColor: palette.surface }]}
       >
         <Ionicons name="options-outline" size={16} color={palette.textMuted} />
-        <Text style={{ color: palette.text, fontSize: 13 }}>
+        <Text style={{ color: palette.text, fontSize: scaleFont(13) }}>
           {methodName ? (isRTL ? methodName.nameAr : methodName.nameEn) : ''}
         </Text>
       </Pressable>
@@ -96,14 +96,14 @@ export default function PrayerTimesScreen() {
         <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
           {days.map((day, index) => (
             <View key={day.date.toDateString()} style={[styles.dayCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-              <Text style={[styles.dayTitle, { color: palette.text }]}>
+              <Text style={[styles.dayTitle, { color: palette.text, fontSize: scaleFont(14) }]}>
                 {index === 0 ? t('today') : formatDate(day.date)}
               </Text>
               <View style={[styles.timesRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
                 {PRAYER_KEYS.map(({ key, labelKey }) => (
                   <View key={key} style={styles.timeCell}>
-                    <Text style={{ color: palette.textMuted, fontSize: 11 }}>{t(labelKey)}</Text>
-                    <Text style={{ color: palette.text, fontSize: 13, fontWeight: '700' }}>
+                    <Text style={{ color: palette.textMuted, fontSize: scaleFont(11) }}>{t(labelKey)}</Text>
+                    <Text style={{ color: palette.text, fontSize: scaleFont(13), fontWeight: '700' }}>
                       {formatTime(day[key])}
                     </Text>
                   </View>
@@ -139,7 +139,7 @@ export default function PrayerTimesScreen() {
                   ) : (
                     <View style={{ width: 18 }} />
                   )}
-                  <Text style={{ color: palette.text, fontSize: 14 }}>
+                  <Text style={{ color: palette.text, fontSize: scaleFont(14) }}>
                     {isRTL ? method.nameAr : method.nameEn}
                   </Text>
                 </Pressable>

@@ -28,7 +28,7 @@ export function AyahCard({
   isPlaying,
   onPlayAudio,
 }: Props) {
-  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation } = useSettings();
+  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
 
@@ -82,7 +82,9 @@ export function AyahCard({
       </Text>
 
       {showTranslation && ayah.translationEn ? (
-        <Text style={[styles.translationText, { color: palette.textMuted }]}>{ayah.translationEn}</Text>
+        <Text style={[styles.translationText, { color: palette.textMuted, fontSize: scaleFont(14) }]}>
+          {ayah.translationEn}
+        </Text>
       ) : null}
 
       {showTafsir ? (
@@ -90,12 +92,19 @@ export function AyahCard({
           {tafsirLoading ? (
             <ActivityIndicator color={palette.primary} />
           ) : tafsirError ? (
-            <Text style={{ color: palette.textMuted, fontSize: 13 }}>{t('tafsirError')}</Text>
+            <Text style={{ color: palette.textMuted, fontSize: scaleFont(13) }}>{t('tafsirError')}</Text>
           ) : (
             <Text
               style={[
                 styles.tafsirText,
-                { color: palette.text, textAlign: 'right', writingDirection: 'rtl', fontFamily: 'Cairo-Variable' },
+                {
+                  color: palette.text,
+                  textAlign: 'right',
+                  writingDirection: 'rtl',
+                  fontFamily: 'Cairo-Variable',
+                  fontSize: scaleFont(15),
+                  lineHeight: scaleFont(15) * 1.6,
+                },
               ]}
             >
               {tafsirText}

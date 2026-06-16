@@ -8,7 +8,7 @@ import { getPalette } from '../../src/theme/colors';
 import { FEATURED_RIWAYAT, OTHER_NARRATIONS_AR, OTHER_NARRATIONS_EN } from '../../src/data/riwayat';
 
 export default function RiwayatScreen() {
-  const { isRTL, t, theme } = useSettings();
+  const { isRTL, t, theme, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
   const otherList = isRTL ? OTHER_NARRATIONS_AR : OTHER_NARRATIONS_EN;
@@ -29,13 +29,13 @@ export default function RiwayatScreen() {
             <Text style={[styles.cardTitle, { color: palette.primary, textAlign: isRTL ? 'right' : 'left' }]}>
               {isRTL ? riwayah.titleAr : riwayah.titleEn}
             </Text>
-            <Section label={isRTL ? 'سند الرواية' : 'Chain of transmission'} isRTL={isRTL} palette={palette}>
+            <Section label={isRTL ? 'سند الرواية' : 'Chain of transmission'} isRTL={isRTL} palette={palette} scaleFont={scaleFont}>
               {isRTL ? riwayah.chainAr : riwayah.chainEn}
             </Section>
-            <Section label={isRTL ? 'انتشارها' : 'Geographic spread'} isRTL={isRTL} palette={palette}>
+            <Section label={isRTL ? 'انتشارها' : 'Geographic spread'} isRTL={isRTL} palette={palette} scaleFont={scaleFont}>
               {isRTL ? riwayah.originAr : riwayah.originEn}
             </Section>
-            <Section label={isRTL ? 'سبب التسمية' : 'Naming'} isRTL={isRTL} palette={palette}>
+            <Section label={isRTL ? 'سبب التسمية' : 'Naming'} isRTL={isRTL} palette={palette} scaleFont={scaleFont}>
               {isRTL ? riwayah.namingAr : riwayah.namingEn}
             </Section>
           </View>
@@ -48,7 +48,7 @@ export default function RiwayatScreen() {
           {otherList.map((line, index) => (
             <Text
               key={index}
-              style={[styles.listItem, { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left' }]}
+              style={[styles.listItem, { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left', fontSize: scaleFont(13) }]}
             >
               {'• '}
               {line}
@@ -65,18 +65,20 @@ function Section({
   children,
   isRTL,
   palette,
+  scaleFont,
 }: {
   label: string;
   children: string;
   isRTL: boolean;
   palette: ReturnType<typeof getPalette>;
+  scaleFont: (base: number) => number;
 }) {
   return (
     <View style={{ marginTop: 10 }}>
-      <Text style={{ color: palette.accent, fontSize: 12, fontWeight: '700', textAlign: isRTL ? 'right' : 'left' }}>
+      <Text style={{ color: palette.accent, fontSize: scaleFont(12), fontWeight: '700', textAlign: isRTL ? 'right' : 'left' }}>
         {label}
       </Text>
-      <Text style={{ color: palette.text, fontSize: 14, lineHeight: 22, marginTop: 4, textAlign: isRTL ? 'right' : 'left' }}>
+      <Text style={{ color: palette.text, fontSize: scaleFont(14), lineHeight: scaleFont(14) * 1.57, marginTop: 4, textAlign: isRTL ? 'right' : 'left' }}>
         {children}
       </Text>
     </View>

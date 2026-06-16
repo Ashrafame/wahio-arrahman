@@ -10,7 +10,7 @@ import { getCurrentCoords } from '../../src/lib/location';
 import { computeQiblaBearing } from '../../src/lib/prayerTimes';
 
 export default function QiblaScreen() {
-  const { isRTL, t, theme } = useSettings();
+  const { isRTL, t, theme, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
 
@@ -88,13 +88,13 @@ export default function QiblaScreen() {
           </View>
 
           {!compassSupported ? (
-            <Text style={[styles.notice, { color: palette.textMuted }]}>{t('qiblaCompassUnsupported')}</Text>
+            <Text style={[styles.notice, { color: palette.textMuted, fontSize: scaleFont(13) }]}>{t('qiblaCompassUnsupported')}</Text>
           ) : (
-            <Text style={[styles.notice, { color: palette.textMuted }]}>{t('qiblaInstructions')}</Text>
+            <Text style={[styles.notice, { color: palette.textMuted, fontSize: scaleFont(13) }]}>{t('qiblaInstructions')}</Text>
           )}
 
           {qiblaBearing !== null ? (
-            <Text style={{ color: palette.text, fontSize: 15, fontWeight: '700', marginTop: 8 }}>
+            <Text style={{ color: palette.text, fontSize: scaleFont(15), fontWeight: '700', marginTop: 8 }}>
               {t('qiblaBearingLabel')}: {Math.round(qiblaBearing)}°
             </Text>
           ) : null}

@@ -9,7 +9,7 @@ import { gregorianToHijri, hijriToGregorian, HIJRI_MONTH_NAMES_AR, HIJRI_MONTH_N
 import { HIJRI_EVENTS } from '../../src/data/hijriEvents';
 
 export default function HijriCalendarScreen() {
-  const { isRTL, t, theme, language } = useSettings();
+  const { isRTL, t, theme, language, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
 
@@ -43,13 +43,13 @@ export default function HijriCalendarScreen() {
 
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
         <View style={[styles.todayCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-          <Text style={{ color: palette.textMuted, fontSize: 12 }}>{t('hijriToday')}</Text>
-          <Text style={[styles.todayDate, { color: palette.text, fontFamily: 'Amiri-Bold' }]}>
+          <Text style={{ color: palette.textMuted, fontSize: scaleFont(12) }}>{t('hijriToday')}</Text>
+          <Text style={[styles.todayDate, { color: palette.text, fontFamily: 'Amiri-Bold', fontSize: scaleFont(22) }]}>
             {formatNumber(hijriToday.day)} {monthNames[hijriToday.month - 1]} {formatNumber(hijriToday.year)} هـ
           </Text>
         </View>
 
-        <Text style={[styles.sectionTitle, { color: palette.text, textAlign: isRTL ? 'right' : 'left' }]}>
+        <Text style={[styles.sectionTitle, { color: palette.text, textAlign: isRTL ? 'right' : 'left', fontSize: scaleFont(14) }]}>
           {t('upcomingOccasions')}
         </Text>
 
@@ -59,15 +59,15 @@ export default function HijriCalendarScreen() {
             style={[styles.eventCard, { backgroundColor: palette.surface, borderColor: palette.border }]}
           >
             <View style={[styles.eventRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <Text style={[styles.eventTitle, { color: palette.text }]}>
+              <Text style={[styles.eventTitle, { color: palette.text, fontSize: scaleFont(14) }]}>
                 {isRTL ? event.titleAr : event.titleEn}
               </Text>
-              <Text style={{ color: palette.accent, fontSize: 12, fontWeight: '700' }}>
+              <Text style={{ color: palette.accent, fontSize: scaleFont(12), fontWeight: '700' }}>
                 {daysRemaining === 0 ? t('today') : `${formatNumber(daysRemaining)} ${t('days')} ${t('daysRemaining')}`}
               </Text>
             </View>
             {(isRTL ? event.noteAr : event.noteEn) ? (
-              <Text style={{ color: palette.textMuted, fontSize: 12, marginTop: 6, textAlign: isRTL ? 'right' : 'left' }}>
+              <Text style={{ color: palette.textMuted, fontSize: scaleFont(12), marginTop: 6, textAlign: isRTL ? 'right' : 'left' }}>
                 {isRTL ? event.noteAr : event.noteEn}
               </Text>
             ) : null}

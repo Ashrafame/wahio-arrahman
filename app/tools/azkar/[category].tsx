@@ -9,7 +9,7 @@ import { AZKAR_CATEGORIES } from '../../../src/data/azkar';
 
 export default function AzkarCategoryScreen() {
   const { category } = useLocalSearchParams<{ category: string }>();
-  const { isRTL, t, theme } = useSettings();
+  const { isRTL, t, theme, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
 
@@ -39,13 +39,20 @@ export default function AzkarCategoryScreen() {
             <Text
               style={[
                 styles.text,
-                { color: palette.text, fontFamily: 'Amiri-Regular', textAlign: 'right', writingDirection: 'rtl' },
+                {
+                  color: palette.text,
+                  fontFamily: 'Amiri-Regular',
+                  textAlign: 'right',
+                  writingDirection: 'rtl',
+                  fontSize: scaleFont(20),
+                  lineHeight: scaleFont(20) * 1.7,
+                },
               ]}
             >
               {item.textAr}
             </Text>
             {item.repeat > 1 ? (
-              <Text style={[styles.repeat, { color: palette.accent }]}>
+              <Text style={[styles.repeat, { color: palette.accent, fontSize: scaleFont(13) }]}>
                 {t('repeat')}: {item.repeat}
               </Text>
             ) : null}

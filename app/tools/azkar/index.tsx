@@ -8,7 +8,7 @@ import { getPalette } from '../../../src/theme/colors';
 import { AZKAR_CATEGORIES } from '../../../src/data/azkar';
 
 export default function AzkarIndexScreen() {
-  const { isRTL, t, theme } = useSettings();
+  const { isRTL, t, theme, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
 
@@ -35,7 +35,7 @@ export default function AzkarIndexScreen() {
             ]}
           >
             <Ionicons name={item.icon as any} size={20} color={palette.primary} />
-            <Text style={{ color: palette.text, fontSize: 15, flex: 1 }}>{t(item.titleKey)}</Text>
+            <Text style={{ color: palette.text, fontSize: scaleFont(15), flex: 1 }}>{t(item.titleKey)}</Text>
             <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={palette.textMuted} />
           </Pressable>
         )}

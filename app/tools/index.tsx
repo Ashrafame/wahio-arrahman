@@ -7,17 +7,17 @@ import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
 import { StringKey } from '../../src/i18n/translations';
 
-const TOOLS: { titleKey: StringKey; icon: keyof typeof Ionicons.glyphMap; route: string }[] = [
-  { titleKey: 'prayerTimes', icon: 'time-outline', route: '/tools/prayer-times' },
-  { titleKey: 'qibla', icon: 'compass-outline', route: '/tools/qibla' },
-  { titleKey: 'tasbih', icon: 'finger-print-outline', route: '/tools/tasbih' },
-  { titleKey: 'azkar', icon: 'book-outline', route: '/tools/azkar' },
-  { titleKey: 'hijriCalendar', icon: 'calendar-outline', route: '/tools/hijri-calendar' },
-  { titleKey: 'riwayat', icon: 'mic-outline', route: '/tools/riwayat' },
+const TOOLS: { titleKey: StringKey; icon: keyof typeof Ionicons.glyphMap; route: string; color: string }[] = [
+  { titleKey: 'prayerTimes', icon: 'time-outline', route: '/tools/prayer-times', color: '#0F6B5C' },
+  { titleKey: 'qibla', icon: 'compass-outline', route: '/tools/qibla', color: '#2E4374' },
+  { titleKey: 'tasbih', icon: 'finger-print-outline', route: '/tools/tasbih', color: '#B07D2B' },
+  { titleKey: 'azkar', icon: 'book-outline', route: '/tools/azkar', color: '#0F4C3A' },
+  { titleKey: 'hijriCalendar', icon: 'calendar-outline', route: '/tools/hijri-calendar', color: '#7A2E3A' },
+  { titleKey: 'riwayat', icon: 'mic-outline', route: '/tools/riwayat', color: '#3D5A6C' },
 ];
 
 export default function ToolsScreen() {
-  const { isRTL, t, theme } = useSettings();
+  const { isRTL, t, theme, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
 
@@ -38,8 +38,8 @@ export default function ToolsScreen() {
             onPress={() => router.push(tool.route as any)}
             style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
           >
-            <Ionicons name={tool.icon} size={30} color={palette.primary} />
-            <Text style={[styles.cardLabel, { color: palette.text }]}>{t(tool.titleKey)}</Text>
+            <Ionicons name={tool.icon} size={32} color={tool.color} />
+            <Text style={[styles.cardLabel, { color: palette.text, fontSize: scaleFont(14) }]}>{t(tool.titleKey)}</Text>
           </Pressable>
         ))}
       </View>

@@ -27,8 +27,22 @@ export interface Ayah {
 
 export const chapters: Chapter[] = chaptersRaw as Chapter[];
 
-const hafsMap = hafsRaw as Record<string, string>;
-const qaloonMap = qaloonRaw as Record<string, string>;
+// Tanzil's Uthmani rasm encodes the trailing alef of tanween-fatha/damma/kasra
+// endings (e.g. قَوْمًا) as a separate token, joined by a plain space, to mirror
+// the printed Madinah Mushaf's calligraphy. Generic (non-Uthmanic) fonts render
+// that space as a visible gap, so we join it back for display purposes only —
+// the underlying letters and diacritics are untouched.
+const TANWEEN_ALEF_GAP = /([ًࣰٌࣱٍࣲ]) ا/g;
+function joinTrailingTanweenAlef(map: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const key in map) {
+    result[key] = map[key].replace(TANWEEN_ALEF_GAP, '$1ا');
+  }
+  return result;
+}
+
+const hafsMap = joinTrailingTanweenAlef(hafsRaw as Record<string, string>);
+const qaloonMap = joinTrailingTanweenAlef(qaloonRaw as Record<string, string>);
 const translationEnMap = translationEnRaw as Record<string, string>;
 const muyassarMap = muyassarRaw as Record<string, string>;
 

@@ -15,6 +15,8 @@ interface Settings {
   qiraah: Qiraah;
   fontFamily: FontFamilyId;
   fontSize: FontSizeId;
+  /** Scale (0 to 1) for all non-Quran UI text (tafsir, tools screens). 0 = smallest, 1 = the "medium" Quran size. */
+  uiFontScale: number;
   showTranslation: boolean;
   tafsirEdition: string;
   theme: ThemeId;
@@ -28,6 +30,7 @@ const DEFAULT_SETTINGS: Settings = {
   qiraah: 'hafs',
   fontFamily: 'amiri',
   fontSize: 'medium',
+  uiFontScale: 0.5,
   showTranslation: false,
   tafsirEdition: 'muyassar',
   theme: 'light',
@@ -45,6 +48,9 @@ interface SettingsContextValue extends Settings {
   setQiraah: (qiraah: Qiraah) => void;
   setFontFamily: (font: FontFamilyId) => void;
   setFontSize: (size: FontSizeId) => void;
+  setUiFontScale: (scale: number) => void;
+  /** Scales a base UI font size (px) by the user's uiFontScale setting. */
+  scaleFont: (base: number) => number;
   setShowTranslation: (show: boolean) => void;
   setTafsirEdition: (id: string) => void;
   setTheme: (theme: ThemeId) => void;
@@ -52,6 +58,16 @@ interface SettingsContextValue extends Settings {
   setQaloonReciter: (id: string) => void;
   setCalculationMethod: (id: CalculationMethodId) => void;
   ready: boolean;
+}
+
+// uiFontScale ranges 0..1; 0 maps to a slightly-reduced size and 1 maps to the
+// "medium" Quran font's proportions, per the requirement that this control
+// must never make non-Quran text exceed the medium Quran font size's scale.
+export const UI_FONT_SCALE_MIN = 0.85;
+export const UI_FONT_SCALE_MAX = 1.25;
+function computeScaledFont(base: number, scale: number): number {
+  const clamped = Math.min(1, Math.max(0, scale));
+  return Math.round(base * (UI_FONT_SCALE_MIN + clamped * (UI_FONT_SCALE_MAX - UI_FONT_SCALE_MIN)));
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -106,6 +122,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setQiraah: (qiraah) => setSettings((s) => ({ ...s, qiraah })),
       setFontFamily: (fontFamily) => setSettings((s) => ({ ...s, fontFamily })),
       setFontSize: (fontSize) => setSettings((s) => ({ ...s, fontSize })),
+      setUiFontScale: (uiFontScale) => setSettings((s) => ({ ...s, uiFontScale })),
+      scaleFont: (base) => computeScaledFont(base, settings.uiFontScale),
       setShowTranslation: (showTranslation) => setSettings((s) => ({ ...s, showTranslation })),
       setTafsirEdition: (tafsirEdition) => setSettings((s) => ({ ...s, tafsirEdition })),
       setTheme: (theme) => setSettings((s) => ({ ...s, theme })),

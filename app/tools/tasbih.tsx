@@ -16,7 +16,7 @@ interface TasbihState {
 }
 
 export default function TasbihScreen() {
-  const { isRTL, t, theme } = useSettings();
+  const { isRTL, t, theme, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
 
@@ -24,6 +24,7 @@ export default function TasbihScreen() {
   const [state, setState] = useState<TasbihState>({ counts: {}, targets: {} });
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [customTargetInput, setCustomTargetInput] = useState('');
+  const [dhikrPickerOpen, setDhikrPickerOpen] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
@@ -66,41 +67,29 @@ export default function TasbihScreen() {
         <View style={{ width: 32 }} />
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: 8, padding: 10 }}
-        style={{ borderBottomWidth: 1, borderColor: palette.border }}
+      <Pressable
+        onPress={() => setDhikrPickerOpen(true)}
+        style={[
+          styles.dhikrSelector,
+          { borderColor: palette.border, backgroundColor: palette.surface, flexDirection: isRTL ? 'row-reverse' : 'row' },
+        ]}
       >
-        {TASBIH_LIST.map((dhikr) => (
-          <Pressable
-            key={dhikr.id}
-            onPress={() => setActiveId(dhikr.id)}
-            style={[
-              styles.dhikrChip,
-              {
-                borderColor: palette.border,
-                backgroundColor: activeId === dhikr.id ? palette.primary : palette.surface,
-              },
-            ]}
-          >
-            <Text style={{ color: activeId === dhikr.id ? palette.primaryText : palette.text, fontSize: 13 }}>
-              {isRTL ? dhikr.textAr : dhikr.textEn}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+        <Text style={{ color: palette.text, fontSize: scaleFont(14), fontWeight: '700', flex: 1, textAlign: isRTL ? 'right' : 'left' }}>
+          {isRTL ? active.textAr : active.textEn}
+        </Text>
+        <Ionicons name="chevron-expand" size={18} color={palette.textMuted} />
+      </Pressable>
 
       <Pressable onPress={increment} style={styles.counterArea}>
-        <Text style={[styles.dhikrText, { color: palette.text, fontFamily: 'Amiri-Bold' }]}>
+        <Text style={[styles.dhikrText, { color: palette.text, fontFamily: 'Amiri-Bold', fontSize: scaleFont(26) }]}>
           {isRTL ? active.textAr : active.textEn}
         </Text>
         <Text style={[styles.countText, { color: palette.primary }]}>{count}</Text>
-        <Text style={{ color: palette.textMuted, fontSize: 13 }}>
+        <Text style={{ color: palette.textMuted, fontSize: scaleFont(13) }}>
           {t('tasbihTarget')}: {target}
         </Text>
         {reachedTarget ? (
-          <Text style={{ color: palette.accent, fontSize: 14, fontWeight: '700', marginTop: 6 }}>
+          <Text style={{ color: palette.accent, fontSize: scaleFont(14), fontWeight: '700', marginTop: 6 }}>
             {t('reachedTarget')}
           </Text>
         ) : null}
@@ -112,7 +101,7 @@ export default function TasbihScreen() {
           style={[styles.actionButton, { borderColor: palette.border, backgroundColor: palette.surface }]}
         >
           <Ionicons name="refresh" size={16} color={palette.textMuted} />
-          <Text style={{ color: palette.text }}>{t('tasbihReset')}</Text>
+          <Text style={{ color: palette.text, fontSize: scaleFont(14) }}>{t('tasbihReset')}</Text>
         </Pressable>
         <Pressable
           onPress={() => {
@@ -122,7 +111,7 @@ export default function TasbihScreen() {
           style={[styles.actionButton, { borderColor: palette.border, backgroundColor: palette.surface }]}
         >
           <Ionicons name="create-outline" size={16} color={palette.textMuted} />
-          <Text style={{ color: palette.text }}>{t('tasbihCustomTarget')}</Text>
+          <Text style={{ color: palette.text, fontSize: scaleFont(14) }}>{t('tasbihCustomTarget')}</Text>
         </Pressable>
       </View>
 
@@ -142,6 +131,41 @@ export default function TasbihScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      <Modal visible={dhikrPickerOpen} transparent animationType="fade" onRequestClose={() => setDhikrPickerOpen(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setDhikrPickerOpen(false)}>
+          <View style={[styles.modalCard, { backgroundColor: palette.surface }]}>
+            <Text style={[styles.modalTitle, { color: palette.text }]}>{t('tasbih')}</Text>
+            <ScrollView style={{ maxHeight: 420 }}>
+              {TASBIH_LIST.map((dhikr) => (
+                <Pressable
+                  key={dhikr.id}
+                  onPress={() => {
+                    setActiveId(dhikr.id);
+                    setDhikrPickerOpen(false);
+                  }}
+                  style={[
+                    styles.modalRow,
+                    {
+                      backgroundColor: activeId === dhikr.id ? palette.surfaceAlt : 'transparent',
+                      flexDirection: isRTL ? 'row-reverse' : 'row',
+                    },
+                  ]}
+                >
+                  {activeId === dhikr.id ? (
+                    <Ionicons name="checkmark-circle" size={18} color={palette.primary} />
+                  ) : (
+                    <View style={{ width: 18 }} />
+                  )}
+                  <Text style={{ color: palette.text, fontSize: scaleFont(15), flex: 1, textAlign: isRTL ? 'right' : 'left' }}>
+                    {isRTL ? dhikr.textAr : dhikr.textEn}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -151,7 +175,15 @@ const styles = StyleSheet.create({
   header: { alignItems: 'center', paddingHorizontal: 12, paddingVertical: 12, justifyContent: 'space-between' },
   iconButton: { padding: 4, width: 32 },
   headerTitle: { fontSize: 17, fontWeight: '700' },
-  dhikrChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, borderWidth: 1 },
+  dhikrSelector: {
+    alignItems: 'center',
+    gap: 8,
+    margin: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
   counterArea: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   dhikrText: { fontSize: 26, textAlign: 'center', marginBottom: 20 },
   countText: { fontSize: 64, fontWeight: '800' },
@@ -170,4 +202,5 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
   input: { borderWidth: 1, borderRadius: 10, padding: 10, fontSize: 16, marginBottom: 12 },
   saveButton: { borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
+  modalRow: { alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 6, borderRadius: 8 },
 });
