@@ -17,6 +17,7 @@ export interface QaloonReciter {
 }
 
 export const HAFS_RECITERS: HafsReciter[] = [
+  { id: 'muaiqly', nameAr: 'ماهر المعيقلي', nameEn: 'Maher Al-Muaiqly', folder: 'Maher_AlMuaiqly_64kbps' },
   { id: 'alafasy', nameAr: 'مشاري العفاسي', nameEn: 'Mishary Alafasy', folder: 'Alafasy_128kbps' },
   { id: 'husary', nameAr: 'محمود خليل الحصري', nameEn: 'Mahmoud Al-Husary', folder: 'Husary_128kbps' },
   { id: 'sudais', nameAr: 'عبدالرحمن السديس', nameEn: 'Abdurrahman As-Sudais', folder: 'Abdurrahmaan_As-Sudais_192kbps' },
