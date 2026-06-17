@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { Ayah } from '../lib/quranData';
 import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
 import { getPalette } from '../theme/colors';
@@ -37,7 +37,7 @@ export function AyahCard({
 
   const handleCopyAyah = async () => {
     const fullText = `${arabicText}${showTranslation && ayah.translationEn ? '\n\n' + ayah.translationEn : ''}`;
-    await Clipboard.setString(fullText);
+    await Clipboard.setStringAsync(fullText);
     Alert.alert('✓', 'تم نسخ الآية');
   };
 
