@@ -92,3 +92,8 @@ export function hijriToGregorian(year: number, month: number, day: number): Date
   const g = jdToGregorian(jd);
   return new Date(g.year, g.month - 1, g.day);
 }
+
+export function daysInHijriMonth(year: number, month: number): number {
+  const next = month === 12 ? hijriToJD(year + 1, 1, 1) : hijriToJD(year, month + 1, 1);
+  return next - hijriToJD(year, month, 1);
+}

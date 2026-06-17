@@ -11,18 +11,17 @@ type ToolItem = {
   titleKey: StringKey;
   route: string;
   color: string;
-} & (
-  | { image: ImageSourcePropType; icon?: never }
-  | { icon: keyof typeof Ionicons.glyphMap; image?: never }
-);
+  image?: ImageSourcePropType;
+  icon?: keyof typeof Ionicons.glyphMap;
+};
 
 const TOOLS: ToolItem[] = [
   { titleKey: 'prayerTimes', image: require('../../assets/icons/prayer_times.png'), route: '/tools/prayer-times', color: '#0F6B5C' },
   { titleKey: 'qibla', image: require('../../assets/icons/qibla.png'), route: '/tools/qibla', color: '#2E4374' },
   { titleKey: 'tasbih', image: require('../../assets/icons/tasbih.png'), route: '/tools/tasbih', color: '#B07D2B' },
   { titleKey: 'azkar', image: require('../../assets/icons/azkar.png'), route: '/tools/azkar', color: '#0F4C3A' },
-  { titleKey: 'hijriCalendar', icon: 'calendar-outline', route: '/tools/hijri-calendar', color: '#7A2E3A' },
-  { titleKey: 'riwayat', icon: 'mic-outline', route: '/tools/riwayat', color: '#3D5A6C' },
+  { titleKey: 'hijriCalendar', image: require('../../assets/icons/hijri_calendar.png'), route: '/tools/hijri-calendar', color: '#7A2E3A' },
+  { titleKey: 'riwayat', image: require('../../assets/icons/riwayat.png'), route: '/tools/riwayat', color: '#3D5A6C' },
 ];
 
 export default function ToolsScreen() {
