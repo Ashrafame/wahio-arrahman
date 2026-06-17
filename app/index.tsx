@@ -19,7 +19,7 @@ import { SurahListItem } from '../src/components/SurahListItem';
 import { JUZ_DATA } from '../src/data/juz';
 
 export default function HomeScreen() {
-  const { language, isRTL, t, theme, scaleFont } = useSettings();
+  const { language, isRTL, t, theme, scaleFont, qiraah } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
@@ -64,9 +64,11 @@ export default function HomeScreen() {
         <Pressable onPress={() => router.push('/search')} style={styles.iconButton} hitSlop={8}>
           <Ionicons name="search" size={24} color={palette.primaryText} />
         </Pressable>
-        <Pressable onPress={() => setJuzOpen(true)} style={styles.iconButton} hitSlop={8}>
-          <Ionicons name="aperture-outline" size={24} color={palette.primaryText} />
-        </Pressable>
+        {qiraah === 'qaloon' && (
+          <Pressable onPress={() => setJuzOpen(true)} style={styles.iconButton} hitSlop={8}>
+            <Ionicons name="aperture-outline" size={24} color={palette.primaryText} />
+          </Pressable>
+        )}
         <Pressable onPress={() => router.push('/tools')} style={styles.iconButton} hitSlop={8}>
           <Ionicons name="grid-outline" size={24} color={palette.primaryText} />
         </Pressable>
@@ -105,13 +107,13 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 24 }}
       />
 
-      <Modal visible={juzOpen} animationType="slide" onRequestClose={() => setJuzOpen(false)}>
+      <Modal visible={juzOpen && qiraah === 'qaloon'} animationType="slide" onRequestClose={() => setJuzOpen(false)}>
         <View style={[styles.juzContainer, { backgroundColor: palette.background, paddingTop: insets.top }]}>
           <View style={[styles.juzHeader, { backgroundColor: palette.primary }]}>
             <Pressable onPress={() => setJuzOpen(false)} style={styles.iconButton} hitSlop={8}>
               <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />
             </Pressable>
-            <Text style={[styles.juzTitle, { color: palette.primaryText }]}>أجزاء القرآن</Text>
+            <Text style={[styles.juzTitle, { color: palette.primaryText }]}>أجزاء القرآن (قالون)</Text>
             <View style={{ width: 32 }} />
           </View>
           <ScrollView contentContainerStyle={{ padding: 12, gap: 10 }} showsVerticalScrollIndicator={false}>
