@@ -18,7 +18,6 @@ import { getPalette } from '../../src/theme/colors';
 import { AyahCard } from '../../src/components/AyahCard';
 import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
 import { getCurrentAudioKey, getCurrentSequenceId, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
-import { fetchAyahTimings, AyahTimestamp } from '../../src/lib/quranTiming';
 
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
@@ -60,7 +59,20 @@ export default function SurahScreen() {
   const [currentSeqId, setCurrentSeqId] = useState<string | null>(getCurrentSequenceId());
   const [lastTappedVerse, setLastTappedVerse] = useState<number | null>(null);
   const [qaloonActiveVerse, setQaloonActiveVerse] = useState<number | null>(null);
-  const qaloonTimingsRef = useRef<AyahTimestamp[] | null>(null);
+
+  // Proportional timing boundaries for Qaloon: each ayah occupies a fraction of the
+  // whole-surah recording proportional to its text length (murattal pace is steady).
+  const qaloonBoundaries = useMemo(() => {
+    if (qiraah !== 'qaloon') return null;
+    const weights = ayahs.map((a) => Math.max(1, (a.textQaloon || '').replace(/\s+/g, '').length));
+    const total = weights.reduce((s, w) => s + w, 0);
+    let acc = 0;
+    return ayahs.map((a, i) => {
+      const start = acc / total;
+      acc += weights[i];
+      return { verse: a.verse, start, end: acc / total };
+    });
+  }, [ayahs, qiraah]);
 
   const reciterId = qiraah === 'hafs' ? hafsReciter : qaloonReciter;
   const setReciterId = qiraah === 'hafs' ? setHafsReciter : setQaloonReciter;
@@ -70,35 +82,20 @@ export default function SurahScreen() {
     return subscribeAudio((key, isPlaying) => {
       setPlayingKey(key);
       setCurrentSeqId(isPlaying ? getCurrentSequenceId() : null);
-      if (!isPlaying) {
-        setQaloonActiveVerse(null);
-        qaloonTimingsRef.current = null;
-      }
+      if (!isPlaying) setQaloonActiveVerse(null);
     });
   }, []);
 
-  // Fetch timing data when Qaloon playback starts for this surah
-  useEffect(() => {
-    if (qiraah !== 'qaloon' || !playingKey) {
-      qaloonTimingsRef.current = null;
-      setQaloonActiveVerse(null);
-      return;
-    }
-    fetchAyahTimings(chapterNumber, qaloonReciter).then((timings) => {
-      qaloonTimingsRef.current = timings;
-    });
-  }, [playingKey, qiraah, chapterNumber, qaloonReciter]);
-
-  // Track position to advance the highlighted ayah in Qaloon mode
+  // Track position to advance the highlighted ayah in Qaloon mode (whole-surah audio)
   useEffect(() => {
     if (qiraah !== 'qaloon') return;
-    return subscribePosition((posMs) => {
-      const timings = qaloonTimingsRef.current;
-      if (!timings) return;
-      const active = timings.find((t) => posMs >= t.from && posMs < t.to);
+    return subscribePosition((posMs, durMs) => {
+      if (!qaloonBoundaries || durMs <= 0) return;
+      const frac = Math.min(0.99999, posMs / durMs);
+      const active = qaloonBoundaries.find((b) => frac >= b.start && frac < b.end);
       if (active) setQaloonActiveVerse(active.verse);
     });
-  }, [qiraah]);
+  }, [qiraah, qaloonBoundaries]);
 
   useEffect(() => {
     let cancelled = false;

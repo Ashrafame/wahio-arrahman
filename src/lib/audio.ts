@@ -2,7 +2,7 @@ import { createAudioPlayer } from 'expo-audio';
 import type { AudioPlayer } from 'expo-audio';
 
 type PlaybackListener = (key: string | null, isPlaying: boolean) => void;
-type PositionListener = (positionMs: number) => void;
+type PositionListener = (positionMs: number, durationMs: number) => void;
 
 let player: AudioPlayer | null = null;
 let currentKey: string | null = null;
@@ -16,8 +16,8 @@ function notify(isPlaying: boolean) {
   for (const listener of listeners) listener(currentKey, isPlaying);
 }
 
-function notifyPosition(posMs: number) {
-  for (const listener of positionListeners) listener(posMs);
+function notifyPosition(posMs: number, durMs: number) {
+  for (const listener of positionListeners) listener(posMs, durMs);
 }
 
 function ensurePlayer(): AudioPlayer {
@@ -25,7 +25,7 @@ function ensurePlayer(): AudioPlayer {
     player = createAudioPlayer(null, { updateInterval: 250 });
     player.addListener('playbackStatusUpdate', (status) => {
       if (status.playing && status.currentTime > 0) {
-        notifyPosition(Math.round(status.currentTime * 1000));
+        notifyPosition(Math.round(status.currentTime * 1000), Math.round((status.duration || 0) * 1000));
       }
       if (status.didJustFinish) {
         if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
