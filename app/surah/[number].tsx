@@ -102,16 +102,23 @@ export default function SurahScreen() {
   }, [tafsirEdition, chapterNumber, ayahs]);
 
   useEffect(() => {
-    if (targetVerse) {
-      const index = ayahs.findIndex((a) => a.verse === targetVerse);
-      if (index >= 0) {
-        setHighlightVerse(targetVerse);
-        setTimeout(() => {
-          listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.2 });
-        }, 500);
-        setTimeout(() => setHighlightVerse(undefined), 3000);
-      }
-    }
+    if (!targetVerse) return;
+    const index = ayahs.findIndex((a) => a.verse === targetVerse);
+    if (index < 0) return;
+
+    setHighlightVerse(targetVerse);
+
+    // First: scroll without animation to get items rendered
+    const t1 = setTimeout(() => {
+      listRef.current?.scrollToIndex({ index, animated: false, viewPosition: 0.2 });
+    }, 300);
+    // Second: smooth scroll after items are rendered
+    const t2 = setTimeout(() => {
+      listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.2 });
+    }, 900);
+    const t3 = setTimeout(() => setHighlightVerse(undefined), 4000);
+
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [targetVerse, ayahs]);
 
   if (!chapter) {
@@ -258,7 +265,7 @@ export default function SurahScreen() {
         ref={listRef}
         data={ayahs}
         keyExtractor={(item) => item.key}
-        initialNumToRender={15}
+        initialNumToRender={targetVerse ? Math.max(15, (ayahs.findIndex(a => a.verse === targetVerse) ?? 0) + 5) : 15}
         ListHeaderComponent={
           chapterNumber !== 1 && chapterNumber !== 9 ? (
             <Text style={[styles.bismillah, { color: palette.text, fontFamily: 'Amiri-Bold' }]}>{BISMILLAH}</Text>
@@ -279,9 +286,12 @@ export default function SurahScreen() {
           />
         )}
         onScrollToIndexFailed={(info) => {
+          // Scroll to estimated offset first, then retry scrollToIndex
+          const offset = info.averageItemLength * info.index;
+          listRef.current?.scrollToOffset({ offset, animated: false });
           setTimeout(() => {
             listRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0.2 });
-          }, 500);
+          }, 300);
         }}
         contentContainerStyle={{ paddingVertical: 10, paddingBottom: 30 }}
       />
