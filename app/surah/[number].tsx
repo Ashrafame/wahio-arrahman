@@ -12,6 +12,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Ayah, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/quranData';
+import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../../src/data/juz';
 import { fetchSurahTafsir, TAFSIR_EDITIONS } from '../../src/lib/tafsirRemote';
 import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
@@ -22,9 +23,10 @@ import { getCurrentAudioKey, getCurrentSequenceId, playAudio, playSequence, stop
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
 export default function SurahScreen() {
-  const params = useLocalSearchParams<{ number: string; verse?: string }>();
+  const params = useLocalSearchParams<{ number: string; verse?: string; juz?: string }>();
   const chapterNumber = Number(params.number);
   const targetVerse = params.verse ? Number(params.verse) : undefined;
+  const fromJuz = params.juz ? Number(params.juz) : undefined;
 
   const {
     isRTL,
@@ -54,6 +56,7 @@ export default function SurahScreen() {
   const [tafsirError, setTafsirError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [reciterPickerOpen, setReciterPickerOpen] = useState(false);
+  const [juzPickerOpen, setJuzPickerOpen] = useState(false);
   const [highlightVerse, setHighlightVerse] = useState<number | undefined>(targetVerse);
   const [playingKey, setPlayingKey] = useState<string | null>(getCurrentAudioKey());
   const [currentSeqId, setCurrentSeqId] = useState<string | null>(getCurrentSequenceId());
@@ -212,12 +215,21 @@ export default function SurahScreen() {
             </Pressable>
           </View>
           <Text style={[styles.headerSubtitle, { color: palette.primaryText }]}>
-            {chapter.nameTranslationEn} · {getVerseCount(chapterNumber, qiraah)} {t('verses')}
+            {fromJuz ? (isRTL ? `الجزء ${fromJuz} · ` : `Juz ${fromJuz} · `) : ''}
+            {(!isRTL || showTranslation) ? `${chapter.nameTranslationEn} · ` : ''}
+            {getVerseCount(chapterNumber, qiraah)} {t('verses')}
           </Text>
         </View>
-        <Pressable onPress={() => router.push('/settings')} style={styles.iconButton} hitSlop={8}>
-          <Ionicons name="settings-outline" size={22} color={palette.primaryText} />
-        </Pressable>
+        <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center' }}>
+          {fromJuz ? (
+            <Pressable onPress={() => setJuzPickerOpen(true)} style={styles.iconButton} hitSlop={8}>
+              <Ionicons name="aperture-outline" size={22} color={palette.primaryText} />
+            </Pressable>
+          ) : null}
+          <Pressable onPress={() => router.push('/settings')} style={styles.iconButton} hitSlop={8}>
+            <Ionicons name="settings-outline" size={22} color={palette.primaryText} />
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView
@@ -374,6 +386,59 @@ export default function SurahScreen() {
         </Pressable>
       </Modal>
 
+      <Modal visible={juzPickerOpen} animationType="slide" onRequestClose={() => setJuzPickerOpen(false)}>
+        <View style={[styles.juzPickerContainer, { backgroundColor: palette.background, paddingTop: insets.top }]}>
+          <View style={[styles.juzPickerHeader, { backgroundColor: palette.primary }]}>
+            <Pressable onPress={() => setJuzPickerOpen(false)} style={styles.iconButton} hitSlop={8}>
+              <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />
+            </Pressable>
+            <Text style={[styles.juzPickerTitle, { color: palette.primaryText }]}>
+              {isRTL ? `أجزاء القرآن ${qiraah === 'qaloon' ? '(قالون)' : '(حفص)'}` : `Quran Juz (${qiraah === 'qaloon' ? 'Qaloon' : 'Hafs'})`}
+            </Text>
+            <View style={{ width: 32 }} />
+          </View>
+          <ScrollView contentContainerStyle={{ padding: 12, gap: 10 }} showsVerticalScrollIndicator={false}>
+            {(qiraah === 'qaloon' ? JUZ_DATA_QALOON : JUZ_DATA_HAFS).map((juz) => (
+              <Pressable
+                key={juz.number}
+                onPress={() => {
+                  setJuzPickerOpen(false);
+                  router.push({
+                    pathname: '/surah/[number]',
+                    params: { number: juz.startSurah.toString(), verse: juz.startAyah.toString(), juz: juz.number.toString() },
+                  });
+                }}
+                style={[
+                  styles.juzCard,
+                  {
+                    backgroundColor: fromJuz === juz.number ? palette.surfaceAlt : palette.surface,
+                    borderColor: fromJuz === juz.number ? palette.accent : palette.border,
+                    flexDirection: isRTL ? 'row-reverse' : 'row',
+                  },
+                ]}
+              >
+                <View style={[styles.juzBadge, { backgroundColor: palette.primary }]}>
+                  <Text style={{ color: palette.primaryText, fontWeight: '800', fontSize: 14 }}>
+                    {juz.number}
+                  </Text>
+                </View>
+                <View style={{ flex: 1, marginHorizontal: 12 }}>
+                  <Text style={{ color: palette.text, fontWeight: '700', fontSize: 15, fontFamily: 'Amiri-Bold' }}>
+                    {isRTL ? juz.nameAr : juz.nameEn}
+                  </Text>
+                  <Text style={{ color: palette.textMuted, fontSize: 12, marginTop: 3 }}>
+                    {isRTL
+                      ? `سورة ${getChapter(juz.startSurah)?.nameArabic} · الآية ${juz.startAyah}`
+                      : `Surah ${getChapter(juz.startSurah)?.nameTranslationEn} · Verse ${juz.startAyah}`}
+                  </Text>
+                </View>
+                <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={20} color={palette.textMuted} />
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      </Modal>
+
     </View>
   );
 }
@@ -499,4 +564,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 8,
   },
+  juzPickerContainer: { flex: 1 },
+  juzPickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  juzPickerTitle: { fontSize: 18, fontWeight: '700', fontFamily: 'Amiri-Bold' },
+  juzCard: { borderWidth: 1, borderRadius: 14, padding: 14, alignItems: 'center' },
+  juzBadge: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
 });

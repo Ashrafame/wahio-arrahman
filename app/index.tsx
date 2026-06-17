@@ -124,7 +124,7 @@ export default function HomeScreen() {
                     setJuzOpen(false);
                     router.push({
                       pathname: '/surah/[number]',
-                      params: { number: juz.startSurah.toString(), verse: juz.startAyah.toString() },
+                      params: { number: juz.startSurah.toString(), verse: juz.startAyah.toString(), juz: juz.number.toString() },
                     });
                   }}
                   style={[styles.juzCard, { backgroundColor: palette.surface, borderColor: palette.border, flexDirection: isRTL ? 'row-reverse' : 'row' }]}
