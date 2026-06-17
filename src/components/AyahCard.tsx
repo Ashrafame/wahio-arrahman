@@ -8,6 +8,7 @@ import { getPalette } from '../theme/colors';
 interface Props {
   ayah: Ayah;
   highlighted?: boolean;
+  isJuzStart?: boolean;
   tafsirText?: string | null;
   tafsirLoading?: boolean;
   tafsirError?: boolean;
@@ -20,6 +21,7 @@ interface Props {
 export function AyahCard({
   ayah,
   highlighted,
+  isJuzStart,
   tafsirText,
   tafsirLoading,
   tafsirError,
@@ -37,8 +39,8 @@ export function AyahCard({
       style={[
         styles.card,
         {
-          backgroundColor: highlighted ? palette.surfaceAlt : palette.surface,
-          borderColor: highlighted ? palette.accent : palette.border,
+          backgroundColor: isJuzStart ? '#2A9D8F20' : highlighted ? palette.surfaceAlt : palette.surface,
+          borderColor: isJuzStart ? '#2A9D8F' : highlighted ? palette.accent : palette.border,
         },
       ]}
     >
