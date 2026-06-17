@@ -16,7 +16,7 @@ import { chapters, normalizeArabic, parseDirectReference, getChapter } from '../
 import { useSettings } from '../src/store/SettingsContext';
 import { getPalette } from '../src/theme/colors';
 import { SurahListItem } from '../src/components/SurahListItem';
-import { JUZ_DATA } from '../src/data/juz';
+import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../src/data/juz';
 
 export default function HomeScreen() {
   const { language, isRTL, t, theme, scaleFont, qiraah } = useSettings();
@@ -117,8 +117,7 @@ export default function HomeScreen() {
             <View style={{ width: 32 }} />
           </View>
           <ScrollView contentContainerStyle={{ padding: 12, gap: 10 }} showsVerticalScrollIndicator={false}>
-            {qiraah === 'qaloon' ? (
-              JUZ_DATA.map((juz) => (
+            {(qiraah === 'qaloon' ? JUZ_DATA_QALOON : JUZ_DATA_HAFS).map((juz) => (
                 <Pressable
                   key={juz.number}
                   onPress={() => {
@@ -147,12 +146,7 @@ export default function HomeScreen() {
                   </View>
                   <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={20} color={palette.textMuted} />
                 </Pressable>
-              ))
-            ) : (
-              <Text style={{ color: palette.textMuted, textAlign: 'center', paddingTop: 20 }}>
-                {isRTL ? 'سيتم إضافة أجزاء رواية حفص قريباً' : 'Hafs Juz divisions coming soon'}
-              </Text>
-            )}
+              ))}
           </ScrollView>
         </View>
       </Modal>
