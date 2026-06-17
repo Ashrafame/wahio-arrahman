@@ -14,10 +14,10 @@ export function SplashOverlay() {
     const timer = setTimeout(() => {
       Animated.timing(opacity, {
         toValue: 0,
-        duration: 550,
+        duration: 500,
         useNativeDriver: true,
       }).start(() => setHidden(true));
-    }, 1600);
+    }, 5000);
     return () => clearTimeout(timer);
   }, [opacity]);
 
