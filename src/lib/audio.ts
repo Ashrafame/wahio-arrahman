@@ -107,3 +107,13 @@ export function subscribePosition(listener: PositionListener): () => void {
   positionListeners.add(listener);
   return () => positionListeners.delete(listener);
 }
+
+/** Seek the current player to positionSeconds after it loads. */
+export async function seekTo(positionSeconds: number): Promise<void> {
+  if (!player) return;
+  try {
+    await player.seekTo(positionSeconds);
+  } catch {
+    // Ignore seek errors (e.g. called before file loads)
+  }
+}
