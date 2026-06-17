@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { Ayah } from '../lib/quranData';
 import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
 import { getPalette } from '../theme/colors';
@@ -34,24 +35,10 @@ export function AyahCard({
   const palette = getPalette(theme);
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
 
-  const handleCopyAyah = () => {
+  const handleCopyAyah = async () => {
     const fullText = `${arabicText}${showTranslation && ayah.translationEn ? '\n\n' + ayah.translationEn : ''}`;
-    Alert.alert(
-      t('copy') || 'Copy',
-      fullText,
-      [
-        { text: t('cancel') || 'Cancel', onPress: () => {} },
-        {
-          text: t('copy') || 'Copy',
-          onPress: () => {
-            // In React Native, we'd need to use a native module for copy
-            // For now, show a confirmation
-            Alert.alert(t('success') || 'Success', t('copiedToClipboard') || 'Copied to clipboard');
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+    await Clipboard.setString(fullText);
+    Alert.alert('✓', 'تم نسخ الآية');
   };
 
   return (
