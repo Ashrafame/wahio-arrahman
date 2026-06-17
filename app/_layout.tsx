@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SettingsProvider, useSettings } from '../src/store/SettingsContext';
 import { getPalette } from '../src/theme/colors';
+import { SplashOverlay } from '../src/components/SplashOverlay';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -47,6 +48,7 @@ function RootStack() {
         <Stack.Screen name="tools/hijri-calendar" options={{ headerShown: false }} />
         <Stack.Screen name="tools/riwayat" options={{ headerShown: false }} />
       </Stack>
+      <SplashOverlay />
     </>
   );
 }
