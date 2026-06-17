@@ -41,7 +41,7 @@ export const JUZ_DATA_HAFS: JuzInfo[] = [
 
 export const JUZ_DATA_QALOON: JuzInfo[] = [
   { number: 1,  nameAr: 'آلم',              nameEn: 'Alif Lam Meem',          startSurah: 1,  startAyah: 1   },
-  { number: 2,  nameAr: 'سيقول',           nameEn: 'Sayaqul',                startSurah: 2,  startAyah: 142 },
+  { number: 2,  nameAr: 'سيقول',           nameEn: 'Sayaqul',                startSurah: 2,  startAyah: 141 },
   { number: 3,  nameAr: 'تلك الرسل',        nameEn: 'Tilka ar-Rusul',         startSurah: 2,  startAyah: 251 },
   { number: 4,  nameAr: 'لن تنالوا البر',  nameEn: 'Lan Tanaalu al-Birr',    startSurah: 3,  startAyah: 91  },
   { number: 5,  nameAr: 'والمحصنات',        nameEn: 'Wal-Muhsanatu',          startSurah: 4,  startAyah: 24  },
@@ -59,7 +59,7 @@ export const JUZ_DATA_QALOON: JuzInfo[] = [
   { number: 17, nameAr: 'اقترب للناس',    nameEn: 'Iqtaraba lil-Nas',       startSurah: 21, startAyah: 1   },
   { number: 18, nameAr: 'قد أفلح',        nameEn: 'Qad Aflaha',             startSurah: 23, startAyah: 1   },
   { number: 19, nameAr: 'وقال الذين',     nameEn: 'Wa Qala alladhin',       startSurah: 25, startAyah: 21  },
-  { number: 20, nameAr: 'ولقد وصّلنا',     nameEn: 'Wa Laqad Wasalna',       startSurah: 27, startAyah: 51  },
+  { number: 20, nameAr: 'فما كان',         nameEn: 'Fa Ma Kana',             startSurah: 27, startAyah: 58  },
   { number: 21, nameAr: 'ولا تجادلوا',    nameEn: 'Wa La Tujadilu',         startSurah: 29, startAyah: 46  },
   { number: 22, nameAr: 'ومن يقنت',       nameEn: 'Wa Man Yaqnut',          startSurah: 33, startAyah: 31  },
   { number: 23, nameAr: 'وما أنزلنا',     nameEn: 'Wa Ma Anzalna',          startSurah: 36, startAyah: 27  },
