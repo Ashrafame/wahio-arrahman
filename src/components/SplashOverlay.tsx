@@ -25,11 +25,18 @@ export function SplashOverlay() {
 
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.container, { opacity }]}>
-      <Image source={require('../../assets/splash.png')} style={StyleSheet.absoluteFill} resizeMode="contain" />
+      <Image source={require('../../assets/splash.png')} style={styles.image} resizeMode="contain" />
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#0D402F', zIndex: 999, elevation: 999 },
+  container: {
+    backgroundColor: '#0D402F',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 999,
+    elevation: 999,
+  },
+  image: { width: '100%', height: '100%' },
 });
