@@ -53,7 +53,7 @@ export function AyahCard({
       ]}
     >
       <View style={[styles.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <View style={[styles.numberBadge, { backgroundColor: palette.primary }]}>
+        <View style={[styles.numberBadge, { backgroundColor: isPlaying ? '#FF9800' : palette.primary }]}>
           <Text style={{ color: palette.primaryText, fontSize: 12, fontWeight: '700' }}>{ayah.verse}</Text>
         </View>
         <View style={[styles.actionsRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
