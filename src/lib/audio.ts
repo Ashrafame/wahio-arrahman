@@ -2,10 +2,12 @@ import { createAudioPlayer } from 'expo-audio';
 import type { AudioPlayer } from 'expo-audio';
 
 type PlaybackListener = (key: string | null, isPlaying: boolean) => void;
+type PositionListener = (positionMs: number) => void;
 
 let player: AudioPlayer | null = null;
 let currentKey: string | null = null;
 const listeners = new Set<PlaybackListener>();
+const positionListeners = new Set<PositionListener>();
 let _seqItems: { key: string; url: string }[] = [];
 let _seqIdx = 0;
 let _seqId: string | null = null;
@@ -14,16 +16,22 @@ function notify(isPlaying: boolean) {
   for (const listener of listeners) listener(currentKey, isPlaying);
 }
 
+function notifyPosition(posMs: number) {
+  for (const listener of positionListeners) listener(posMs);
+}
+
 function ensurePlayer(): AudioPlayer {
   if (!player) {
-    player = createAudioPlayer(null);
+    player = createAudioPlayer(null, { updateInterval: 250 });
     player.addListener('playbackStatusUpdate', (status) => {
+      if (status.playing && status.currentTime > 0) {
+        notifyPosition(Math.round(status.currentTime * 1000));
+      }
       if (status.didJustFinish) {
         if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
           _seqIdx++;
           currentKey = _seqItems[_seqIdx].key;
           notify(true);
-          // Delay replace+play so the event loop clears before loading the next track
           const nextUrl = _seqItems[_seqIdx].url;
           setTimeout(() => {
             if (_seqItems.length > 0) {
@@ -44,7 +52,6 @@ function ensurePlayer(): AudioPlayer {
   return player;
 }
 
-/** Plays the given url; `key` identifies the playable item (e.g. an ayah key) so the UI can show which one is active. */
 export function playAudio(key: string, url: string) {
   _seqItems = [];
   _seqIdx = 0;
@@ -61,7 +68,6 @@ export function playAudio(key: string, url: string) {
   notify(true);
 }
 
-/** Plays a sequence of items one by one. `seqId` uniquely identifies this sequence so UI can track it. */
 export function playSequence(seqId: string, items: { key: string; url: string }[]) {
   if (!items.length) return;
   _seqItems = items;
@@ -95,4 +101,9 @@ export function getCurrentSequenceId(): string | null {
 export function subscribeAudio(listener: PlaybackListener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
+}
+
+export function subscribePosition(listener: PositionListener): () => void {
+  positionListeners.add(listener);
+  return () => positionListeners.delete(listener);
 }
