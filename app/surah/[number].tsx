@@ -69,6 +69,17 @@ export default function SurahScreen() {
     });
   }, []);
 
+  // Auto-scroll to the currently playing ayah whenever the key advances in a Hafs sequence
+  useEffect(() => {
+    if (qiraah !== 'hafs' || !playingKey) return;
+    const parts = playingKey.split(':');
+    if (parts.length !== 3 || Number(parts[0]) !== chapterNumber) return;
+    const verse = Number(parts[1]);
+    const index = ayahs.findIndex((a) => a.verse === verse);
+    if (index < 0) return;
+    listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.4 });
+  }, [playingKey, qiraah, chapterNumber, ayahs]);;
+
   useEffect(() => {
     let cancelled = false;
     const edition = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
