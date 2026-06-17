@@ -68,11 +68,17 @@ export function getAyahText(chapter: number, verse: number, qiraah: Qiraah): str
   return (qiraah === 'hafs' ? hafsMap : qaloonMap)[key] ?? '';
 }
 
-export function getSurahAyahs(chapter: number): Ayah[] {
-  const meta = getChapter(chapter);
-  if (!meta) return [];
+export function getVerseCount(chapter: number, qiraah: Qiraah = 'hafs'): number {
+  const map = qiraah === 'hafs' ? hafsMap : qaloonMap;
+  let count = 0;
+  while (map[`${chapter}:${count + 1}`]) count++;
+  return count || (getChapter(chapter)?.versesCount ?? 0);
+}
+
+export function getSurahAyahs(chapter: number, qiraah: Qiraah = 'hafs'): Ayah[] {
+  const count = getVerseCount(chapter, qiraah);
   const ayahs: Ayah[] = [];
-  for (let v = 1; v <= meta.versesCount; v++) {
+  for (let v = 1; v <= count; v++) {
     ayahs.push(getAyah(chapter, v));
   }
   return ayahs;

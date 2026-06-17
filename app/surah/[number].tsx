@@ -11,7 +11,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Ayah, getChapter, getSurahAyahs } from '../../src/lib/quranData';
+import { Ayah, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/quranData';
 import { fetchSurahTafsir, TAFSIR_EDITIONS } from '../../src/lib/tafsirRemote';
 import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
@@ -46,7 +46,7 @@ export default function SurahScreen() {
   const listRef = useRef<FlatList<Ayah>>(null);
 
   const chapter = getChapter(chapterNumber);
-  const ayahs = useMemo(() => getSurahAyahs(chapterNumber), [chapterNumber]);
+  const ayahs = useMemo(() => getSurahAyahs(chapterNumber, qiraah), [chapterNumber, qiraah]);
 
   const [openTafsirVerses, setOpenTafsirVerses] = useState<Set<number>>(new Set());
   const [tafsirMap, setTafsirMap] = useState<Record<number, string>>({});
@@ -200,7 +200,7 @@ export default function SurahScreen() {
             ) : null}
           </View>
           <Text style={[styles.headerSubtitle, { color: palette.primaryText }]}>
-            {chapter.nameTranslationEn} · {chapter.versesCount} {t('verses')}
+            {chapter.nameTranslationEn} · {getVerseCount(chapterNumber, qiraah)} {t('verses')}
           </Text>
         </View>
         <Pressable onPress={() => router.push('/settings')} style={styles.iconButton} hitSlop={8}>
