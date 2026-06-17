@@ -105,11 +105,11 @@ export default function SurahScreen() {
     if (targetVerse) {
       const index = ayahs.findIndex((a) => a.verse === targetVerse);
       if (index >= 0) {
-        setTimeout(() => {
-          listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.1 });
-        }, 250);
         setHighlightVerse(targetVerse);
-        setTimeout(() => setHighlightVerse(undefined), 2500);
+        setTimeout(() => {
+          listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.2 });
+        }, 500);
+        setTimeout(() => setHighlightVerse(undefined), 3000);
       }
     }
   }, [targetVerse, ayahs]);
@@ -280,8 +280,8 @@ export default function SurahScreen() {
         )}
         onScrollToIndexFailed={(info) => {
           setTimeout(() => {
-            listRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0.1 });
-          }, 300);
+            listRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0.2 });
+          }, 500);
         }}
         contentContainerStyle={{ paddingVertical: 10, paddingBottom: 30 }}
       />

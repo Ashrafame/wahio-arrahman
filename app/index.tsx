@@ -138,8 +138,8 @@ export default function HomeScreen() {
                   </Text>
                   <Text style={{ color: palette.textMuted, fontSize: scaleFont(12), marginTop: 3 }}>
                     {isRTL
-                      ? `سورة ${getChapter(juz.startSurah)?.nameArabic}`
-                      : `Surah ${getChapter(juz.startSurah)?.nameTranslationEn}`}
+                      ? `سورة ${getChapter(juz.startSurah)?.nameArabic} · الآية ${juz.startAyah}`
+                      : `Surah ${getChapter(juz.startSurah)?.nameTranslationEn} · Verse ${juz.startAyah}`}
                   </Text>
                 </View>
                 <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={20} color={palette.textMuted} />
