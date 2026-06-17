@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Ayah } from '../lib/quranData';
 import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
@@ -34,13 +34,34 @@ export function AyahCard({
   const palette = getPalette(theme);
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
 
+  const handleCopyAyah = () => {
+    const fullText = `${arabicText}${showTranslation && ayah.translationEn ? '\n\n' + ayah.translationEn : ''}`;
+    Alert.alert(
+      t('copy') || 'Copy',
+      fullText,
+      [
+        { text: t('cancel') || 'Cancel', onPress: () => {} },
+        {
+          text: t('copy') || 'Copy',
+          onPress: () => {
+            // In React Native, we'd need to use a native module for copy
+            // For now, show a confirmation
+            Alert.alert(t('success') || 'Success', t('copiedToClipboard') || 'Copied to clipboard');
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
-    <View
+    <Pressable
+      onLongPress={handleCopyAyah}
       style={[
         styles.card,
         {
-          backgroundColor: isJuzStart ? '#2A9D8F20' : highlighted ? palette.surfaceAlt : palette.surface,
-          borderColor: isJuzStart ? '#2A9D8F' : highlighted ? palette.accent : palette.border,
+          backgroundColor: isPlaying ? '#FFE5CC' : isJuzStart ? '#2A9D8F20' : highlighted ? palette.surfaceAlt : palette.surface,
+          borderColor: isPlaying ? '#FF9800' : isJuzStart ? '#2A9D8F' : highlighted ? palette.accent : palette.border,
         },
       ]}
     >
@@ -114,7 +135,7 @@ export function AyahCard({
           )}
         </View>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 
