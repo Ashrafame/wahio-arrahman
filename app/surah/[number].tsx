@@ -60,19 +60,26 @@ export default function SurahScreen() {
   const [lastTappedVerse, setLastTappedVerse] = useState<number | null>(null);
   const [qaloonActiveVerse, setQaloonActiveVerse] = useState<number | null>(null);
 
-  // Proportional timing boundaries for Qaloon: each ayah occupies a fraction of the
-  // whole-surah recording proportional to its text length (murattal pace is steady).
+  // Proportional timing boundaries for Qaloon (whole-surah audio).
+  // Model: total_weight = intro + sum(text_i + pause_per_ayah)
+  // where intro ≈ isti'atha + bismillah (omitted for ch.1 & ch.9)
+  // and pause_per_ayah ≈ breath + tone-drop between verses.
+  // Constants are in "equivalent char units" at murattal Qaloon pace (~8 chars/sec).
   const qaloonBoundaries = useMemo(() => {
     if (qiraah !== 'qaloon') return null;
-    const weights = ayahs.map((a) => Math.max(1, (a.textQaloon || '').replace(/\s+/g, '').length));
-    const total = weights.reduce((s, w) => s + w, 0);
-    let acc = 0;
+    const textWeights = ayahs.map((a) => Math.max(1, (a.textQaloon || '').replace(/\s+/g, '').length));
+    const totalText = textWeights.reduce((s, w) => s + w, 0);
+    // ch.1: bismillah is ayah-1 so only isti'atha (~1.5s); ch.9: no bismillah (~1.5s); else ~4s
+    const INTRO = (chapterNumber === 1 || chapterNumber === 9) ? 12 : 32;
+    const PAUSE = 6; // ~0.75s per ayah
+    const totalWeight = INTRO + totalText + PAUSE * ayahs.length;
+    let acc = INTRO;
     return ayahs.map((a, i) => {
-      const start = acc / total;
-      acc += weights[i];
-      return { verse: a.verse, start, end: acc / total };
+      const start = acc / totalWeight;
+      acc += textWeights[i] + PAUSE;
+      return { verse: a.verse, start, end: Math.min(0.999, acc / totalWeight) };
     });
-  }, [ayahs, qiraah]);
+  }, [ayahs, qiraah, chapterNumber]);
 
   const reciterId = qiraah === 'hafs' ? hafsReciter : qaloonReciter;
   const setReciterId = qiraah === 'hafs' ? setHafsReciter : setQaloonReciter;
