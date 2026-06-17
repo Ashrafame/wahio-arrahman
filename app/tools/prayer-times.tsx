@@ -96,23 +96,53 @@ export default function PrayerTimesScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
-          {days.map((day, index) => (
-            <View key={day.date.toDateString()} style={[styles.dayCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-              <Text style={[styles.dayTitle, { color: palette.text, fontSize: scaleFont(14) }]}>
-                {index === 0 ? t('today') : formatDate(day.date)}
-              </Text>
-              <View style={[styles.timesRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                {PRAYER_KEYS.map(({ key, labelKey }) => (
-                  <View key={key} style={styles.timeCell}>
-                    <Text style={{ color: palette.textMuted, fontSize: scaleFont(11) }}>{t(labelKey)}</Text>
-                    <Text style={{ color: palette.text, fontSize: scaleFont(13), fontWeight: '700' }}>
-                      {formatTime(day[key])}
-                    </Text>
-                  </View>
-                ))}
+          {days.map((day, index) => {
+            const now = new Date();
+            let currentPrayerKey: string | null = null;
+            let nextPrayerKey: string | null = null;
+
+            if (index === 0) {
+              for (let i = 0; i < PRAYER_KEYS.length; i++) {
+                const prayerTime = day[PRAYER_KEYS[i].key as keyof Omit<DayPrayerTimes, 'date'>];
+                if (prayerTime.getTime() > now.getTime()) {
+                  nextPrayerKey = PRAYER_KEYS[i].key;
+                  if (i > 0) {
+                    currentPrayerKey = PRAYER_KEYS[i - 1].key;
+                  }
+                  break;
+                }
+              }
+              if (!nextPrayerKey && PRAYER_KEYS.length > 0) {
+                currentPrayerKey = PRAYER_KEYS[PRAYER_KEYS.length - 1].key;
+              }
+            }
+
+            return (
+              <View key={day.date.toDateString()} style={[styles.dayCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+                <Text style={[styles.dayTitle, { color: palette.text, fontSize: scaleFont(14) }]}>
+                  {index === 0 ? t('today') : formatDate(day.date)}
+                </Text>
+                <View style={[styles.timesRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                  {PRAYER_KEYS.map(({ key, labelKey }) => {
+                    const isCurrent = key === currentPrayerKey;
+                    const isNext = key === nextPrayerKey;
+                    return (
+                      <View key={key} style={styles.timeCell}>
+                        <Text style={{ color: palette.textMuted, fontSize: scaleFont(11) }}>{t(labelKey)}</Text>
+                        <Text style={{
+                          color: isCurrent ? '#E63946' : isNext ? '#2A9D8F' : palette.text,
+                          fontSize: scaleFont(13),
+                          fontWeight: isCurrent ? '800' : '700',
+                        }}>
+                          {formatTime(day[key])}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </ScrollView>
       )}
 
