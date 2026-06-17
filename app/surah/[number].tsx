@@ -18,7 +18,7 @@ import { getPalette } from '../../src/theme/colors';
 import { AyahCard } from '../../src/components/AyahCard';
 import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
 import { getCurrentAudioKey, getCurrentSequenceId, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
-import { getTrablsiCachedUri, triggerJuzDownload } from '../../src/lib/qaloonCache';
+import { getTrablsiCachedUri, triggerJuzDownload, subscribeDownloads, getJuzForAyah, type DownloadEvent } from '../../src/lib/qaloonCache';
 
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
@@ -60,6 +60,7 @@ export default function SurahScreen() {
   const [currentSeqId, setCurrentSeqId] = useState<string | null>(getCurrentSequenceId());
   const [lastTappedVerse, setLastTappedVerse] = useState<number | null>(null);
   const [qaloonActiveVerse, setQaloonActiveVerse] = useState<number | null>(null);
+  const [juzDownloadEvent, setJuzDownloadEvent] = useState<DownloadEvent | null>(null);
 
   // Proportional timing boundaries for Qaloon (whole-surah audio).
   // Model: total_weight = intro + sum(text_i + pause_per_ayah)
@@ -93,6 +94,16 @@ export default function SurahScreen() {
       if (!isPlaying) setQaloonActiveVerse(null);
     });
   }, []);
+
+  useEffect(() => {
+    return subscribeDownloads((event) => {
+      const relevantJuz = getJuzForAyah(chapterNumber, 1);
+      // Show banner only for the juz that belongs to the current surah
+      if (event.juz === relevantJuz || event.status === 'done' || event.status === 'error') {
+        setJuzDownloadEvent(event.status === 'done' || event.status === 'error' ? null : event);
+      }
+    });
+  }, [chapterNumber]);
 
   // Track position to advance the highlighted ayah in Qaloon mode (whole-surah audio only)
   useEffect(() => {
@@ -310,6 +321,16 @@ export default function SurahScreen() {
         <View style={[styles.noticeBanner, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
           <Text style={{ color: palette.textMuted, fontSize: 12, textAlign: isRTL ? 'right' : 'left' }}>
             {t('qaloonSurahOnlyNotice')}
+          </Text>
+        </View>
+      ) : null}
+
+      {juzDownloadEvent ? (
+        <View style={[styles.noticeBanner, { backgroundColor: '#0D402F20', borderColor: '#0D402F40' }]}>
+          <Text style={{ color: '#0D402F', fontSize: 12, textAlign: 'right' }}>
+            {juzDownloadEvent.status === 'extracting'
+              ? `⏳ جارٍ فك الضغط للجزء ${juzDownloadEvent.juz}...`
+              : `⬇ تحميل الجزء ${juzDownloadEvent.juz} للتشغيل المنفصل... ${Math.round(('progress' in juzDownloadEvent ? juzDownloadEvent.progress : 0) * 100)}٪`}
           </Text>
         </View>
       ) : null}
