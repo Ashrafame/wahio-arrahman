@@ -17,6 +17,7 @@ import { fetchSurahTafsir, TAFSIR_EDITIONS } from '../../src/lib/tafsirRemote';
 import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
 import { AyahCard } from '../../src/components/AyahCard';
+import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
 import { getCurrentAudioKey, getCurrentSequenceId, pauseAudio, resumeAudio, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
 
@@ -257,6 +258,7 @@ export default function SurahScreen() {
   };
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>
+      <IslamicPatternBackground />
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable onPress={() => router.back()} style={styles.iconButton} hitSlop={8}>
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />

@@ -12,6 +12,7 @@ import {
 } from '../src/store/SettingsContext';
 import { Qiraah } from '../src/lib/quranData';
 import { getPalette } from '../src/theme/colors';
+import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 
 export default function SettingsScreen() {
   const {
@@ -39,6 +40,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>
+      <IslamicPatternBackground />
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable onPress={() => router.back()} style={styles.iconButton} hitSlop={8}>
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />

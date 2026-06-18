@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../../src/store/SettingsContext';
 import { getPalette } from '../../../src/theme/colors';
 import { AZKAR_CATEGORIES } from '../../../src/data/azkar';
+import { IslamicPatternBackground } from '../../../src/components/IslamicPatternBackground';
 
 export default function AzkarCategoryScreen() {
   const { category } = useLocalSearchParams<{ category: string }>();
@@ -25,6 +26,7 @@ export default function AzkarCategoryScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>
+      <IslamicPatternBackground />
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable onPress={() => router.back()} style={styles.iconButton} hitSlop={8}>
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />

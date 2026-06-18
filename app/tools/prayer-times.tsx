@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
 import { getCurrentCoords, Coords } from '../../src/lib/location';
+import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import { CALCULATION_METHODS, computePrayerTimes, DayPrayerTimes } from '../../src/lib/prayerTimes';
 import { StringKey } from '../../src/i18n/translations';
 
@@ -62,6 +63,7 @@ export default function PrayerTimesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>
+      <IslamicPatternBackground />
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable onPress={() => router.back()} style={styles.iconButton} hitSlop={8}>
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />

@@ -17,6 +17,7 @@ import { useSettings } from '../src/store/SettingsContext';
 import { getPalette } from '../src/theme/colors';
 import { SurahListItem } from '../src/components/SurahListItem';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../src/data/juz';
+import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 
 export default function HomeScreen() {
   const { language, isRTL, t, theme, scaleFont, qiraah } = useSettings();
@@ -54,6 +55,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>
+      <IslamicPatternBackground />
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <View style={{ flex: 1 }}>
           <Text style={[styles.title, { color: palette.primaryText, fontFamily: 'Amiri-Bold' }]}>
