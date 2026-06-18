@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
+  FlatList,
   Modal,
   Pressable,
   ScrollView,
@@ -12,24 +11,15 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import * as Clipboard from 'expo-clipboard';
 import { Ayah, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/quranData';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../../src/data/juz';
 import { fetchSurahTafsir, TAFSIR_EDITIONS } from '../../src/lib/tafsirRemote';
-import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../../src/store/SettingsContext';
+import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
+import { AyahCard } from '../../src/components/AyahCard';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
-import {
-  getCurrentAudioKey,
-  getCurrentSequenceId,
-  pauseAudio,
-  resumeAudio,
-  playAudio,
-  playSequence,
-  subscribeAudio,
-  subscribePosition,
-} from '../../src/lib/audio';
+import { getCurrentAudioKey, getCurrentSequenceId, pauseAudio, resumeAudio, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
 
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
@@ -45,12 +35,8 @@ export default function SurahScreen() {
     theme,
     qiraah,
     setQiraah,
-    fontFamily,
-    fontSize,
-    scaleFont,
     showTranslation,
     setShowTranslation,
-    showEnglishQuran,
     tafsirEdition,
     setTafsirEdition,
     hafsReciter,
@@ -60,20 +46,18 @@ export default function SurahScreen() {
   } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
-
-  const scrollRef = useRef<ScrollView>(null);
-  const scrollContentHeight = useRef(0);
+  const listRef = useRef<FlatList<Ayah>>(null);
   const qaloonLastScrolledVerse = useRef<number | null>(null);
 
   const chapter = getChapter(chapterNumber);
   const ayahs = useMemo(() => getSurahAyahs(chapterNumber, qiraah), [chapterNumber, qiraah]);
 
-  // Proportional boundaries for Qaloon auto-scroll
+  // Proportional boundaries for Qaloon — used only for auto-scroll (not for highlighting)
   const qaloonBoundaries = useMemo(() => {
     if (qiraah !== 'qaloon') return null;
     const textWeights = ayahs.map((a) => Math.max(1, (a.textQaloon || '').replace(/\s+/g, '').length));
     const totalText = textWeights.reduce((s, w) => s + w, 0);
-    const INTRO = chapterNumber === 1 || chapterNumber === 9 ? 12 : 32;
+    const INTRO = (chapterNumber === 1 || chapterNumber === 9) ? 12 : 32;
     const PAUSE = 6;
     const totalWeight = INTRO + totalText + PAUSE * ayahs.length;
     let acc = INTRO;
@@ -95,13 +79,10 @@ export default function SurahScreen() {
   const [playingKey, setPlayingKey] = useState<string | null>(getCurrentAudioKey());
   const [currentSeqId, setCurrentSeqId] = useState<string | null>(getCurrentSequenceId());
   const [isActuallyPlaying, setIsActuallyPlaying] = useState(false);
-  const [contextVerse, setContextVerse] = useState<number | null>(null);
   const reciterId = qiraah === 'hafs' ? hafsReciter : qaloonReciter;
   const setReciterId = qiraah === 'hafs' ? setHafsReciter : setQaloonReciter;
   const reciterOptions = getRecitersForQiraah(qiraah);
   const qaloonSurahKey = `${chapterNumber}:${reciterId}`;
-
-  const englishMode = !isRTL && showEnglishQuran;
 
   useEffect(() => {
     return subscribeAudio((key, isPlaying) => {
@@ -111,35 +92,18 @@ export default function SurahScreen() {
     });
   }, []);
 
-  // Scroll to a verse by proportional text-length estimation
-  const scrollToVerse = useCallback(
-    (verse: number) => {
-      if (scrollContentHeight.current === 0) return;
-      const getLen = (a: Ayah) =>
-        englishMode
-          ? (a.translationEn || '').length
-          : (qiraah === 'hafs' ? a.textHafs : a.textQaloon).length;
-      const total = ayahs.reduce((s, a) => s + getLen(a), 0);
-      let before = 0;
-      for (const a of ayahs) {
-        if (a.verse === verse) break;
-        before += getLen(a);
-      }
-      const y = (before / total) * scrollContentHeight.current;
-      scrollRef.current?.scrollTo({ y: Math.max(0, y - 200), animated: true });
-    },
-    [ayahs, qiraah, englishMode]
-  );
-
-  // Auto-scroll for Hafs: follow the playing ayah key
+  // Auto-scroll to the currently playing ayah whenever the key advances in a Hafs sequence
   useEffect(() => {
     if (qiraah !== 'hafs' || !playingKey) return;
     const parts = playingKey.split(':');
     if (parts.length !== 3 || Number(parts[0]) !== chapterNumber) return;
-    scrollToVerse(Number(parts[1]));
-  }, [playingKey, qiraah, chapterNumber, scrollToVerse]);
+    const verse = Number(parts[1]);
+    const index = ayahs.findIndex((a) => a.verse === verse);
+    if (index < 0) return;
+    listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.4 });
+  }, [playingKey, qiraah, chapterNumber, ayahs]);
 
-  // Auto-scroll for Qaloon: proportional position subscription
+  // Auto-scroll for Qaloon using proportional position estimate (no highlighting, just scroll)
   useEffect(() => {
     if (qiraah !== 'qaloon') return;
     qaloonLastScrolledVerse.current = null;
@@ -149,15 +113,17 @@ export default function SurahScreen() {
       const active = qaloonBoundaries.find((b) => frac >= b.start && frac < b.end);
       if (!active || qaloonLastScrolledVerse.current === active.verse) return;
       qaloonLastScrolledVerse.current = active.verse;
-      scrollToVerse(active.verse);
+      const index = ayahs.findIndex((a) => a.verse === active.verse);
+      if (index < 0) return;
+      listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.4 });
     });
-  }, [qiraah, qaloonBoundaries, playingKey, qaloonSurahKey, scrollToVerse]);
+  }, [qiraah, qaloonBoundaries, playingKey, qaloonSurahKey, ayahs]);
 
-  // Tafsir loading
   useEffect(() => {
     let cancelled = false;
     const edition = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
     if (!edition) return;
+
     if (edition.bundled) {
       const map: Record<number, string> = {};
       for (const ayah of ayahs) map[ayah.verse] = ayah.tafsirMuyassar;
@@ -165,24 +131,44 @@ export default function SurahScreen() {
       setTafsirError(false);
       return;
     }
+
     setTafsirLoading(true);
     setTafsirError(false);
     fetchSurahTafsir(edition.slug, chapterNumber)
-      .then((map) => { if (!cancelled) setTafsirMap(map); })
-      .catch(() => { if (!cancelled) setTafsirError(true); })
-      .finally(() => { if (!cancelled) setTafsirLoading(false); });
-    return () => { cancelled = true; };
+      .then((map) => {
+        if (!cancelled) setTafsirMap(map);
+      })
+      .catch(() => {
+        if (!cancelled) setTafsirError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setTafsirLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [tafsirEdition, chapterNumber, ayahs]);
 
-  // Scroll to target verse on mount
   useEffect(() => {
     if (!targetVerse) return;
+    const index = ayahs.findIndex((a) => a.verse === targetVerse);
+    if (index < 0) return;
+
     setHighlightVerse(targetVerse);
-    const t1 = setTimeout(() => scrollToVerse(targetVerse), 400);
-    const t2 = setTimeout(() => scrollToVerse(targetVerse), 1000);
+
+    // First: scroll without animation to get items rendered
+    const t1 = setTimeout(() => {
+      listRef.current?.scrollToIndex({ index, animated: false, viewPosition: 0.2 });
+    }, 300);
+    // Second: smooth scroll after items are rendered
+    const t2 = setTimeout(() => {
+      listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.2 });
+    }, 900);
     const t3 = setTimeout(() => setHighlightVerse(undefined), 4000);
+
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [targetVerse, scrollToVerse]);
+  }, [targetVerse, ayahs]);
 
   if (!chapter) {
     return (
@@ -201,11 +187,6 @@ export default function SurahScreen() {
     });
   };
 
-  const handleCopyAyah = async (text: string) => {
-    await Clipboard.setStringAsync(text);
-    Alert.alert('✓', 'تم نسخ الآية');
-  };
-
   const currentEditionName = (lang: 'ar' | 'en') => {
     const edition = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
     return edition ? (lang === 'ar' ? edition.nameArabic : edition.nameEnglish) : '';
@@ -216,13 +197,17 @@ export default function SurahScreen() {
     return reciter ? (lang === 'ar' ? reciter.nameAr : reciter.nameEn) : '';
   };
 
-  // ── Hafs sequence playback ──────────────────────────────────────────────
+  // ── Hafs: sequence of per-ayah files ────────────────────────────────────
   const hafsSeqId = `surah:${chapterNumber}:hafs:${hafsReciter}`;
   const hafsIsPlaying = currentSeqId === hafsSeqId;
 
   const handlePlayHafsSurah = () => {
     if (hafsIsPlaying) { pauseAudio(); return; }
-    if (!isActuallyPlaying && getCurrentSequenceId() === hafsSeqId) { resumeAudio(); return; }
+    // Resume if same sequence is paused mid-way
+    if (!isActuallyPlaying && getCurrentSequenceId() === hafsSeqId) {
+      resumeAudio();
+      return;
+    }
     const items = ayahs
       .map((a) => {
         const audio = getAyahAudioUrl(chapterNumber, a.verse, 'hafs', hafsReciter);
@@ -233,13 +218,14 @@ export default function SurahScreen() {
     playSequence(hafsSeqId, items);
   };
 
-  // ── Qaloon whole-surah playback ─────────────────────────────────────────
+  // ── Qaloon: whole-surah file ─────────────────────────────────────────────
   const qaloonSurahIsPlaying = playingKey === qaloonSurahKey && isActuallyPlaying;
 
   const handlePlayQaloonSurah = () => {
     if (qaloonSurahIsPlaying) { pauseAudio(); return; }
     const audio = getAyahAudioUrl(chapterNumber, 1, 'qaloon', reciterId);
     if (!audio) return;
+    // playAudio resumes if same key is paused, starts fresh otherwise
     playAudio(qaloonSurahKey, audio.url);
   };
 
@@ -270,22 +256,9 @@ export default function SurahScreen() {
       });
     }
   };
-
-  // Shared text shadow giving Arabic text a floating depth effect
-  const arabicShadow = {
-    textShadowColor: theme === 'light' ? 'rgba(122,79,42,0.13)' : 'rgba(0,0,0,0.45)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  };
-
-  const baseFontSize = FONT_SIZE_MAP[fontSize];
-  const baseLineHeight = baseFontSize * 1.95;
-
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>
       <IslamicPatternBackground />
-
-      {/* ── Header ──────────────────────────────────────────────────────── */}
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable onPress={() => router.back()} style={styles.iconButton} hitSlop={8}>
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />
@@ -319,7 +292,6 @@ export default function SurahScreen() {
         </View>
       </View>
 
-      {/* ── Toolbar ─────────────────────────────────────────────────────── */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -373,127 +345,41 @@ export default function SurahScreen() {
         </View>
       ) : null}
 
-      {/* ── Continuous Mushaf Text ───────────────────────────────────────── */}
-      <ScrollView
-        ref={scrollRef}
-        onContentSizeChange={(_, h) => { scrollContentHeight.current = h; }}
-        contentContainerStyle={{ paddingBottom: 60 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Bismillah */}
-        {chapterNumber !== 1 && chapterNumber !== 9 ? (
-          <Text style={[styles.bismillah, { color: palette.text, fontFamily: 'Amiri-Bold', ...arabicShadow }]}>
-            {BISMILLAH}
-          </Text>
-        ) : null}
+      <FlatList
+        ref={listRef}
+        data={ayahs}
+        keyExtractor={(item) => item.key}
+        initialNumToRender={targetVerse ? Math.max(15, (ayahs.findIndex(a => a.verse === targetVerse) ?? 0) + 5) : 15}
+        ListHeaderComponent={
+          chapterNumber !== 1 && chapterNumber !== 9 ? (
+            <Text style={[styles.bismillah, { color: palette.text, fontFamily: 'Amiri-Bold' }]}>{BISMILLAH}</Text>
+          ) : null
+        }
+        renderItem={({ item }) => (
+          <AyahCard
+            ayah={item}
+            highlighted={highlightVerse === item.verse}
+            isJuzStart={item.chapter === chapterNumber && item.verse === targetVerse}
+            showTafsir={openTafsirVerses.has(item.verse)}
+            onToggleTafsir={() => toggleTafsir(item.verse)}
+            tafsirText={tafsirMap[item.verse]}
+            tafsirLoading={tafsirLoading}
+            tafsirError={tafsirError}
+            isPlaying={isAyahPlaying(item.verse)}
+            onPlayAudio={qiraah === 'hafs' ? () => handlePlayAyah(item.verse) : undefined}
+          />
+        )}
+        onScrollToIndexFailed={(info) => {
+          // Scroll to estimated offset first, then retry scrollToIndex
+          const offset = info.averageItemLength * info.index;
+          listRef.current?.scrollToOffset({ offset, animated: false });
+          setTimeout(() => {
+            listRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0.2 });
+          }, 300);
+        }}
+        contentContainerStyle={{ paddingVertical: 10, paddingBottom: 30 }}
+      />
 
-        {/* All ayahs as one continuous text block */}
-        <Text
-          style={[
-            {
-              fontFamily: englishMode ? undefined : FONT_FAMILY_MAP[fontFamily],
-              fontSize: englishMode ? baseFontSize * 0.65 : baseFontSize,
-              lineHeight: englishMode ? baseFontSize * 0.65 * 1.6 : baseLineHeight,
-              color: palette.text,
-              textAlign: englishMode ? 'left' : 'justify',
-              writingDirection: englishMode ? 'ltr' : 'rtl',
-              paddingHorizontal: 18,
-              paddingTop: 14,
-            },
-            englishMode ? {} : arabicShadow,
-          ]}
-        >
-          {ayahs.map((ayah) => {
-            const text = englishMode
-              ? (ayah.translationEn || '')
-              : qiraah === 'hafs'
-              ? ayah.textHafs
-              : ayah.textQaloon;
-            const playing = isAyahPlaying(ayah.verse);
-            const highlighted = highlightVerse === ayah.verse;
-            const tafsirOpen = openTafsirVerses.has(ayah.verse);
-
-            return (
-              <React.Fragment key={ayah.verse}>
-                <Text
-                  onLongPress={() => setContextVerse(ayah.verse)}
-                  // @ts-expect-error delayLongPress works at runtime; RN types are behind
-                  delayLongPress={1500}
-                  style={
-                    playing
-                      ? { color: palette.accent }
-                      : highlighted
-                      ? { color: palette.primary }
-                      : undefined
-                  }
-                >
-                  {text}
-                </Text>
-                {/* Verse end marker — tap to toggle tafsir, always prominent gold */}
-                <Text
-                  onPress={() => toggleTafsir(ayah.verse)}
-                  style={{
-                    color: tafsirOpen ? palette.primary : palette.accent,
-                    fontSize: baseFontSize * (englishMode ? 0.7 : 0.58),
-                    fontFamily: englishMode ? undefined : FONT_FAMILY_MAP[fontFamily],
-                  }}
-                >
-                  {englishMode ? ` (${ayah.verse}) ` : ` ﴿${ayah.verse}﴾ `}
-                </Text>
-              </React.Fragment>
-            );
-          })}
-        </Text>
-
-        {/* Translation block (Arabic mode with showTranslation) */}
-        {!englishMode && showTranslation ? (
-          <View style={[styles.translationBlock, { borderTopColor: palette.border }]}>
-            {ayahs.map((ayah) => (
-              <Text key={ayah.verse} style={{ color: palette.textMuted, fontSize: scaleFont(13), lineHeight: scaleFont(13) * 1.5, marginBottom: 3 }}>
-                <Text style={{ color: palette.accent, fontWeight: '700' }}>{ayah.verse}. </Text>
-                {ayah.translationEn}
-              </Text>
-            ))}
-          </View>
-        ) : null}
-
-        {/* Tafsir panels for selected verses */}
-        {[...openTafsirVerses].sort((a, b) => a - b).map((verse) => (
-          <View
-            key={verse}
-            style={[styles.tafsirPanel, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
-          >
-            <View style={[styles.tafsirPanelHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <Text style={{ color: palette.accent, fontWeight: '700', fontSize: scaleFont(12) }}>
-                {isRTL ? `تفسير الآية ${verse}` : `Tafsir — Verse ${verse}`}
-              </Text>
-              <Pressable onPress={() => toggleTafsir(verse)} hitSlop={8}>
-                <Ionicons name="close-circle" size={18} color={palette.textMuted} />
-              </Pressable>
-            </View>
-            {tafsirLoading ? (
-              <ActivityIndicator color={palette.primary} />
-            ) : tafsirError ? (
-              <Text style={{ color: palette.textMuted, fontSize: scaleFont(13) }}>{t('tafsirError')}</Text>
-            ) : (
-              <Text
-                style={{
-                  color: palette.text,
-                  textAlign: isRTL ? 'right' : 'left',
-                  writingDirection: isRTL ? 'rtl' : 'ltr',
-                  fontFamily: 'Cairo-Variable',
-                  fontSize: scaleFont(14),
-                  lineHeight: scaleFont(14) * 1.6,
-                }}
-              >
-                {tafsirMap[verse]}
-              </Text>
-            )}
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* ── Modals ──────────────────────────────────────────────────────── */}
       <Modal visible={pickerOpen} transparent animationType="fade" onRequestClose={() => setPickerOpen(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setPickerOpen(false)}>
           <View style={[styles.modalCard, { backgroundColor: palette.surface }]}>
@@ -501,13 +387,26 @@ export default function SurahScreen() {
             {TAFSIR_EDITIONS.map((edition) => (
               <Pressable
                 key={edition.id}
-                onPress={() => { setTafsirEdition(edition.id); setPickerOpen(false); }}
-                style={[styles.modalRow, { backgroundColor: tafsirEdition === edition.id ? palette.surfaceAlt : 'transparent', flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+                onPress={() => {
+                  setTafsirEdition(edition.id);
+                  setPickerOpen(false);
+                }}
+                style={[
+                  styles.modalRow,
+                  {
+                    backgroundColor: tafsirEdition === edition.id ? palette.surfaceAlt : 'transparent',
+                    flexDirection: isRTL ? 'row-reverse' : 'row',
+                  },
+                ]}
               >
-                {tafsirEdition === edition.id
-                  ? <Ionicons name="checkmark-circle" size={18} color={palette.primary} />
-                  : <View style={{ width: 18 }} />}
-                <Text style={{ color: palette.text, fontSize: 15 }}>{isRTL ? edition.nameArabic : edition.nameEnglish}</Text>
+                {tafsirEdition === edition.id ? (
+                  <Ionicons name="checkmark-circle" size={18} color={palette.primary} />
+                ) : (
+                  <View style={{ width: 18 }} />
+                )}
+                <Text style={{ color: palette.text, fontSize: 15 }}>
+                  {isRTL ? edition.nameArabic : edition.nameEnglish}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -521,13 +420,26 @@ export default function SurahScreen() {
             {reciterOptions.map((reciter) => (
               <Pressable
                 key={reciter.id}
-                onPress={() => { setReciterId(reciter.id); setReciterPickerOpen(false); }}
-                style={[styles.modalRow, { backgroundColor: reciterId === reciter.id ? palette.surfaceAlt : 'transparent', flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+                onPress={() => {
+                  setReciterId(reciter.id);
+                  setReciterPickerOpen(false);
+                }}
+                style={[
+                  styles.modalRow,
+                  {
+                    backgroundColor: reciterId === reciter.id ? palette.surfaceAlt : 'transparent',
+                    flexDirection: isRTL ? 'row-reverse' : 'row',
+                  },
+                ]}
               >
-                {reciterId === reciter.id
-                  ? <Ionicons name="checkmark-circle" size={18} color={palette.primary} />
-                  : <View style={{ width: 18 }} />}
-                <Text style={{ color: palette.text, fontSize: 15 }}>{isRTL ? reciter.nameAr : reciter.nameEn}</Text>
+                {reciterId === reciter.id ? (
+                  <Ionicons name="checkmark-circle" size={18} color={palette.primary} />
+                ) : (
+                  <View style={{ width: 18 }} />
+                )}
+                <Text style={{ color: palette.text, fontSize: 15 }}>
+                  {isRTL ? reciter.nameAr : reciter.nameEn}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -556,10 +468,19 @@ export default function SurahScreen() {
                     params: { number: juz.startSurah.toString(), verse: juz.startAyah.toString(), juz: juz.number.toString() },
                   });
                 }}
-                style={[styles.juzCard, { backgroundColor: fromJuz === juz.number ? palette.surfaceAlt : palette.surface, borderColor: fromJuz === juz.number ? palette.accent : palette.border, flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+                style={[
+                  styles.juzCard,
+                  {
+                    backgroundColor: fromJuz === juz.number ? palette.surfaceAlt : palette.surface,
+                    borderColor: fromJuz === juz.number ? palette.accent : palette.border,
+                    flexDirection: isRTL ? 'row-reverse' : 'row',
+                  },
+                ]}
               >
                 <View style={[styles.juzBadge, { backgroundColor: palette.primary }]}>
-                  <Text style={{ color: palette.primaryText, fontWeight: '800', fontSize: 14 }}>{juz.number}</Text>
+                  <Text style={{ color: palette.primaryText, fontWeight: '800', fontSize: 14 }}>
+                    {juz.number}
+                  </Text>
                 </View>
                 <View style={{ flex: 1, marginHorizontal: 12 }}>
                   <Text style={{ color: palette.text, fontWeight: '700', fontSize: 15, fontFamily: 'Amiri-Bold' }}>
@@ -578,82 +499,6 @@ export default function SurahScreen() {
         </View>
       </Modal>
 
-      {/* ── Ayah context menu (long-press 1.5s) ─────────────────────────── */}
-      <Modal
-        visible={contextVerse !== null}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setContextVerse(null)}
-      >
-        <Pressable style={styles.ctxOverlay} onPress={() => setContextVerse(null)}>
-          <Pressable style={[styles.ctxMenu, { backgroundColor: palette.surface }]}>
-            <View style={[styles.ctxHeader, { borderBottomColor: palette.border }]}>
-              <View style={[styles.ctxHandleBar, { backgroundColor: palette.border }]} />
-              <Text style={{ color: palette.textMuted, fontSize: 13, marginTop: 8 }}>
-                {isRTL ? `الآية ${contextVerse}` : `Verse ${contextVerse}`}
-              </Text>
-            </View>
-            {qiraah === 'hafs' ? (
-              <Pressable
-                onPress={() => {
-                  if (contextVerse !== null) handlePlayAyah(contextVerse);
-                  setContextVerse(null);
-                }}
-                style={[styles.ctxRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
-              >
-                <Ionicons name="play-circle-outline" size={26} color={palette.accent} />
-                <Text style={{ color: palette.text, fontSize: 16 }}>
-                  {isRTL ? 'تشغيل الآية' : 'Play verse'}
-                </Text>
-              </Pressable>
-            ) : null}
-            <Pressable
-              onPress={() => {
-                if (contextVerse !== null) toggleTafsir(contextVerse);
-                setContextVerse(null);
-              }}
-              style={[styles.ctxRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
-            >
-              <Ionicons
-                name={contextVerse !== null && openTafsirVerses.has(contextVerse) ? 'book' : 'book-outline'}
-                size={26}
-                color={palette.accent}
-              />
-              <Text style={{ color: palette.text, fontSize: 16 }}>
-                {isRTL
-                  ? contextVerse !== null && openTafsirVerses.has(contextVerse)
-                    ? 'إخفاء التفسير'
-                    : 'عرض التفسير'
-                  : contextVerse !== null && openTafsirVerses.has(contextVerse)
-                  ? 'Hide tafsir'
-                  : 'Show tafsir'}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                if (contextVerse !== null) {
-                  const a = ayahs.find((x) => x.verse === contextVerse);
-                  if (a) {
-                    const txt = englishMode
-                      ? a.translationEn || ''
-                      : qiraah === 'hafs'
-                      ? a.textHafs
-                      : a.textQaloon;
-                    handleCopyAyah(txt);
-                  }
-                }
-                setContextVerse(null);
-              }}
-              style={[styles.ctxRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
-            >
-              <Ionicons name="copy-outline" size={26} color={palette.accent} />
-              <Text style={{ color: palette.text, fontSize: 16 }}>
-                {isRTL ? 'نسخ الآية' : 'Copy verse'}
-              </Text>
-            </Pressable>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 }
@@ -702,7 +547,10 @@ function ToolbarChip({
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, { borderColor: palette.border, backgroundColor: active ? palette.surfaceAlt : palette.surface }]}
+      style={[
+        styles.chip,
+        { borderColor: palette.border, backgroundColor: active ? palette.surfaceAlt : palette.surface },
+      ]}
     >
       <Ionicons name={icon} size={15} color={active ? palette.accent : palette.textMuted} />
       <Text style={{ color: active ? palette.accent : palette.textMuted, fontSize: 12, marginLeft: 4 }}>
@@ -714,46 +562,77 @@ function ToolbarChip({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { alignItems: 'center', paddingHorizontal: 12, paddingVertical: 12 },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
   iconButton: { padding: 4, width: 32 },
   headerTitle: { fontSize: 20 },
   headerSubtitle: { fontSize: 11, opacity: 0.85, marginTop: 2 },
-  toolbar: { borderBottomWidth: 1, paddingVertical: 8 },
-  segmented: { flexDirection: 'row', borderWidth: 1, borderRadius: 10, overflow: 'hidden' },
-  segmentedOption: { paddingHorizontal: 12, paddingVertical: 6 },
-  chip: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
-  bismillah: { textAlign: 'center', fontSize: 26, marginVertical: 16 },
-  noticeBanner: { borderBottomWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },
-  translationBlock: {
-    marginHorizontal: 18,
-    marginTop: 14,
-    paddingTop: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
+  toolbar: {
+    borderBottomWidth: 1,
+    paddingVertical: 8,
   },
-  tafsirPanel: {
-    margin: 12,
-    marginTop: 6,
-    padding: 12,
-    borderRadius: 12,
+  segmented: {
+    flexDirection: 'row',
     borderWidth: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
-  tafsirPanelHeader: {
-    justifyContent: 'space-between',
+  segmentedOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  chip: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 },
-  modalCard: { borderRadius: 16, padding: 16 },
-  modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
-  modalRow: { alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 6, borderRadius: 8 },
+  bismillah: {
+    textAlign: 'center',
+    fontSize: 26,
+    marginVertical: 16,
+  },
+  noticeBanner: {
+    borderBottomWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    borderRadius: 16,
+    padding: 16,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  modalRow: {
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    borderRadius: 8,
+  },
   juzPickerContainer: { flex: 1 },
-  juzPickerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 12 },
+  juzPickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
   juzPickerTitle: { fontSize: 18, fontWeight: '700', fontFamily: 'Amiri-Bold' },
   juzCard: { borderWidth: 1, borderRadius: 14, padding: 14, alignItems: 'center' },
   juzBadge: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  ctxOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
-  ctxMenu: { borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingBottom: 36 },
-  ctxHeader: { alignItems: 'center', paddingTop: 12, paddingBottom: 14, borderBottomWidth: StyleSheet.hairlineWidth },
-  ctxHandleBar: { width: 38, height: 4, borderRadius: 2 },
-  ctxRow: { alignItems: 'center', gap: 16, paddingHorizontal: 24, paddingVertical: 16 },
 });
