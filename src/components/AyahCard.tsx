@@ -49,19 +49,11 @@ export function AyahCard({
     Alert.alert('✓', 'تم نسخ الآية');
   };
 
-  // Side accent border for the playing state — on the text-start edge
-  const playingBorder = isPlaying
-    ? isRTL
-      ? { borderRightWidth: 3, borderRightColor: palette.accent }
-      : { borderLeftWidth: 3, borderLeftColor: palette.accent }
-    : {};
-
   return (
     <Pressable
       onLongPress={handleCopyAyah}
       style={[
         styles.card,
-        playingBorder,
         isJuzStart && styles.juzStartCard,
         highlighted && !isPlaying && { backgroundColor: palette.accent + '12' },
       ]}
@@ -165,7 +157,7 @@ export function AyahCard({
 const styles = StyleSheet.create({
   card: {
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 8,
     marginHorizontal: 0,
     marginVertical: 0,
     borderBottomWidth: StyleSheet.hairlineWidth,
