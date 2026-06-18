@@ -18,7 +18,7 @@ import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
 import { AyahCard } from '../../src/components/AyahCard';
 import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
-import { getCurrentAudioKey, getCurrentSequenceId, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
+import { getCurrentAudioKey, getCurrentSequenceId, pauseAudio, resumeAudio, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
 
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
@@ -77,6 +77,7 @@ export default function SurahScreen() {
   const [highlightVerse, setHighlightVerse] = useState<number | undefined>(targetVerse);
   const [playingKey, setPlayingKey] = useState<string | null>(getCurrentAudioKey());
   const [currentSeqId, setCurrentSeqId] = useState<string | null>(getCurrentSequenceId());
+  const [isActuallyPlaying, setIsActuallyPlaying] = useState(false);
   const reciterId = qiraah === 'hafs' ? hafsReciter : qaloonReciter;
   const setReciterId = qiraah === 'hafs' ? setHafsReciter : setQaloonReciter;
   const reciterOptions = getRecitersForQiraah(qiraah);
@@ -86,6 +87,7 @@ export default function SurahScreen() {
     return subscribeAudio((key, isPlaying) => {
       setPlayingKey(key);
       setCurrentSeqId(isPlaying ? getCurrentSequenceId() : null);
+      setIsActuallyPlaying(isPlaying);
     });
   }, []);
 
@@ -199,7 +201,12 @@ export default function SurahScreen() {
   const hafsIsPlaying = currentSeqId === hafsSeqId;
 
   const handlePlayHafsSurah = () => {
-    if (hafsIsPlaying) { stopAudio(); return; }
+    if (hafsIsPlaying) { pauseAudio(); return; }
+    // Resume if same sequence is paused mid-way
+    if (!isActuallyPlaying && getCurrentSequenceId() === hafsSeqId) {
+      resumeAudio();
+      return;
+    }
     const items = ayahs
       .map((a) => {
         const audio = getAyahAudioUrl(chapterNumber, a.verse, 'hafs', hafsReciter);
@@ -211,12 +218,13 @@ export default function SurahScreen() {
   };
 
   // ── Qaloon: whole-surah file ─────────────────────────────────────────────
-  const qaloonSurahIsPlaying = playingKey === qaloonSurahKey;
+  const qaloonSurahIsPlaying = playingKey === qaloonSurahKey && isActuallyPlaying;
 
   const handlePlayQaloonSurah = () => {
-    if (qaloonSurahIsPlaying) { stopAudio(); return; }
+    if (qaloonSurahIsPlaying) { pauseAudio(); return; }
     const audio = getAyahAudioUrl(chapterNumber, 1, 'qaloon', reciterId);
     if (!audio) return;
+    // playAudio resumes if same key is paused, starts fresh otherwise
     playAudio(qaloonSurahKey, audio.url);
   };
 

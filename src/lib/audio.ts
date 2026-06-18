@@ -57,14 +57,34 @@ export function playAudio(key: string, url: string) {
   _seqIdx = 0;
   _seqId = null;
   const p = ensurePlayer();
-  if (currentKey === key && p.playing) {
-    p.pause();
-    notify(false);
+  if (currentKey === key) {
+    if (p.playing) {
+      p.pause();
+      notify(false);
+    } else {
+      // Same file paused — resume from current position instead of restarting
+      p.play();
+      notify(true);
+    }
     return;
   }
   currentKey = key;
   p.replace({ uri: url });
   p.play();
+  notify(true);
+}
+
+/** Pause without resetting position or sequence state. */
+export function pauseAudio() {
+  if (!player) return;
+  player.pause();
+  notify(false);
+}
+
+/** Resume a paused player (single file or sequence) from where it stopped. */
+export function resumeAudio() {
+  if (!player || !currentKey) return;
+  player.play();
   notify(true);
 }
 
