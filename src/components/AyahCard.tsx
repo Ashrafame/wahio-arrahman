@@ -36,30 +36,50 @@ export function AyahCard({
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
   const englishMode = !isRTL && showEnglishQuran;
 
+  // Warm text shadow that matches the Islamic pattern color — gives the floating depth
+  const arabicTextShadow = {
+    textShadowColor: theme === 'light' ? 'rgba(122,79,42,0.13)' : 'rgba(0,0,0,0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  };
+
   const handleCopyAyah = async () => {
     const fullText = `${arabicText}${showTranslation && ayah.translationEn ? '\n\n' + ayah.translationEn : ''}`;
     await Clipboard.setStringAsync(fullText);
     Alert.alert('✓', 'تم نسخ الآية');
   };
 
+  // Side accent border for the playing state — on the text-start edge
+  const playingBorder = isPlaying
+    ? isRTL
+      ? { borderRightWidth: 3, borderRightColor: palette.accent }
+      : { borderLeftWidth: 3, borderLeftColor: palette.accent }
+    : {};
+
   return (
     <Pressable
       onLongPress={handleCopyAyah}
       style={[
         styles.card,
-        {
-          backgroundColor: isPlaying ? '#FFE5CC' : isJuzStart ? '#2A9D8F20' : highlighted ? palette.surfaceAlt : palette.surface,
-          borderColor: isPlaying ? '#FF9800' : isJuzStart ? '#2A9D8F' : highlighted ? palette.accent : palette.border,
-        },
+        playingBorder,
+        isJuzStart && styles.juzStartCard,
+        highlighted && !isPlaying && { backgroundColor: palette.accent + '12' },
       ]}
     >
       <View style={[styles.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <View style={[styles.numberBadge, { backgroundColor: palette.primary }]}>
-          <Text style={{ color: palette.primaryText, fontSize: 12, fontWeight: '700' }}>{ayah.verse}</Text>
+        <View
+          style={[
+            styles.numberBadge,
+            { backgroundColor: isPlaying ? palette.accent : palette.primary },
+          ]}
+        >
+          <Text style={{ color: palette.primaryText, fontSize: 12, fontWeight: '700' }}>
+            {ayah.verse}
+          </Text>
         </View>
         <View style={[styles.actionsRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           {onPlayAudio ? (
-            <Pressable onPress={onPlayAudio} style={styles.tafsirButton} hitSlop={8}>
+            <Pressable onPress={onPlayAudio} style={styles.actionButton} hitSlop={8}>
               <Ionicons
                 name={isPlaying ? 'pause-circle' : 'play-circle-outline'}
                 size={20}
@@ -67,7 +87,7 @@ export function AyahCard({
               />
             </Pressable>
           ) : null}
-          <Pressable onPress={onToggleTafsir} style={styles.tafsirButton} hitSlop={8}>
+          <Pressable onPress={onToggleTafsir} style={styles.actionButton} hitSlop={8}>
             <Ionicons
               name={showTafsir ? 'book' : 'book-outline'}
               size={18}
@@ -78,7 +98,16 @@ export function AyahCard({
       </View>
 
       {englishMode && ayah.translationEn ? (
-        <Text style={[styles.translationText, { color: palette.text, fontSize: FONT_SIZE_MAP[fontSize] * 0.65, lineHeight: FONT_SIZE_MAP[fontSize] * 0.65 * 1.5, marginTop: 0 }]}>
+        <Text
+          style={[
+            styles.englishPrimaryText,
+            {
+              color: palette.text,
+              fontSize: FONT_SIZE_MAP[fontSize] * 0.65,
+              lineHeight: FONT_SIZE_MAP[fontSize] * 0.65 * 1.5,
+            },
+          ]}
+        >
           {ayah.translationEn}
         </Text>
       ) : (
@@ -89,8 +118,8 @@ export function AyahCard({
               color: palette.text,
               fontFamily: FONT_FAMILY_MAP[fontFamily],
               fontSize: FONT_SIZE_MAP[fontSize],
-              textAlign: 'right',
               lineHeight: FONT_SIZE_MAP[fontSize] * 1.8,
+              ...arabicTextShadow,
             },
           ]}
         >
@@ -135,11 +164,16 @@ export function AyahCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
-    marginHorizontal: 12,
-    marginVertical: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    marginHorizontal: 0,
+    marginVertical: 0,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(139,94,60,0.18)',
+  },
+  juzStartCard: {
+    borderTopWidth: 1.5,
+    borderTopColor: '#2A9D8F',
   },
   headerRow: {
     justifyContent: 'space-between',
@@ -154,9 +188,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actionsRow: { alignItems: 'center', gap: 6 },
-  tafsirButton: { padding: 4 },
+  actionButton: { padding: 4 },
   arabicText: {
     writingDirection: 'rtl',
+    textAlign: 'right',
+  },
+  englishPrimaryText: {
+    textAlign: 'left',
   },
   translationText: {
     marginTop: 10,
