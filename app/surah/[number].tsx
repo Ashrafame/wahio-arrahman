@@ -44,6 +44,8 @@ export default function SurahScreen() {
     qaloonReciter,
     setHafsReciter,
     setQaloonReciter,
+    language,
+    setLanguage,
   } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
@@ -297,12 +299,12 @@ export default function SurahScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={[styles.toolbar, { backgroundColor: palette.surface, borderColor: palette.border }]}
-        contentContainerStyle={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: 8, paddingHorizontal: 10 }}
+        contentContainerStyle={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: 8, paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center' }}
       >
         <SegmentedToggle
           options={[
-            { id: 'hafs', label: 'حفص' },
-            { id: 'qaloon', label: 'قالون' },
+            { id: 'hafs', label: isRTL ? 'حفص' : 'Hafs' },
+            { id: 'qaloon', label: isRTL ? 'قالون' : 'Qaloon' },
           ]}
           value={qiraah}
           onChange={(v) => handleQiraahChange(v as 'hafs' | 'qaloon')}
@@ -327,6 +329,13 @@ export default function SurahScreen() {
           active={false}
           label={currentReciterName(isRTL ? 'ar' : 'en')}
           onPress={() => setReciterPickerOpen(true)}
+          palette={palette}
+        />
+        <ToolbarChip
+          icon="globe-outline"
+          active={false}
+          label={language === 'ar' ? 'EN' : 'عربي'}
+          onPress={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
           palette={palette}
         />
         <ToolbarChip
@@ -585,7 +594,6 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 11, opacity: 0.85, marginTop: 2 },
   toolbar: {
     borderBottomWidth: 1,
-    paddingVertical: 8,
   },
   segmented: {
     flexDirection: 'row',
@@ -595,7 +603,7 @@ const styles = StyleSheet.create({
   },
   segmentedOption: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 9,
   },
   chip: {
     flexDirection: 'row',
