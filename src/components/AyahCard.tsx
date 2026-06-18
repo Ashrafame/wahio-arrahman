@@ -157,7 +157,7 @@ export function AyahCard({
 const styles = StyleSheet.create({
   card: {
     paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingVertical: 2,
     marginHorizontal: 0,
     marginVertical: 0,
     borderBottomWidth: StyleSheet.hairlineWidth,
