@@ -18,7 +18,7 @@ import { useSettings } from '../../src/store/SettingsContext';
 import { getPalette } from '../../src/theme/colors';
 import { AyahCard } from '../../src/components/AyahCard';
 import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
-import { getCurrentAudioKey, getCurrentSequenceId, playAudio, playSequence, stopAudio, subscribeAudio } from '../../src/lib/audio';
+import { getCurrentAudioKey, getCurrentSequenceId, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
 
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
@@ -46,9 +46,26 @@ export default function SurahScreen() {
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<Ayah>>(null);
+  const qaloonLastScrolledVerse = useRef<number | null>(null);
 
   const chapter = getChapter(chapterNumber);
   const ayahs = useMemo(() => getSurahAyahs(chapterNumber, qiraah), [chapterNumber, qiraah]);
+
+  // Proportional boundaries for Qaloon — used only for auto-scroll (not for highlighting)
+  const qaloonBoundaries = useMemo(() => {
+    if (qiraah !== 'qaloon') return null;
+    const textWeights = ayahs.map((a) => Math.max(1, (a.textQaloon || '').replace(/\s+/g, '').length));
+    const totalText = textWeights.reduce((s, w) => s + w, 0);
+    const INTRO = (chapterNumber === 1 || chapterNumber === 9) ? 12 : 32;
+    const PAUSE = 6;
+    const totalWeight = INTRO + totalText + PAUSE * ayahs.length;
+    let acc = INTRO;
+    return ayahs.map((a, i) => {
+      const start = acc / totalWeight;
+      acc += textWeights[i] + PAUSE;
+      return { verse: a.verse, start, end: Math.min(0.999, acc / totalWeight) };
+    });
+  }, [ayahs, qiraah, chapterNumber]);
 
   const [openTafsirVerses, setOpenTafsirVerses] = useState<Set<number>>(new Set());
   const [tafsirMap, setTafsirMap] = useState<Record<number, string>>({});
@@ -81,7 +98,23 @@ export default function SurahScreen() {
     const index = ayahs.findIndex((a) => a.verse === verse);
     if (index < 0) return;
     listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.4 });
-  }, [playingKey, qiraah, chapterNumber, ayahs]);;
+  }, [playingKey, qiraah, chapterNumber, ayahs]);
+
+  // Auto-scroll for Qaloon using proportional position estimate (no highlighting, just scroll)
+  useEffect(() => {
+    if (qiraah !== 'qaloon') return;
+    qaloonLastScrolledVerse.current = null;
+    return subscribePosition((posMs, durMs) => {
+      if (playingKey !== qaloonSurahKey || durMs <= 0 || !qaloonBoundaries) return;
+      const frac = Math.min(0.99999, posMs / durMs);
+      const active = qaloonBoundaries.find((b) => frac >= b.start && frac < b.end);
+      if (!active || qaloonLastScrolledVerse.current === active.verse) return;
+      qaloonLastScrolledVerse.current = active.verse;
+      const index = ayahs.findIndex((a) => a.verse === active.verse);
+      if (index < 0) return;
+      listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.4 });
+    });
+  }, [qiraah, qaloonBoundaries, playingKey, qaloonSurahKey, ayahs]);
 
   useEffect(() => {
     let cancelled = false;
