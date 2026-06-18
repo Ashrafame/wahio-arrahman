@@ -210,9 +210,11 @@ export default function SurahScreen() {
             <Text style={[styles.headerTitle, { color: palette.primaryText, fontFamily: 'Amiri-Bold' }]}>
               {chapter.nameArabic}
             </Text>
-            <Pressable onPress={handlePlaySurah} hitSlop={8}>
-              <Ionicons name={surahIsPlaying ? 'pause-circle' : 'play-circle'} size={22} color={palette.primaryText} />
-            </Pressable>
+            {!fromJuz ? (
+              <Pressable onPress={handlePlaySurah} hitSlop={8}>
+                <Ionicons name={surahIsPlaying ? 'pause-circle' : 'play-circle'} size={22} color={palette.primaryText} />
+              </Pressable>
+            ) : null}
           </View>
           <Text style={[styles.headerSubtitle, { color: palette.primaryText }]}>
             {fromJuz ? (isRTL ? `الجزء ${fromJuz} · ` : `Juz ${fromJuz} · `) : ''}
