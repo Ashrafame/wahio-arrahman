@@ -22,6 +22,7 @@ import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
 import { getCurrentAudioKey, getCurrentSequenceId, pauseAudio, resumeAudio, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
 
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+const BISMILLAH_EN = 'In the name of Allah, the Most Gracious, the Most Merciful';
 
 export default function SurahScreen() {
   const params = useLocalSearchParams<{ number: string; verse?: string; juz?: string }>();
@@ -351,8 +352,20 @@ export default function SurahScreen() {
         keyExtractor={(item) => item.key}
         initialNumToRender={targetVerse ? Math.max(15, (ayahs.findIndex(a => a.verse === targetVerse) ?? 0) + 5) : 15}
         ListHeaderComponent={
-          chapterNumber !== 1 && chapterNumber !== 9 ? (
-            <Text style={[styles.bismillah, { color: palette.text, fontFamily: 'Amiri-Bold' }]}>{BISMILLAH}</Text>
+          // Show Bismillah header for all surahs except At-Tawbah (9).
+          // For Al-Fatiha in Hafs, verse 1 already IS the Bismillah so skip the header.
+          // For Al-Fatiha in Qaloon, verse 1 is Al-Hamd so we must add the header manually.
+          chapterNumber !== 9 && (chapterNumber !== 1 || qiraah === 'qaloon') ? (
+            <View style={styles.bismillahBlock}>
+              <Text style={[styles.bismillah, { color: palette.text, fontFamily: 'Amiri-Bold' }]}>
+                {BISMILLAH}
+              </Text>
+              {showTranslation ? (
+                <Text style={[styles.bismillahTranslation, { color: palette.textMuted }]}>
+                  {BISMILLAH_EN}
+                </Text>
+              ) : null}
+            </View>
           ) : null
         }
         renderItem={({ item }) => (
@@ -592,10 +605,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
+  bismillahBlock: {
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
   bismillah: {
     textAlign: 'center',
     fontSize: 26,
-    marginVertical: 16,
+  },
+  bismillahTranslation: {
+    textAlign: 'center',
+    fontSize: 13,
+    marginTop: 6,
+    lineHeight: 18,
   },
   noticeBanner: {
     borderBottomWidth: 1,
