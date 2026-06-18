@@ -95,6 +95,7 @@ export default function SurahScreen() {
   const [playingKey, setPlayingKey] = useState<string | null>(getCurrentAudioKey());
   const [currentSeqId, setCurrentSeqId] = useState<string | null>(getCurrentSequenceId());
   const [isActuallyPlaying, setIsActuallyPlaying] = useState(false);
+  const [contextVerse, setContextVerse] = useState<number | null>(null);
   const reciterId = qiraah === 'hafs' ? hafsReciter : qaloonReciter;
   const setReciterId = qiraah === 'hafs' ? setHafsReciter : setQaloonReciter;
   const reciterOptions = getRecitersForQiraah(qiraah);
@@ -415,8 +416,9 @@ export default function SurahScreen() {
             return (
               <React.Fragment key={ayah.verse}>
                 <Text
-                  onPress={qiraah === 'hafs' ? () => handlePlayAyah(ayah.verse) : undefined}
-                  onLongPress={() => handleCopyAyah(text)}
+                  onLongPress={() => setContextVerse(ayah.verse)}
+                  // @ts-expect-error delayLongPress works at runtime; RN types are behind
+                  delayLongPress={1500}
                   style={
                     playing
                       ? { color: palette.accent }
@@ -427,11 +429,11 @@ export default function SurahScreen() {
                 >
                   {text}
                 </Text>
-                {/* Verse end marker — tap to toggle tafsir */}
+                {/* Verse end marker — tap to toggle tafsir, always prominent gold */}
                 <Text
                   onPress={() => toggleTafsir(ayah.verse)}
                   style={{
-                    color: tafsirOpen ? palette.accent : palette.textMuted,
+                    color: tafsirOpen ? palette.primary : palette.accent,
                     fontSize: baseFontSize * (englishMode ? 0.7 : 0.58),
                     fontFamily: englishMode ? undefined : FONT_FAMILY_MAP[fontFamily],
                   }}
@@ -575,6 +577,83 @@ export default function SurahScreen() {
           </ScrollView>
         </View>
       </Modal>
+
+      {/* ── Ayah context menu (long-press 1.5s) ─────────────────────────── */}
+      <Modal
+        visible={contextVerse !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setContextVerse(null)}
+      >
+        <Pressable style={styles.ctxOverlay} onPress={() => setContextVerse(null)}>
+          <Pressable style={[styles.ctxMenu, { backgroundColor: palette.surface }]}>
+            <View style={[styles.ctxHeader, { borderBottomColor: palette.border }]}>
+              <View style={[styles.ctxHandleBar, { backgroundColor: palette.border }]} />
+              <Text style={{ color: palette.textMuted, fontSize: 13, marginTop: 8 }}>
+                {isRTL ? `الآية ${contextVerse}` : `Verse ${contextVerse}`}
+              </Text>
+            </View>
+            {qiraah === 'hafs' ? (
+              <Pressable
+                onPress={() => {
+                  if (contextVerse !== null) handlePlayAyah(contextVerse);
+                  setContextVerse(null);
+                }}
+                style={[styles.ctxRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+              >
+                <Ionicons name="play-circle-outline" size={26} color={palette.accent} />
+                <Text style={{ color: palette.text, fontSize: 16 }}>
+                  {isRTL ? 'تشغيل الآية' : 'Play verse'}
+                </Text>
+              </Pressable>
+            ) : null}
+            <Pressable
+              onPress={() => {
+                if (contextVerse !== null) toggleTafsir(contextVerse);
+                setContextVerse(null);
+              }}
+              style={[styles.ctxRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+            >
+              <Ionicons
+                name={contextVerse !== null && openTafsirVerses.has(contextVerse) ? 'book' : 'book-outline'}
+                size={26}
+                color={palette.accent}
+              />
+              <Text style={{ color: palette.text, fontSize: 16 }}>
+                {isRTL
+                  ? contextVerse !== null && openTafsirVerses.has(contextVerse)
+                    ? 'إخفاء التفسير'
+                    : 'عرض التفسير'
+                  : contextVerse !== null && openTafsirVerses.has(contextVerse)
+                  ? 'Hide tafsir'
+                  : 'Show tafsir'}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                if (contextVerse !== null) {
+                  const a = ayahs.find((x) => x.verse === contextVerse);
+                  if (a) {
+                    const txt = englishMode
+                      ? a.translationEn || ''
+                      : qiraah === 'hafs'
+                      ? a.textHafs
+                      : a.textQaloon;
+                    handleCopyAyah(txt);
+                  }
+                }
+                setContextVerse(null);
+              }}
+              style={[styles.ctxRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+            >
+              <Ionicons name="copy-outline" size={26} color={palette.accent} />
+              <Text style={{ color: palette.text, fontSize: 16 }}>
+                {isRTL ? 'نسخ الآية' : 'Copy verse'}
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -672,4 +751,9 @@ const styles = StyleSheet.create({
   juzPickerTitle: { fontSize: 18, fontWeight: '700', fontFamily: 'Amiri-Bold' },
   juzCard: { borderWidth: 1, borderRadius: 14, padding: 14, alignItems: 'center' },
   juzBadge: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  ctxOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  ctxMenu: { borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingBottom: 36 },
+  ctxHeader: { alignItems: 'center', paddingTop: 12, paddingBottom: 14, borderBottomWidth: StyleSheet.hairlineWidth },
+  ctxHandleBar: { width: 38, height: 4, borderRadius: 2 },
+  ctxRow: { alignItems: 'center', gap: 16, paddingHorizontal: 24, paddingVertical: 16 },
 });
