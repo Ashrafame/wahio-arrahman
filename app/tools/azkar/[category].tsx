@@ -38,26 +38,59 @@ export default function AzkarCategoryScreen() {
       <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
         {data.items.map((item, index) => (
           <View key={index} style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-            <Text
-              style={[
-                styles.text,
-                {
-                  color: palette.text,
-                  fontFamily: 'Amiri-Regular',
-                  textAlign: 'right',
-                  writingDirection: 'rtl',
-                  fontSize: scaleFont(20),
-                  lineHeight: scaleFont(20) * 1.7,
-                },
-              ]}
-            >
-              {item.textAr}
-            </Text>
-            {item.repeat > 1 ? (
-              <Text style={[styles.repeat, { color: palette.accent, fontSize: scaleFont(13) }]}>
-                {t('repeat')}: {item.repeat}
-              </Text>
-            ) : null}
+            {isRTL ? (
+              <>
+                <Text
+                  style={[
+                    styles.arabicText,
+                    {
+                      color: palette.text,
+                      fontSize: scaleFont(20),
+                      lineHeight: scaleFont(20) * 1.7,
+                    },
+                  ]}
+                >
+                  {item.textAr}
+                </Text>
+                {item.repeat > 1 ? (
+                  <Text style={[styles.repeat, { color: palette.accent, fontSize: scaleFont(13), textAlign: 'right' }]}>
+                    {t('repeat')}: {item.repeat}
+                  </Text>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <Text
+                  style={[
+                    styles.englishText,
+                    {
+                      color: palette.text,
+                      fontSize: scaleFont(16),
+                      lineHeight: scaleFont(16) * 1.6,
+                    },
+                  ]}
+                >
+                  {item.textEn}
+                </Text>
+                <Text
+                  style={[
+                    styles.arabicSecondary,
+                    {
+                      color: palette.textMuted,
+                      fontSize: scaleFont(17),
+                      lineHeight: scaleFont(17) * 1.7,
+                    },
+                  ]}
+                >
+                  {item.textAr}
+                </Text>
+                {item.repeat > 1 ? (
+                  <Text style={[styles.repeat, { color: palette.accent, fontSize: scaleFont(13), textAlign: 'left' }]}>
+                    {t('repeat')}: {item.repeat}
+                  </Text>
+                ) : null}
+              </>
+            )}
           </View>
         ))}
       </ScrollView>
@@ -70,7 +103,20 @@ const styles = StyleSheet.create({
   header: { alignItems: 'center', paddingHorizontal: 12, paddingVertical: 12, justifyContent: 'space-between' },
   iconButton: { padding: 4, width: 32 },
   headerTitle: { fontSize: 17, fontWeight: '700' },
-  card: { borderWidth: 1, borderRadius: 14, padding: 16 },
-  text: { fontSize: 20, lineHeight: 34 },
-  repeat: { marginTop: 10, fontSize: 13, fontWeight: '700', textAlign: 'right' },
+  card: { borderWidth: 1, borderRadius: 14, padding: 16, gap: 10 },
+  arabicText: {
+    fontFamily: 'Amiri-Regular',
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
+  arabicSecondary: {
+    fontFamily: 'Amiri-Regular',
+    textAlign: 'right',
+    writingDirection: 'rtl',
+    marginTop: 4,
+  },
+  englishText: {
+    textAlign: 'left',
+  },
+  repeat: { fontWeight: '700' },
 });
