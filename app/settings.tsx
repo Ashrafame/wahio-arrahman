@@ -31,6 +31,8 @@ export default function SettingsScreen() {
     setUiFontScale,
     showTranslation,
     setShowTranslation,
+    showEnglishQuran,
+    setShowEnglishQuran,
   } = useSettings();
   const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
@@ -77,6 +79,8 @@ export default function SettingsScreen() {
             options={[
               { id: 'amiri', label: 'Amiri' },
               { id: 'scheherazade', label: 'Scheherazade' },
+              { id: 'reemkufi', label: 'الخط الكوفي' },
+              { id: 'jomhuria', label: 'جمهورية' },
             ]}
             value={fontFamily}
             onChange={(v) => setFontFamily(v as FontFamilyId)}
@@ -102,18 +106,18 @@ export default function SettingsScreen() {
 
         <Section title={t('uiFontSize')} palette={palette} isRTL={isRTL}>
           <View style={[styles.sliderRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <Ionicons name="text" size={14} color={palette.textMuted} />
+            <Ionicons name="text" size={isRTL ? 22 : 14} color={palette.textMuted} />
             <Slider
               style={{ flex: 1 }}
               minimumValue={0}
               maximumValue={1}
-              value={uiFontScale}
-              onValueChange={setUiFontScale}
+              value={isRTL ? 1 - uiFontScale : uiFontScale}
+              onValueChange={(v) => setUiFontScale(isRTL ? 1 - v : v)}
               minimumTrackTintColor={palette.primary}
               maximumTrackTintColor={palette.border}
               thumbTintColor={palette.primary}
             />
-            <Ionicons name="text" size={22} color={palette.textMuted} />
+            <Ionicons name="text" size={isRTL ? 14 : 22} color={palette.textMuted} />
           </View>
         </Section>
 
@@ -130,19 +134,35 @@ export default function SettingsScreen() {
           />
         </Section>
 
-        <Section title={t('translation')} palette={palette} isRTL={isRTL}>
-          <Pressable
-            onPress={() => setShowTranslation(!showTranslation)}
-            style={[styles.switchRow, { flexDirection: isRTL ? 'row-reverse' : 'row', borderColor: palette.border }]}
-          >
-            <Text style={{ color: palette.text }}>{t('showTranslation')}</Text>
-            <Ionicons
-              name={showTranslation ? 'checkbox' : 'square-outline'}
-              size={22}
-              color={showTranslation ? palette.primary : palette.textMuted}
-            />
-          </Pressable>
-        </Section>
+        {language === 'ar' ? (
+          <Section title={t('translation')} palette={palette} isRTL={isRTL}>
+            <Pressable
+              onPress={() => setShowTranslation(!showTranslation)}
+              style={[styles.switchRow, { flexDirection: isRTL ? 'row-reverse' : 'row', borderColor: palette.border }]}
+            >
+              <Text style={{ color: palette.text }}>{t('showTranslation')}</Text>
+              <Ionicons
+                name={showTranslation ? 'checkbox' : 'square-outline'}
+                size={22}
+                color={showTranslation ? palette.primary : palette.textMuted}
+              />
+            </Pressable>
+          </Section>
+        ) : (
+          <Section title={t('englishQuran')} palette={palette} isRTL={isRTL}>
+            <Pressable
+              onPress={() => setShowEnglishQuran(!showEnglishQuran)}
+              style={[styles.switchRow, { flexDirection: isRTL ? 'row-reverse' : 'row', borderColor: palette.border }]}
+            >
+              <Text style={{ color: palette.text }}>{t('showEnglishQuran')}</Text>
+              <Ionicons
+                name={showEnglishQuran ? 'checkbox' : 'square-outline'}
+                size={22}
+                color={showEnglishQuran ? palette.primary : palette.textMuted}
+              />
+            </Pressable>
+          </Section>
+        )}
 
         <Text style={[styles.about, { color: palette.textMuted }]}>{t('sources')}</Text>
       </ScrollView>

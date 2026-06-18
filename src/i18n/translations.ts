@@ -23,6 +23,8 @@ export const STRINGS = {
   uiFontSize: { ar: 'حجم خط الواجهة والتفسير', en: 'Interface & tafsir font size' },
   translation: { ar: 'الترجمة', en: 'Translation' },
   showTranslation: { ar: 'إظهار الترجمة الإنجليزية', en: 'Show English translation' },
+  englishQuran: { ar: 'القرآن بالإنجليزية', en: 'English Quran' },
+  showEnglishQuran: { ar: 'إظهار القرآن بالإنجليزية كنص أساسي', en: 'Show English Quran as primary text' },
   tafsir: { ar: 'التفسير', en: 'Tafsir' },
   selectTafsir: { ar: 'اختر التفسير', en: 'Select Tafsir' },
   language: { ar: 'اللغة', en: 'Language' },

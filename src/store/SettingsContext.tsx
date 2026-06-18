@@ -6,7 +6,7 @@ import { Qiraah } from '../lib/quranData';
 import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
 import { CalculationMethodId, DEFAULT_CALCULATION_METHOD } from '../lib/prayerTimes';
 
-export type FontFamilyId = 'amiri' | 'scheherazade';
+export type FontFamilyId = 'amiri' | 'scheherazade' | 'reemkufi' | 'jomhuria';
 export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
 export type ThemeId = 'light' | 'dark';
 
@@ -18,6 +18,7 @@ interface Settings {
   /** Scale (0 to 1) for all non-Quran UI text (tafsir, tools screens). 0 = smallest, 1 = the "medium" Quran size. */
   uiFontScale: number;
   showTranslation: boolean;
+  showEnglishQuran: boolean;
   tafsirEdition: string;
   theme: ThemeId;
   hafsReciter: string;
@@ -32,6 +33,7 @@ const DEFAULT_SETTINGS: Settings = {
   fontSize: 'medium',
   uiFontScale: 0.5,
   showTranslation: false,
+  showEnglishQuran: false,
   tafsirEdition: 'muyassar',
   theme: 'light',
   hafsReciter: DEFAULT_HAFS_RECITER_ID,
@@ -52,6 +54,7 @@ interface SettingsContextValue extends Settings {
   /** Scales a base UI font size (px) by the user's uiFontScale setting. */
   scaleFont: (base: number) => number;
   setShowTranslation: (show: boolean) => void;
+  setShowEnglishQuran: (show: boolean) => void;
   setTafsirEdition: (id: string) => void;
   setTheme: (theme: ThemeId) => void;
   setHafsReciter: (id: string) => void;
@@ -75,6 +78,8 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 export const FONT_FAMILY_MAP: Record<FontFamilyId, string> = {
   amiri: 'Amiri-Regular',
   scheherazade: 'ScheherazadeNew-Regular',
+  reemkufi: 'ReemKufi-Regular',
+  jomhuria: 'Jomhuria-Regular',
 };
 
 export const FONT_SIZE_MAP: Record<FontSizeId, number> = {
@@ -125,6 +130,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setUiFontScale: (uiFontScale) => setSettings((s) => ({ ...s, uiFontScale })),
       scaleFont: (base) => computeScaledFont(base, settings.uiFontScale),
       setShowTranslation: (showTranslation) => setSettings((s) => ({ ...s, showTranslation })),
+      setShowEnglishQuran: (showEnglishQuran) => setSettings((s) => ({ ...s, showEnglishQuran })),
       setTafsirEdition: (tafsirEdition) => setSettings((s) => ({ ...s, tafsirEdition })),
       setTheme: (theme) => setSettings((s) => ({ ...s, theme })),
       setHafsReciter: (hafsReciter) => setSettings((s) => ({ ...s, hafsReciter })),

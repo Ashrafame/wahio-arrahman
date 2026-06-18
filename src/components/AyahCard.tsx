@@ -31,9 +31,10 @@ export function AyahCard({
   isPlaying,
   onPlayAudio,
 }: Props) {
-  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, scaleFont } = useSettings();
+  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, showEnglishQuran, scaleFont } = useSettings();
   const palette = getPalette(theme);
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
+  const englishMode = !isRTL && showEnglishQuran;
 
   const handleCopyAyah = async () => {
     const fullText = `${arabicText}${showTranslation && ayah.translationEn ? '\n\n' + ayah.translationEn : ''}`;
@@ -76,22 +77,28 @@ export function AyahCard({
         </View>
       </View>
 
-      <Text
-        style={[
-          styles.arabicText,
-          {
-            color: palette.text,
-            fontFamily: FONT_FAMILY_MAP[fontFamily],
-            fontSize: FONT_SIZE_MAP[fontSize],
-            textAlign: 'right',
-            lineHeight: FONT_SIZE_MAP[fontSize] * 1.8,
-          },
-        ]}
-      >
-        {arabicText}
-      </Text>
+      {englishMode && ayah.translationEn ? (
+        <Text style={[styles.translationText, { color: palette.text, fontSize: FONT_SIZE_MAP[fontSize] * 0.65, lineHeight: FONT_SIZE_MAP[fontSize] * 0.65 * 1.5, marginTop: 0 }]}>
+          {ayah.translationEn}
+        </Text>
+      ) : (
+        <Text
+          style={[
+            styles.arabicText,
+            {
+              color: palette.text,
+              fontFamily: FONT_FAMILY_MAP[fontFamily],
+              fontSize: FONT_SIZE_MAP[fontSize],
+              textAlign: 'right',
+              lineHeight: FONT_SIZE_MAP[fontSize] * 1.8,
+            },
+          ]}
+        >
+          {arabicText}
+        </Text>
+      )}
 
-      {showTranslation && ayah.translationEn ? (
+      {!englishMode && showTranslation && ayah.translationEn ? (
         <Text style={[styles.translationText, { color: palette.textMuted, fontSize: scaleFont(14) }]}>
           {ayah.translationEn}
         </Text>

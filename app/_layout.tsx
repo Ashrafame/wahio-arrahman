@@ -60,6 +60,8 @@ export default function RootLayout() {
     'ScheherazadeNew-Regular': require('../assets/fonts/ScheherazadeNew-Regular.ttf'),
     'ScheherazadeNew-Bold': require('../assets/fonts/ScheherazadeNew-Bold.ttf'),
     'Cairo-Variable': require('../assets/fonts/Cairo-Variable.ttf'),
+    'ReemKufi-Regular': require('../assets/fonts/ReemKufi-Regular.ttf'),
+    'Jomhuria-Regular': require('../assets/fonts/Jomhuria-Regular.ttf'),
   });
 
   if (!fontsLoaded) return null;
