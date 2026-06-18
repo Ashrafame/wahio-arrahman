@@ -199,6 +199,21 @@ export default function SurahScreen() {
   const isAyahPlaying = (verse: number) =>
     qiraah === 'hafs' && playingKey === `${chapterNumber}:${verse}:${reciterId}`;
 
+  const handleQiraahChange = (newQiraah: 'hafs' | 'qaloon') => {
+    setQiraah(newQiraah);
+    if (!fromJuz) return;
+    const juzData = newQiraah === 'qaloon' ? JUZ_DATA_QALOON : JUZ_DATA_HAFS;
+    const juz = juzData.find((j) => j.number === fromJuz);
+    if (!juz) return;
+    if (juz.startSurah === chapterNumber) {
+      router.setParams({ verse: juz.startAyah.toString() });
+    } else {
+      router.replace({
+        pathname: '/surah/[number]',
+        params: { number: juz.startSurah.toString(), verse: juz.startAyah.toString(), juz: fromJuz.toString() },
+      });
+    }
+  };
   return (
     <View style={[styles.container, { backgroundColor: palette.background, paddingTop: insets.top }]}>
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -246,7 +261,7 @@ export default function SurahScreen() {
             { id: 'qaloon', label: 'قالون' },
           ]}
           value={qiraah}
-          onChange={(v) => setQiraah(v as 'hafs' | 'qaloon')}
+          onChange={(v) => handleQiraahChange(v as 'hafs' | 'qaloon')}
           palette={palette}
         />
         <ToolbarChip
