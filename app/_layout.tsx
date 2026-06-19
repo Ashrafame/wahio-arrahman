@@ -47,6 +47,7 @@ function RootStack() {
         <Stack.Screen name="tools/azkar/[category]" options={{ headerShown: false }} />
         <Stack.Screen name="tools/hijri-calendar" options={{ headerShown: false }} />
         <Stack.Screen name="tools/riwayat" options={{ headerShown: false }} />
+        <Stack.Screen name="about" options={{ headerShown: false }} />
       </Stack>
       <SplashOverlay />
     </>

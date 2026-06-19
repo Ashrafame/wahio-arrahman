@@ -281,7 +281,9 @@ export default function AboutScreen() {
               : `© ${YEAR} ${DEVELOPER_EN} — All rights reserved`}
           </Text>
           <Text style={[styles.footerMade, { color: palette.accent }]}>
-            {ar ? 'صُنع بنية الدعوة إلى الله ❤' : 'Made with the intention of da\'wa for God ❤'}
+            {ar
+              ? 'صُنعَ التطبيق بنية الدعوةِ إلى الله و صدقةٍ جاريه بإذن الله و عن والدي و زوجتي و ابنائي'
+              : "This app was built as an act of da'wa for God and a continuous charity (Sadaqah Jariyah) by His will, dedicated to my parents, my wife, and my children"}
           </Text>
         </View>
       </ScrollView>
