@@ -1,10 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, StyleSheet } from 'react-native';
 
+const SPLASH_DURATION_MS = 7000;
+const FADE_DURATION_MS   = 600;
+const BG_COLOR           = '#303c25';
+
 /**
  * In-app splash overlay that shows the full-screen splash artwork on top of the
- * app, then fades out. This guarantees the branded splash is visible even in
- * Expo Go, where the native (config-plugin) splash image is not applied.
+ * app for 7 seconds, then fades out. Works in Expo Go and production alike since
+ * the native config-plugin splash may not be applied in dev.
  */
 export function SplashOverlay() {
   const opacity = useRef(new Animated.Value(1)).current;
@@ -14,10 +18,10 @@ export function SplashOverlay() {
     const timer = setTimeout(() => {
       Animated.timing(opacity, {
         toValue: 0,
-        duration: 500,
+        duration: FADE_DURATION_MS,
         useNativeDriver: true,
       }).start(() => setHidden(true));
-    }, 5000);
+    }, SPLASH_DURATION_MS);
     return () => clearTimeout(timer);
   }, [opacity]);
 
@@ -25,16 +29,18 @@ export function SplashOverlay() {
 
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.container, { opacity }]}>
-      <Image source={require('../../assets/splash.png')} style={styles.image} resizeMode="contain" />
+      <Image
+        source={require('../../assets/splash.png')}
+        style={styles.image}
+        resizeMode="cover"
+      />
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#0D402F',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: BG_COLOR,
     zIndex: 999,
     elevation: 999,
   },
