@@ -554,6 +554,18 @@ export default function SettingsScreen() {
         </Section>
 
         <Text style={[styles.about, { color: palette.textMuted }]}>{t('sources')}</Text>
+
+        {/* About / about the app */}
+        <Pressable
+          onPress={() => router.push('/about')}
+          style={[styles.aboutRow, { backgroundColor: palette.surface, borderColor: palette.border, flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+        >
+          <Ionicons name="information-circle-outline" size={20} color={palette.primary} />
+          <Text style={{ color: palette.text, fontSize: 14, fontWeight: '600', flex: 1, marginHorizontal: 10, textAlign: isRTL ? 'right' : 'left' }}>
+            {t('about')}
+          </Text>
+          <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={palette.textMuted} />
+        </Pressable>
       </ScrollView>
 
       <ColorPickerModal
@@ -653,4 +665,11 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   about: { fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 },
+  aboutRow: {
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 4,
+  },
 });
