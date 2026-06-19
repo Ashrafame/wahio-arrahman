@@ -282,7 +282,7 @@ export default function AboutScreen() {
           </Text>
           <Text style={[styles.footerMade, { color: palette.accent }]}>
             {ar
-              ? 'صُنعَ التطبيق بنية الدعوةِ إلى الله و صدقةٍ جاريه بإذن الله و عن والدي و زوجتي و ابنائي'
+              ? 'صُنعَ التطبيق بنية الدعوةِ إلى الله و صدقةٍ جاريه بإذن الله عني و عن والديَّ و زوجتي و ابنائي'
               : "This app was built as an act of da'wa for God and a continuous charity (Sadaqah Jariyah) by His will, dedicated to my parents, my wife, and my children"}
           </Text>
         </View>
