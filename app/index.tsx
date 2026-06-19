@@ -58,10 +58,10 @@ export default function HomeScreen() {
       <IslamicPatternBackground />
       <View style={[styles.header, { backgroundColor: palette.primary, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.title, { color: palette.primaryText, fontFamily: 'Amiri-Bold' }]}>
+          <Text style={[styles.title, { color: palette.primaryText, fontFamily: 'Amiri-Bold', textAlign: isRTL ? 'right' : 'left' }]}>
             {t('appNameArabic')}
           </Text>
-          <Text style={[styles.subtitle, { color: palette.primaryText }]}>{t('appNameEnglish')}</Text>
+          <Text style={[styles.subtitle, { color: palette.primaryText, textAlign: isRTL ? 'right' : 'left' }]}>{t('appNameEnglish')}</Text>
         </View>
         <Pressable onPress={() => router.push('/search')} style={styles.iconButton} hitSlop={8}>
           <Ionicons name="search" size={24} color={palette.primaryText} />
