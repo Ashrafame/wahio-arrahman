@@ -5,14 +5,12 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/SettingsContext';
-import { getPalette } from '../../src/theme/colors';
 import { getCurrentCoords } from '../../src/lib/location';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import { computeQiblaBearing } from '../../src/lib/prayerTimes';
 
 export default function QiblaScreen() {
-  const { isRTL, t, theme, scaleFont } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, scaleFont, palette } = useSettings();
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);

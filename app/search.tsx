@@ -5,12 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getChapter, parseDirectReference, SearchResult, searchQuran } from '../src/lib/quranData';
 import { useSettings } from '../src/store/SettingsContext';
-import { getPalette } from '../src/theme/colors';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 
 export default function SearchScreen() {
-  const { isRTL, t, theme, qiraah } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, qiraah, palette } = useSettings();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
 

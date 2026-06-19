@@ -11,7 +11,15 @@ import {
   useSettings,
 } from '../src/store/SettingsContext';
 import { Qiraah } from '../src/lib/quranData';
-import { getPalette } from '../src/theme/colors';
+import {
+  Palette,
+  PrimaryColorId,
+  BgColorId,
+  PatternStyleId,
+  PRIMARY_COLORS,
+  BG_PRESETS,
+  PATTERN_STYLES,
+} from '../src/theme/colors';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 
 export default function SettingsScreen() {
@@ -34,8 +42,15 @@ export default function SettingsScreen() {
     setShowTranslation,
     showEnglishQuran,
     setShowEnglishQuran,
+    palette,
+    primaryColorId,
+    bgColorId,
+    patternStyleId,
+    setPrimaryColorId,
+    setBgColorId,
+    setPatternStyleId,
+    resetAppearance,
   } = useSettings();
-  const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
 
   return (
@@ -166,6 +181,100 @@ export default function SettingsScreen() {
           </Section>
         )}
 
+        {/* ── Appearance ─────────────────────────────────────────────────── */}
+        <Section title={t('appearance')} palette={palette} isRTL={isRTL}>
+          <View style={{ gap: 16 }}>
+            {/* Primary color */}
+            <View>
+              <Text style={[styles.subLabel, { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
+                {t('primaryColor')}
+              </Text>
+              <View style={[styles.swatchRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                {(Object.keys(PRIMARY_COLORS) as PrimaryColorId[]).map((id) => {
+                  const color = theme === 'dark' ? PRIMARY_COLORS[id].dark : PRIMARY_COLORS[id].light;
+                  const selected = primaryColorId === id;
+                  return (
+                    <Pressable
+                      key={id}
+                      onPress={() => setPrimaryColorId(id)}
+                      style={[
+                        styles.colorSwatch,
+                        { backgroundColor: color },
+                        selected && { borderWidth: 3, borderColor: palette.accent },
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Background color */}
+            <View>
+              <Text style={[styles.subLabel, { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
+                {t('bgColor')}
+              </Text>
+              <View style={[styles.swatchRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                {(Object.keys(BG_PRESETS) as BgColorId[]).map((id) => {
+                  const color = theme === 'dark' ? BG_PRESETS[id].dark.background : BG_PRESETS[id].light.background;
+                  const selected = bgColorId === id;
+                  return (
+                    <Pressable
+                      key={id}
+                      onPress={() => setBgColorId(id)}
+                      style={[
+                        styles.colorSwatch,
+                        { backgroundColor: color, borderWidth: 1, borderColor: palette.border },
+                        selected && { borderWidth: 3, borderColor: palette.accent },
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Pattern style */}
+            <View>
+              <Text style={[styles.subLabel, { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
+                {t('backgroundPattern')}
+              </Text>
+              <View style={[styles.optionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                {(Object.keys(PATTERN_STYLES) as PatternStyleId[]).map((id) => {
+                  const label = isRTL ? PATTERN_STYLES[id].labelAr : PATTERN_STYLES[id].labelEn;
+                  const selected = patternStyleId === id;
+                  return (
+                    <Pressable
+                      key={id}
+                      onPress={() => setPatternStyleId(id)}
+                      style={[
+                        styles.optionChip,
+                        {
+                          backgroundColor: selected ? palette.primary : palette.surface,
+                          borderColor: selected ? palette.primary : palette.border,
+                        },
+                      ]}
+                    >
+                      <Text style={{ color: selected ? palette.primaryText : palette.text, fontSize: 12 }}>
+                        {label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Reset button */}
+            <Pressable
+              onPress={resetAppearance}
+              style={[styles.resetButton, { borderColor: palette.border, backgroundColor: palette.surface }]}
+            >
+              <Ionicons name="refresh-outline" size={16} color={palette.textMuted} />
+              <Text style={{ color: palette.textMuted, fontSize: 13, marginLeft: 6 }}>
+                {t('resetAppearance')}
+              </Text>
+            </Pressable>
+          </View>
+        </Section>
+
         <Text style={[styles.about, { color: palette.textMuted }]}>{t('sources')}</Text>
       </ScrollView>
     </View>
@@ -180,7 +289,7 @@ function Section({
 }: {
   title: string;
   children: React.ReactNode;
-  palette: ReturnType<typeof getPalette>;
+  palette: Palette;
   isRTL: boolean;
 }) {
   return (
@@ -203,7 +312,7 @@ function OptionRow<T extends string>({
   options: { id: T; label: string }[];
   value: T;
   onChange: (v: T) => void;
-  palette: ReturnType<typeof getPalette>;
+  palette: Palette;
   isRTL: boolean;
 }) {
   return (
@@ -233,8 +342,11 @@ const styles = StyleSheet.create({
   iconButton: { padding: 4, width: 32 },
   headerTitle: { fontSize: 17, fontWeight: '700' },
   sectionTitle: { fontSize: 13, fontWeight: '700', marginBottom: 8, opacity: 0.8 },
+  subLabel: { fontSize: 12, marginBottom: 8, opacity: 0.7 },
   optionRow: { flexWrap: 'wrap', gap: 8 },
   optionChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, borderWidth: 1 },
+  swatchRow: { flexWrap: 'wrap', gap: 10 },
+  colorSwatch: { width: 36, height: 36, borderRadius: 18 },
   sliderRow: { alignItems: 'center', gap: 8 },
   switchRow: {
     alignItems: 'center',
@@ -242,6 +354,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 12,
+  },
+  resetButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
   },
   about: { fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 },
 });

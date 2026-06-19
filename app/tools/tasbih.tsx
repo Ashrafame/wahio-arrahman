@@ -5,7 +5,6 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/SettingsContext';
-import { getPalette } from '../../src/theme/colors';
 import { TASBIH_LIST } from '../../src/data/tasbihList';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 
@@ -17,8 +16,7 @@ interface TasbihState {
 }
 
 export default function TasbihScreen() {
-  const { isRTL, t, theme, scaleFont } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, scaleFont, palette } = useSettings();
   const insets = useSafeAreaInsets();
 
   const [activeId, setActiveId] = useState(TASBIH_LIST[0].id);

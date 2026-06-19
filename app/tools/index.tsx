@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/SettingsContext';
-import { getPalette } from '../../src/theme/colors';
 import { StringKey } from '../../src/i18n/translations';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 
@@ -26,8 +25,7 @@ const TOOLS: ToolItem[] = [
 ];
 
 export default function ToolsScreen() {
-  const { isRTL, t, theme, scaleFont } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, scaleFont, palette } = useSettings();
   const insets = useSafeAreaInsets();
 
   return (

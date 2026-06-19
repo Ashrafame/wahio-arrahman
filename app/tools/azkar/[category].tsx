@@ -4,14 +4,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../../src/store/SettingsContext';
-import { getPalette } from '../../../src/theme/colors';
 import { AZKAR_CATEGORIES } from '../../../src/data/azkar';
 import { IslamicPatternBackground } from '../../../src/components/IslamicPatternBackground';
 
 export default function AzkarCategoryScreen() {
   const { category } = useLocalSearchParams<{ category: string }>();
-  const { isRTL, t, theme, scaleFont } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, scaleFont, palette } = useSettings();
   const insets = useSafeAreaInsets();
 
   const data = AZKAR_CATEGORIES.find((c) => c.id === category);

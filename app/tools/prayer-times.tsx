@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/SettingsContext';
-import { getPalette } from '../../src/theme/colors';
 import { getCurrentCoords, Coords } from '../../src/lib/location';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import { CALCULATION_METHODS, computePrayerTimes, DayPrayerTimes } from '../../src/lib/prayerTimes';
@@ -22,8 +21,7 @@ const PRAYER_KEYS: { key: keyof Omit<DayPrayerTimes, 'date'>; labelKey: StringKe
 ];
 
 export default function PrayerTimesScreen() {
-  const { isRTL, t, theme, language, calculationMethod, setCalculationMethod, scaleFont } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, language, calculationMethod, setCalculationMethod, scaleFont, palette } = useSettings();
   const insets = useSafeAreaInsets();
 
   const [coords, setCoords] = useState<Coords | null>(null);

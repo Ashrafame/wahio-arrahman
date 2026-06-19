@@ -5,6 +5,13 @@ import { Language, StringKey, translate } from '../i18n/translations';
 import { Qiraah } from '../lib/quranData';
 import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
 import { CalculationMethodId, DEFAULT_CALCULATION_METHOD } from '../lib/prayerTimes';
+import {
+  Palette,
+  BgColorId,
+  PrimaryColorId,
+  PatternStyleId,
+  buildPalette,
+} from '../theme/colors';
 
 export type FontFamilyId = 'amiri' | 'scheherazade' | 'diwan' | 'ruqa';
 export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
@@ -24,6 +31,9 @@ interface Settings {
   hafsReciter: string;
   qaloonReciter: string;
   calculationMethod: CalculationMethodId;
+  primaryColorId: PrimaryColorId;
+  bgColorId: BgColorId;
+  patternStyleId: PatternStyleId;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -39,6 +49,9 @@ const DEFAULT_SETTINGS: Settings = {
   hafsReciter: DEFAULT_HAFS_RECITER_ID,
   qaloonReciter: DEFAULT_QALOON_RECITER_ID,
   calculationMethod: DEFAULT_CALCULATION_METHOD,
+  primaryColorId: 'forest',
+  bgColorId: 'cream',
+  patternStyleId: 'khatam',
 };
 
 const STORAGE_KEY = 'wahio-arrahman:settings';
@@ -46,6 +59,7 @@ const STORAGE_KEY = 'wahio-arrahman:settings';
 interface SettingsContextValue extends Settings {
   isRTL: boolean;
   t: (key: StringKey) => string;
+  palette: Palette;
   setLanguage: (language: Language) => void;
   setQiraah: (qiraah: Qiraah) => void;
   setFontFamily: (font: FontFamilyId) => void;
@@ -60,6 +74,10 @@ interface SettingsContextValue extends Settings {
   setHafsReciter: (id: string) => void;
   setQaloonReciter: (id: string) => void;
   setCalculationMethod: (id: CalculationMethodId) => void;
+  setPrimaryColorId: (id: PrimaryColorId) => void;
+  setBgColorId: (id: BgColorId) => void;
+  setPatternStyleId: (id: PatternStyleId) => void;
+  resetAppearance: () => void;
   ready: boolean;
 }
 
@@ -122,6 +140,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       ...settings,
       isRTL: settings.language === 'ar',
       ready,
+      palette: buildPalette(settings.theme, settings.primaryColorId, settings.bgColorId),
       t: (key: StringKey) => translate(key, settings.language),
       setLanguage: (language) => setSettings((s) => ({ ...s, language })),
       setQiraah: (qiraah) => setSettings((s) => ({ ...s, qiraah })),
@@ -136,6 +155,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setHafsReciter: (hafsReciter) => setSettings((s) => ({ ...s, hafsReciter })),
       setQaloonReciter: (qaloonReciter) => setSettings((s) => ({ ...s, qaloonReciter })),
       setCalculationMethod: (calculationMethod) => setSettings((s) => ({ ...s, calculationMethod })),
+      setPrimaryColorId: (primaryColorId) => setSettings((s) => ({ ...s, primaryColorId })),
+      setBgColorId: (bgColorId) => setSettings((s) => ({ ...s, bgColorId })),
+      setPatternStyleId: (patternStyleId) => setSettings((s) => ({ ...s, patternStyleId })),
+      resetAppearance: () => setSettings((s) => ({
+        ...s,
+        primaryColorId: 'forest',
+        bgColorId: 'cream',
+        patternStyleId: 'khatam',
+        theme: 'light',
+      })),
     };
   }, [settings, ready]);
 

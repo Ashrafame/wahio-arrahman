@@ -12,10 +12,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Ayah, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/quranData';
+import { Palette } from '../../src/theme/colors';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../../src/data/juz';
 import { fetchSurahTafsir, TAFSIR_EDITIONS } from '../../src/lib/tafsirRemote';
 import { useSettings } from '../../src/store/SettingsContext';
-import { getPalette } from '../../src/theme/colors';
 import { AyahCard } from '../../src/components/AyahCard';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import { getAyahAudioUrl, getRecitersForQiraah } from '../../src/lib/reciters';
@@ -46,8 +46,8 @@ export default function SurahScreen() {
     setQaloonReciter,
     language,
     setLanguage,
+    palette,
   } = useSettings();
-  const palette = getPalette(theme);
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<Ayah>>(null);
   const qaloonLastScrolledVerse = useRef<number | null>(null);
@@ -347,14 +347,6 @@ export default function SurahScreen() {
         />
       </ScrollView>
 
-      {qiraah === 'qaloon' ? (
-        <View style={[styles.noticeBanner, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
-          <Text style={{ color: palette.textMuted, fontSize: 12, textAlign: isRTL ? 'right' : 'left' }}>
-            {t('qaloonSurahOnlyNotice')}
-          </Text>
-        </View>
-      ) : null}
-
       <FlatList
         ref={listRef}
         data={ayahs}
@@ -534,7 +526,7 @@ function SegmentedToggle({
   options: { id: string; label: string }[];
   value: string;
   onChange: (v: string) => void;
-  palette: ReturnType<typeof getPalette>;
+  palette: Palette;
 }) {
   return (
     <View style={[styles.segmented, { borderColor: palette.border }]}>
@@ -564,7 +556,7 @@ function ToolbarChip({
   label: string;
   active: boolean;
   onPress: () => void;
-  palette: ReturnType<typeof getPalette>;
+  palette: Palette;
 }) {
   return (
     <Pressable
@@ -627,11 +619,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 6,
     lineHeight: 18,
-  },
-  noticeBanner: {
-    borderBottomWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
   },
   modalOverlay: {
     flex: 1,

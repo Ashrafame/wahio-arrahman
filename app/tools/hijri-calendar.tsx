@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/SettingsContext';
-import { getPalette } from '../../src/theme/colors';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import {
   gregorianToHijri,
@@ -24,8 +23,7 @@ const DAY_LABELS_AR = ['س','ح','ن','ث','ر','خ','ج']; // Sat Sun Mon Tue W
 const DAY_LABELS_EN = ['Sa','Su','Mo','Tu','We','Th','Fr'];
 
 export default function HijriCalendarScreen() {
-  const { isRTL, t, theme, language, scaleFont } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, language, scaleFont, palette } = useSettings();
   const insets = useSafeAreaInsets();
 
   const today = useMemo(() => new Date(), []);

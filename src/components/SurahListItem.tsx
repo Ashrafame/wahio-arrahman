@@ -2,7 +2,6 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Chapter } from '../lib/quranData';
 import { useSettings } from '../store/SettingsContext';
-import { getPalette } from '../theme/colors';
 
 interface Props {
   chapter: Chapter;
@@ -10,8 +9,7 @@ interface Props {
 }
 
 export function SurahListItem({ chapter, onPress }: Props) {
-  const { language, isRTL, t, theme } = useSettings();
-  const palette = getPalette(theme);
+  const { language, isRTL, t, palette } = useSettings();
 
   return (
     <Pressable

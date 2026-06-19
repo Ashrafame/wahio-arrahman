@@ -4,13 +4,12 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/SettingsContext';
-import { getPalette } from '../../src/theme/colors';
+import { Palette } from '../../src/theme/colors';
 import { FEATURED_RIWAYAT, OTHER_NARRATIONS_AR, OTHER_NARRATIONS_EN } from '../../src/data/riwayat';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 
 export default function RiwayatScreen() {
-  const { isRTL, t, theme, scaleFont } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, scaleFont, palette } = useSettings();
   const insets = useSafeAreaInsets();
   const otherList = isRTL ? OTHER_NARRATIONS_AR : OTHER_NARRATIONS_EN;
 
@@ -74,7 +73,7 @@ function Section({
   label: string;
   children: string;
   isRTL: boolean;
-  palette: ReturnType<typeof getPalette>;
+  palette: Palette;
   scaleFont: (base: number) => number;
 }) {
   return (

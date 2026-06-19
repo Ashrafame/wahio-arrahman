@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { Ayah } from '../lib/quranData';
 import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
-import { getPalette } from '../theme/colors';
 
 interface Props {
   ayah: Ayah;
@@ -31,8 +30,7 @@ export function AyahCard({
   isPlaying,
   onPlayAudio,
 }: Props) {
-  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, showEnglishQuran, scaleFont } = useSettings();
-  const palette = getPalette(theme);
+  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, showEnglishQuran, scaleFont, palette } = useSettings();
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
   const englishMode = !isRTL && showEnglishQuran;
 

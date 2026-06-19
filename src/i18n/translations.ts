@@ -113,6 +113,11 @@ export const STRINGS = {
   daysRemaining: { ar: 'متبقي', en: 'remaining' },
   days: { ar: 'يوم', en: 'days' },
   otherNarrations: { ar: 'الروايات الأخرى', en: 'Other Narrations' },
+  appearance: { ar: 'تخصيص المظهر', en: 'Appearance' },
+  primaryColor: { ar: 'لون التطبيق', en: 'App Color' },
+  bgColor: { ar: 'لون الخلفية', en: 'Background Color' },
+  backgroundPattern: { ar: 'نمط الخلفية', en: 'Background Pattern' },
+  resetAppearance: { ar: 'إعادة تعيين المظهر', en: 'Reset to Default' },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;

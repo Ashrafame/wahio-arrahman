@@ -14,14 +14,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { chapters, normalizeArabic, parseDirectReference, getChapter } from '../src/lib/quranData';
 import { useSettings } from '../src/store/SettingsContext';
-import { getPalette } from '../src/theme/colors';
 import { SurahListItem } from '../src/components/SurahListItem';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../src/data/juz';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 
 export default function HomeScreen() {
-  const { language, isRTL, t, theme, scaleFont, qiraah } = useSettings();
-  const palette = getPalette(theme);
+  const { language, isRTL, t, scaleFont, qiraah, palette } = useSettings();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [juzOpen, setJuzOpen] = useState(false);
