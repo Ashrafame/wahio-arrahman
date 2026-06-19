@@ -34,6 +34,8 @@ interface Settings {
   primaryColorId: PrimaryColorId;
   bgColorId: BgColorId;
   patternStyleId: PatternStyleId;
+  customPrimaryColor: string | null;
+  customBgColor: string | null;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -52,6 +54,8 @@ const DEFAULT_SETTINGS: Settings = {
   primaryColorId: 'forest',
   bgColorId: 'cream',
   patternStyleId: 'khatam',
+  customPrimaryColor: null,
+  customBgColor: null,
 };
 
 const STORAGE_KEY = 'wahio-arrahman:settings';
@@ -77,6 +81,8 @@ interface SettingsContextValue extends Settings {
   setPrimaryColorId: (id: PrimaryColorId) => void;
   setBgColorId: (id: BgColorId) => void;
   setPatternStyleId: (id: PatternStyleId) => void;
+  setCustomPrimaryColor: (color: string | null) => void;
+  setCustomBgColor: (color: string | null) => void;
   resetAppearance: () => void;
   ready: boolean;
 }
@@ -140,7 +146,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       ...settings,
       isRTL: settings.language === 'ar',
       ready,
-      palette: buildPalette(settings.theme, settings.primaryColorId, settings.bgColorId),
+      palette: buildPalette(settings.theme, settings.primaryColorId, settings.bgColorId, settings.customPrimaryColor, settings.customBgColor),
       t: (key: StringKey) => translate(key, settings.language),
       setLanguage: (language) => setSettings((s) => ({ ...s, language })),
       setQiraah: (qiraah) => setSettings((s) => ({ ...s, qiraah })),
@@ -158,12 +164,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setPrimaryColorId: (primaryColorId) => setSettings((s) => ({ ...s, primaryColorId })),
       setBgColorId: (bgColorId) => setSettings((s) => ({ ...s, bgColorId })),
       setPatternStyleId: (patternStyleId) => setSettings((s) => ({ ...s, patternStyleId })),
+      setCustomPrimaryColor: (customPrimaryColor) => setSettings((s) => ({ ...s, customPrimaryColor })),
+      setCustomBgColor: (customBgColor) => setSettings((s) => ({ ...s, customBgColor })),
       resetAppearance: () => setSettings((s) => ({
         ...s,
         primaryColorId: 'forest',
         bgColorId: 'cream',
         patternStyleId: 'khatam',
         theme: 'light',
+        customPrimaryColor: null,
+        customBgColor: null,
       })),
     };
   }, [settings, ready]);

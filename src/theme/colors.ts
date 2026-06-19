@@ -99,13 +99,15 @@ export function buildPalette(
   theme: 'light' | 'dark',
   primaryColorId: PrimaryColorId,
   bgColorId: BgColorId,
+  customPrimary?: string | null,
+  customBg?: string | null,
 ): Palette {
   const base = theme === 'dark' ? DARK_PALETTE : LIGHT_PALETTE;
   const pc = PRIMARY_COLORS[primaryColorId];
   const bg = BG_PRESETS[bgColorId];
   const bgColors = theme === 'dark' ? bg.dark : bg.light;
-  const primary = theme === 'dark' ? pc.dark : pc.light;
-  // primaryText is always white in light mode; in dark mode it matches the bg
+  const primary = customPrimary ?? (theme === 'dark' ? pc.dark : pc.light);
   const primaryText = theme === 'dark' ? bgColors.background : '#FFFFFF';
-  return { ...base, ...bgColors, primary, primaryText };
+  const background = customBg ?? bgColors.background;
+  return { ...base, ...bgColors, background, primary, primaryText };
 }

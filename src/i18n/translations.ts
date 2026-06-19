@@ -118,6 +118,7 @@ export const STRINGS = {
   bgColor: { ar: 'لون الخلفية', en: 'Background Color' },
   backgroundPattern: { ar: 'نمط الخلفية', en: 'Background Pattern' },
   resetAppearance: { ar: 'إعادة تعيين المظهر', en: 'Reset to Default' },
+  colorPicker: { ar: 'لون مخصص', en: 'Custom Color' },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;

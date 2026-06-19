@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function SurahListItem({ chapter, onPress }: Props) {
-  const { language, isRTL, t, palette } = useSettings();
+  const { language, isRTL, t, palette, scaleFont } = useSettings();
 
   return (
     <Pressable
@@ -24,13 +24,15 @@ export function SurahListItem({ chapter, onPress }: Props) {
       ]}
     >
       <View style={[styles.badge, { backgroundColor: palette.primary }]}>
-        <Text style={[styles.badgeText, { color: palette.primaryText }]}>{chapter.number}</Text>
+        <Text style={[styles.badgeText, { color: palette.primaryText, fontSize: scaleFont(13) }]}>
+          {chapter.number}
+        </Text>
       </View>
       <View style={[styles.info, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-        <Text style={[styles.nameArabic, { color: palette.text, fontFamily: 'Amiri-Bold' }]}>
+        <Text style={[styles.nameArabic, { color: palette.text, fontFamily: 'Amiri-Bold', fontSize: scaleFont(20) }]}>
           {chapter.nameArabic}
         </Text>
-        <Text style={[styles.meta, { color: palette.textMuted }]}>
+        <Text style={[styles.meta, { color: palette.textMuted, fontSize: scaleFont(12) }]}>
           {language === 'ar'
             ? `${chapter.versesCount} ${t('verses')} · ${chapter.revelationType === 'Mecca' ? t('meccan') : t('medinan')}`
             : `${chapter.nameTranslationEn} · ${chapter.versesCount} ${t('verses')} · ${
