@@ -6,7 +6,7 @@ import { Qiraah } from '../lib/quranData';
 import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
 import { CalculationMethodId, DEFAULT_CALCULATION_METHOD } from '../lib/prayerTimes';
 
-export type FontFamilyId = 'amiri' | 'scheherazade' | 'reemkufi' | 'jomhuria';
+export type FontFamilyId = 'amiri' | 'scheherazade' | 'diwan' | 'ruqa';
 export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
 export type ThemeId = 'light' | 'dark';
 
@@ -78,8 +78,8 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 export const FONT_FAMILY_MAP: Record<FontFamilyId, string> = {
   amiri: 'Amiri-Regular',
   scheherazade: 'ScheherazadeNew-Regular',
-  reemkufi: 'ReemKufi-Regular',
-  jomhuria: 'Jomhuria-Regular',
+  diwan: 'Rakkas-Regular',
+  ruqa: 'ArefRuqaa-Regular',
 };
 
 export const FONT_SIZE_MAP: Record<FontSizeId, number> = {
