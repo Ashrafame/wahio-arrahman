@@ -148,11 +148,8 @@ export default function AboutScreen() {
               <Text style={[styles.devName, { color: palette.text }]}>
                 {ar ? DEVELOPER_AR : DEVELOPER_EN}
               </Text>
-              <Text style={[styles.devSub, { color: palette.textMuted }]}>
-                {ar ? 'Ashraf Ben Lashher · Ben Lasheer' : 'اشرف بن الاشهر · بن الأشير'}
-              </Text>
               <Text style={[styles.devRole, { color: palette.accent }]}>
-                {ar ? 'مطوّر مستقل · داعية' : 'Independent Developer · Da\'wa'}
+                {ar ? 'مهندس و مطور برمجيات مستقل.' : 'Software Engineer & Independent Developer.'}
               </Text>
             </View>
           </View>
