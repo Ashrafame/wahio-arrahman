@@ -142,6 +142,7 @@ export default function SurahScreen() {
 
     setTafsirLoading(true);
     setTafsirError(false);
+    setTafsirMap({});
     fetchSurahTafsir(effectiveEdition.slug, chapterNumber)
       .then((map) => {
         if (!cancelled) setTafsirMap(map);
