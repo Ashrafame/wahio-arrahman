@@ -135,9 +135,9 @@ export function AyahCard({
                 styles.tafsirText,
                 {
                   color: palette.text,
-                  textAlign: 'right',
-                  writingDirection: 'rtl',
-                  fontFamily: 'Cairo-Variable',
+                  textAlign: isRTL ? 'right' : 'left',
+                  writingDirection: isRTL ? 'rtl' : 'ltr',
+                  fontFamily: isRTL ? 'Cairo-Variable' : undefined,
                   fontSize: scaleFont(15),
                   lineHeight: scaleFont(15) * 1.6,
                 },

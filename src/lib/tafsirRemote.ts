@@ -6,16 +6,20 @@ export interface TafsirEdition {
   nameArabic: string;
   nameEnglish: string;
   bundled?: boolean;
+  englishId?: string;
+  isEnglish?: boolean;
 }
 
 export const TAFSIR_EDITIONS: TafsirEdition[] = [
-  { id: 'muyassar', slug: 'ar-tafsir-muyassar', nameArabic: 'التفسير الميسر', nameEnglish: 'Al-Muyassar', bundled: true },
-  { id: 'ibnkathir', slug: 'ar-tafsir-ibn-kathir', nameArabic: 'تفسير ابن كثير', nameEnglish: 'Ibn Kathir' },
-  { id: 'tabari', slug: 'ar-tafsir-al-tabari', nameArabic: 'تفسير الطبري', nameEnglish: 'Al-Tabari' },
-  { id: 'qurtubi', slug: 'ar-tafseer-al-qurtubi', nameArabic: 'تفسير القرطبي', nameEnglish: 'Al-Qurtubi' },
-  { id: 'saadi', slug: 'ar-tafseer-al-saddi', nameArabic: 'تفسير السعدي', nameEnglish: 'Al-Saadi' },
-  { id: 'baghawi', slug: 'ar-tafsir-al-baghawi', nameArabic: 'تفسير البغوي', nameEnglish: 'Al-Baghawi' },
-  { id: 'jalalayn', slug: 'ar-tafsir-al-jalalayn', nameArabic: 'تفسير الجلالين', nameEnglish: 'Al-Jalalayn' },
+  { id: 'muyassar',    slug: 'ar-tafsir-muyassar',    nameArabic: 'التفسير الميسر',     nameEnglish: 'Al-Muyassar',           bundled: true, englishId: 'en-ibnkathir' },
+  { id: 'ibnkathir',  slug: 'ar-tafsir-ibn-kathir',   nameArabic: 'تفسير ابن كثير',     nameEnglish: 'Ibn Kathir',                           englishId: 'en-ibnkathir' },
+  { id: 'tabari',     slug: 'ar-tafsir-al-tabari',    nameArabic: 'تفسير الطبري',       nameEnglish: 'Al-Tabari',                            englishId: 'en-ibnkathir' },
+  { id: 'qurtubi',    slug: 'ar-tafseer-al-qurtubi',  nameArabic: 'تفسير القرطبي',      nameEnglish: 'Al-Qurtubi',                           englishId: 'en-ibnkathir' },
+  { id: 'saadi',      slug: 'ar-tafseer-al-saddi',    nameArabic: 'تفسير السعدي',       nameEnglish: 'Al-Saadi',                             englishId: 'en-ibnkathir' },
+  { id: 'baghawi',    slug: 'ar-tafsir-al-baghawi',   nameArabic: 'تفسير البغوي',       nameEnglish: 'Al-Baghawi',                           englishId: 'en-ibnkathir' },
+  { id: 'jalalayn',   slug: 'ar-tafsir-al-jalalayn',  nameArabic: 'تفسير الجلالين',     nameEnglish: 'Al-Jalalayn',                          englishId: 'en-ibnkathir' },
+  // English edition — auto-used when app language is English
+  { id: 'en-ibnkathir', slug: 'en-tafisr-ibn-kathir', nameArabic: 'ابن كثير (إنجليزي)', nameEnglish: 'Ibn Kathir (English)', isEnglish: true },
 ];
 
 interface RemoteTafsirAyah {

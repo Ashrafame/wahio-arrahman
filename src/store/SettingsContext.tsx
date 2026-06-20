@@ -126,7 +126,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         } else {
           const deviceLang = Localization.getLocales()[0]?.languageCode;
           if (deviceLang && deviceLang !== 'ar') {
-            setSettings((s) => ({ ...s, language: 'en' }));
+            setSettings((s) => ({ ...s, language: 'en', showEnglishQuran: true }));
           }
         }
       } finally {
@@ -148,7 +148,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       ready,
       palette: buildPalette(settings.theme, settings.primaryColorId, settings.bgColorId, settings.customPrimaryColor, settings.customBgColor),
       t: (key: StringKey) => translate(key, settings.language),
-      setLanguage: (language) => setSettings((s) => ({ ...s, language })),
+      setLanguage: (language) => setSettings((s) => ({
+        ...s,
+        language,
+        ...(language === 'en' ? { showEnglishQuran: true } : {}),
+      })),
       setQiraah: (qiraah) => setSettings((s) => ({ ...s, qiraah })),
       setFontFamily: (fontFamily) => setSettings((s) => ({ ...s, fontFamily })),
       setFontSize: (fontSize) => setSettings((s) => ({ ...s, fontSize })),

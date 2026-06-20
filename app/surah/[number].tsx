@@ -124,10 +124,15 @@ export default function SurahScreen() {
 
   useEffect(() => {
     let cancelled = false;
-    const edition = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
-    if (!edition) return;
+    const baseEdition = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
+    if (!baseEdition) return;
 
-    if (edition.bundled) {
+    // When app language is English, resolve to the English-equivalent edition
+    const effectiveEdition = language !== 'ar' && !baseEdition.isEnglish
+      ? (TAFSIR_EDITIONS.find((e) => e.id === baseEdition.englishId) ?? baseEdition)
+      : baseEdition;
+
+    if (effectiveEdition.bundled) {
       const map: Record<number, string> = {};
       for (const ayah of ayahs) map[ayah.verse] = ayah.tafsirMuyassar;
       setTafsirMap(map);
@@ -137,7 +142,7 @@ export default function SurahScreen() {
 
     setTafsirLoading(true);
     setTafsirError(false);
-    fetchSurahTafsir(edition.slug, chapterNumber)
+    fetchSurahTafsir(effectiveEdition.slug, chapterNumber)
       .then((map) => {
         if (!cancelled) setTafsirMap(map);
       })
@@ -151,7 +156,7 @@ export default function SurahScreen() {
     return () => {
       cancelled = true;
     };
-  }, [tafsirEdition, chapterNumber, ayahs]);
+  }, [tafsirEdition, chapterNumber, ayahs, language]);
 
   useEffect(() => {
     if (!targetVerse) return;
