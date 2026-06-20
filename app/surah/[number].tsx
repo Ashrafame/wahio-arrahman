@@ -71,6 +71,16 @@ export default function SurahScreen() {
     });
   }, [ayahs, qiraah, chapterNumber]);
 
+  // Resolve the effective tafsir edition: auto-switch to English when app language is English
+  const effectiveTafsirEdition = useMemo(() => {
+    const base = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
+    if (!base) return tafsirEdition;
+    if (language !== 'ar' && !base.isEnglish && base.englishId) {
+      return base.englishId;
+    }
+    return tafsirEdition;
+  }, [tafsirEdition, language]);
+
   const [openTafsirVerses, setOpenTafsirVerses] = useState<Set<number>>(new Set());
   const [tafsirMap, setTafsirMap] = useState<Record<number, string>>({});
   const [tafsirLoading, setTafsirLoading] = useState(false);
@@ -124,15 +134,10 @@ export default function SurahScreen() {
 
   useEffect(() => {
     let cancelled = false;
-    const baseEdition = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
-    if (!baseEdition) return;
+    const edition = TAFSIR_EDITIONS.find((e) => e.id === effectiveTafsirEdition);
+    if (!edition) return;
 
-    // When app language is English, resolve to the English-equivalent edition
-    const effectiveEdition = language !== 'ar' && !baseEdition.isEnglish
-      ? (TAFSIR_EDITIONS.find((e) => e.id === baseEdition.englishId) ?? baseEdition)
-      : baseEdition;
-
-    if (effectiveEdition.bundled) {
+    if (edition.bundled) {
       const map: Record<number, string> = {};
       for (const ayah of ayahs) map[ayah.verse] = ayah.tafsirMuyassar;
       setTafsirMap(map);
@@ -143,7 +148,7 @@ export default function SurahScreen() {
     setTafsirLoading(true);
     setTafsirError(false);
     setTafsirMap({});
-    fetchSurahTafsir(effectiveEdition.slug, chapterNumber)
+    fetchSurahTafsir(edition.slug, chapterNumber)
       .then((map) => {
         if (!cancelled) setTafsirMap(map);
       })
@@ -157,7 +162,7 @@ export default function SurahScreen() {
     return () => {
       cancelled = true;
     };
-  }, [tafsirEdition, chapterNumber, ayahs, language]);
+  }, [effectiveTafsirEdition, chapterNumber, ayahs]);
 
   useEffect(() => {
     if (!targetVerse) return;
