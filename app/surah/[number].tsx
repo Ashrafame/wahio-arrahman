@@ -73,11 +73,8 @@ export default function SurahScreen() {
 
   // Resolve the effective tafsir edition: auto-switch to English when app language is English
   const effectiveTafsirEdition = useMemo(() => {
-    const base = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
-    if (!base) return tafsirEdition;
-    if (language !== 'ar' && !base.isEnglish && base.englishId) {
-      return base.englishId;
-    }
+    if (language !== 'ar') return 'en-ibnkathir'; // only English tafsir available in English mode
+    if (tafsirEdition === 'en-ibnkathir') return 'ibnkathir'; // safety: no English edition in Arabic mode
     return tafsirEdition;
   }, [tafsirEdition, language]);
 
@@ -202,7 +199,7 @@ export default function SurahScreen() {
   };
 
   const currentEditionName = (lang: 'ar' | 'en') => {
-    const edition = TAFSIR_EDITIONS.find((e) => e.id === tafsirEdition);
+    const edition = TAFSIR_EDITIONS.find((e) => e.id === effectiveTafsirEdition);
     return edition ? (lang === 'ar' ? edition.nameArabic : edition.nameEnglish) : '';
   };
 
@@ -409,22 +406,22 @@ export default function SurahScreen() {
         <Pressable style={styles.modalOverlay} onPress={() => setPickerOpen(false)}>
           <View style={[styles.modalCard, { backgroundColor: palette.surface }]}>
             <Text style={[styles.modalTitle, { color: palette.text }]}>{t('selectTafsir')}</Text>
-            {TAFSIR_EDITIONS.map((edition) => (
+            {TAFSIR_EDITIONS.filter((e) => isRTL ? !e.isEnglish : !!e.isEnglish).map((edition) => (
               <Pressable
                 key={edition.id}
                 onPress={() => {
-                  setTafsirEdition(edition.id);
+                  if (!edition.isEnglish) setTafsirEdition(edition.id);
                   setPickerOpen(false);
                 }}
                 style={[
                   styles.modalRow,
                   {
-                    backgroundColor: tafsirEdition === edition.id ? palette.surfaceAlt : 'transparent',
+                    backgroundColor: effectiveTafsirEdition === edition.id ? palette.surfaceAlt : 'transparent',
                     flexDirection: isRTL ? 'row-reverse' : 'row',
                   },
                 ]}
               >
-                {tafsirEdition === edition.id ? (
+                {effectiveTafsirEdition === edition.id ? (
                   <Ionicons name="checkmark-circle" size={18} color={palette.primary} />
                 ) : (
                   <View style={{ width: 18 }} />

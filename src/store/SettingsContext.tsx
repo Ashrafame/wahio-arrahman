@@ -152,6 +152,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         ...s,
         language,
         ...(language === 'en' ? { showEnglishQuran: true } : {}),
+        ...(language === 'ar' && s.tafsirEdition === 'en-ibnkathir' ? { tafsirEdition: 'ibnkathir' } : {}),
       })),
       setQiraah: (qiraah) => setSettings((s) => ({ ...s, qiraah })),
       setFontFamily: (fontFamily) => setSettings((s) => ({ ...s, fontFamily })),
