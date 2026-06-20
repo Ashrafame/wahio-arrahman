@@ -544,7 +544,7 @@ function SegmentedToggle({
           onPress={() => onChange(opt.id)}
           style={[styles.segmentedOption, { backgroundColor: value === opt.id ? palette.primary : 'transparent' }]}
         >
-          <Text style={{ color: value === opt.id ? palette.primaryText : palette.text, fontFamily: 'Amiri-Bold' }}>
+          <Text style={{ color: value === opt.id ? palette.primaryText : palette.text, fontFamily: 'Amiri-Bold', fontSize: 14, lineHeight: 20 }}>
             {opt.label}
           </Text>
         </Pressable>
@@ -600,10 +600,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     overflow: 'hidden',
+    minHeight: 38,
   },
   segmentedOption: {
     paddingHorizontal: 12,
-    paddingVertical: 9,
+    paddingTop: 6,
+    paddingBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   chip: {
     flexDirection: 'row',
