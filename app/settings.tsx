@@ -366,7 +366,7 @@ export default function SettingsScreen() {
 
         <Section title={t('uiFontSize')} palette={palette} isRTL={isRTL}>
           <View style={[styles.sliderRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <Ionicons name="text" size={isRTL ? 22 : 14} color={palette.textMuted} />
+            <Ionicons name="text" size={14} color={palette.textMuted} />
             <Slider
               style={{ flex: 1 }}
               minimumValue={0}
@@ -377,7 +377,7 @@ export default function SettingsScreen() {
               maximumTrackTintColor={palette.border}
               thumbTintColor={palette.primary}
             />
-            <Ionicons name="text" size={isRTL ? 14 : 22} color={palette.textMuted} />
+            <Ionicons name="text" size={22} color={palette.textMuted} />
           </View>
         </Section>
 
