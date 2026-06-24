@@ -596,6 +596,7 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 11, opacity: 0.85, marginTop: 2 },
   toolbar: {
     borderBottomWidth: 1,
+    height: 54,
   },
   toolbarChips: {
     flexDirection: 'row-reverse',
@@ -609,7 +610,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     overflow: 'hidden',
-    minHeight: 38,
+    height: 38,
   },
   segmentedOption: {
     paddingHorizontal: 12,
