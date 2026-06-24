@@ -11,7 +11,7 @@ const positionListeners = new Set<PositionListener>();
 let _seqItems: { key: string; url: string }[] = [];
 let _seqIdx = 0;
 let _seqId: string | null = null;
-let _seqAdvancing = false;
+let _lastFinishHandledAt = 0;
 
 function notify(isPlaying: boolean) {
   for (const listener of listeners) listener(currentKey, isPlaying);
@@ -29,10 +29,13 @@ function ensurePlayer(): AudioPlayer {
         notifyPosition(Math.round(status.currentTime * 1000), Math.round((status.duration || 0) * 1000));
       }
       if (status.didJustFinish) {
-        // Android fires didJustFinish twice per track — guard against double-advance
-        if (_seqAdvancing) return;
+        // On Android, player.replace() triggers a spurious didJustFinish for the
+        // old track. Debounce: ignore any finish event within 1500ms of the last
+        // one we handled. Real ayahs are always longer than 1.5 seconds.
+        const now = Date.now();
+        if (now - _lastFinishHandledAt < 1500) return;
+        _lastFinishHandledAt = now;
         if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
-          _seqAdvancing = true;
           _seqIdx++;
           currentKey = _seqItems[_seqIdx].key;
           notify(true);
@@ -42,13 +45,11 @@ function ensurePlayer(): AudioPlayer {
               player!.replace({ uri: nextUrl });
               player!.play();
             }
-            _seqAdvancing = false;
           }, 200);
         } else {
           _seqItems = [];
           _seqIdx = 0;
           _seqId = null;
-          _seqAdvancing = false;
           currentKey = null;
           notify(false);
         }
@@ -99,7 +100,7 @@ export function playSequence(seqId: string, items: { key: string; url: string }[
   _seqItems = items;
   _seqIdx = 0;
   _seqId = seqId;
-  _seqAdvancing = false;
+  _lastFinishHandledAt = 0;
   const p = ensurePlayer();
   currentKey = items[0].key;
   p.replace({ uri: items[0].url });
@@ -111,7 +112,7 @@ export function stopAudio() {
   _seqItems = [];
   _seqIdx = 0;
   _seqId = null;
-  _seqAdvancing = false;
+  _lastFinishHandledAt = 0;
   if (!player) return;
   player.pause();
   currentKey = null;
