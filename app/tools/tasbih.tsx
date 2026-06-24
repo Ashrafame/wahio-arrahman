@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,16 @@ export default function TasbihScreen() {
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [customTargetInput, setCustomTargetInput] = useState('');
   const [dhikrPickerOpen, setDhikrPickerOpen] = useState(false);
+
+  const pulseAnim = useRef(new Animated.Value(0.35)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1600, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.35, duration: 1600, useNativeDriver: true }),
+      ]),
+    ).start();
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
@@ -90,6 +100,9 @@ export default function TasbihScreen() {
         <Text style={{ color: palette.textMuted, fontSize: scaleFont(13) }}>
           {t('tasbihTarget')}: {target}
         </Text>
+        <Animated.View style={{ marginTop: 28, opacity: pulseAnim }}>
+          <Ionicons name="finger-print-outline" size={52} color={palette.primary} />
+        </Animated.View>
         {reachedTarget ? (
           <Text style={{ color: palette.accent, fontSize: scaleFont(14), fontWeight: '700', marginTop: 6 }}>
             {t('reachedTarget')}
