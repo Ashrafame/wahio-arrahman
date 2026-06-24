@@ -577,7 +577,7 @@ function ToolbarChip({
       ]}
     >
       <Ionicons name={icon} size={15} color={active ? palette.accent : palette.textMuted} />
-      <Text style={{ color: active ? palette.accent : palette.textMuted, fontSize: 12, marginLeft: 4 }}>
+      <Text style={{ color: active ? palette.accent : palette.textMuted, fontSize: 12, lineHeight: 16, marginLeft: 4 }}>
         {label}
       </Text>
     </Pressable>
