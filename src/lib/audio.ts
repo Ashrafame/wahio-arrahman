@@ -1,122 +1,115 @@
 import { createAudioPlayer } from 'expo-audio';
 import type { AudioPlayer } from 'expo-audio';
-import { File, Paths } from 'expo-file-system';
 
 type PlaybackListener = (key: string | null, isPlaying: boolean) => void;
 type PositionListener = (positionMs: number, durationMs: number) => void;
 
-let player: AudioPlayer | null = null;
-let currentKey: string | null = null;
 const listeners = new Set<PlaybackListener>();
 const positionListeners = new Set<PositionListener>();
+let currentKey: string | null = null;
 let _seqItems: { key: string; url: string }[] = [];
 let _seqIdx = 0;
 let _seqId: string | null = null;
-let _hasPlayedCurrentItem = false;
-
-// Gapless pre-fetch: remote URL → local cached path (in-memory index)
-const _audioCache = new Map<string, string>();
-let _preloadingUrl: string | null = null;
-
-async function preloadNextUrl(url: string): Promise<void> {
-  if (_audioCache.has(url) || _preloadingUrl === url) return;
-  _preloadingUrl = url;
-  try {
-    const raw = url.split('?')[0].split('/').pop() ?? 'audio.mp3';
-    const name = raw.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const destFile = new File(Paths.cache, name);
-    if (!destFile.exists) {
-      await File.downloadFileAsync(url, destFile);
-    }
-    _audioCache.set(url, destFile.uri);
-  } catch {
-    // Ignore — transition will fall back to streaming the remote URL
-  } finally {
-    if (_preloadingUrl === url) _preloadingUrl = null;
-  }
-}
-
-function localUri(url: string): string {
-  return _audioCache.get(url) ?? url;
-}
 
 function notify(isPlaying: boolean) {
-  for (const listener of listeners) listener(currentKey, isPlaying);
+  for (const l of listeners) l(currentKey, isPlaying);
 }
-
 function notifyPosition(posMs: number, durMs: number) {
-  for (const listener of positionListeners) listener(posMs, durMs);
+  for (const l of positionListeners) l(posMs, durMs);
 }
 
-function ensurePlayer(): AudioPlayer {
-  if (!player) {
-    player = createAudioPlayer(null, { updateInterval: 250 });
-    player.addListener('playbackStatusUpdate', (status) => {
-      if (status.playing && status.currentTime > 0) {
-        const posMs = Math.round(status.currentTime * 1000);
-        const durMs = Math.round((status.duration || 0) * 1000);
-        notifyPosition(posMs, durMs);
-
-        // Confirm the current item has genuinely played (> 0.5 s of real audio)
-        if (status.currentTime > 0.5) _hasPlayedCurrentItem = true;
-
-        // When 3 s remain, pre-download the next ayah to local cache so the
-        // transition fires from disk — zero network latency at the boundary.
-        const nextIdx = _seqIdx + 1;
-        if (
-          _seqItems.length > 0 &&
-          nextIdx < _seqItems.length &&
-          durMs > 0 &&
-          durMs - posMs <= 3000
-        ) {
-          preloadNextUrl(_seqItems[nextIdx].url);
-        }
-      }
-
-      if (status.didJustFinish) {
-        // On Android, player.replace() triggers a spurious didJustFinish before
-        // the new track has played any audio. Guard: only advance the sequence
-        // when we have confirmed real playback of the current item (> 0.5 s).
-        // Spurious events from replace() always fire before the new file plays,
-        // so _hasPlayedCurrentItem is still false at that point.
-        if (!_hasPlayedCurrentItem) return;
-        _hasPlayedCurrentItem = false;
-
-        if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
-          _seqIdx++;
-          currentKey = _seqItems[_seqIdx].key;
-          notify(true);
-          // Use the locally cached file if pre-fetch completed in time;
-          // otherwise stream the remote URL directly (still no added delay).
-          player!.replace({ uri: localUri(_seqItems[_seqIdx].url) });
-          player!.play();
-        } else {
-          _seqItems = [];
-          _seqIdx = 0;
-          _seqId = null;
-          currentKey = null;
-          notify(false);
-        }
-      }
-    });
-  }
-  return player;
+// ── solo player (single-file playback) ────────────────────────────────────────
+let _solo: AudioPlayer | null = null;
+function getSolo(): AudioPlayer {
+  if (!_solo) _solo = createAudioPlayer(null, { updateInterval: 250 });
+  return _solo;
 }
+
+// ── gapless sequence: two alternating players ─────────────────────────────────
+//
+// Pattern: one player is "active" (currently playing), the other is "buffer"
+// (silently pre-loading the next ayah). On transition we just call play() on
+// the already-loaded buffer — no replace(), no decode startup, no gap.
+//
+// Critically: replace() is only ever called on the BUFFER player, not the
+// active one. On Android, replace() triggers a spurious didJustFinish for the
+// old track; because the active player's listener never sees replace(), that
+// spurious event is naturally discarded without any guards.
+let _pA: AudioPlayer | null = null;
+let _pB: AudioPlayer | null = null;
+let _isA = true;         // true → pA active, pB buffer
+let _sub: { remove: () => void } | null = null;
+let _bufLoadedFor = -1; // _seqIdx whose next track is already loaded in buffer()
+
+function _active(): AudioPlayer | null { return _isA ? _pA : _pB; }
+function _buffer(): AudioPlayer | null { return _isA ? _pB : _pA; }
+
+function _ensureSeqPlayers(): void {
+  if (!_pA) _pA = createAudioPlayer(null, { updateInterval: 250 });
+  if (!_pB) _pB = createAudioPlayer(null, { updateInterval: 250 });
+}
+
+function _attachSeqListener(): void {
+  _sub?.remove();
+  _sub = null;
+  const a = _active();
+  if (!a) return;
+  _sub = a.addListener('playbackStatusUpdate', (status) => {
+    if (status.playing && status.currentTime > 0) {
+      notifyPosition(
+        Math.round(status.currentTime * 1000),
+        Math.round((status.duration || 0) * 1000),
+      );
+
+      // On the first status update for this ayah, load the NEXT ayah into
+      // the buffer player. This gives it the full duration of the current
+      // ayah to decode and buffer before we need it.
+      const nextIdx = _seqIdx + 1;
+      if (
+        _seqItems.length > 0 &&
+        nextIdx < _seqItems.length &&
+        _bufLoadedFor !== _seqIdx
+      ) {
+        _bufLoadedFor = _seqIdx;
+        _buffer()?.replace({ uri: _seqItems[nextIdx].url });
+      }
+    }
+
+    if (status.didJustFinish) {
+      const nextIdx = _seqIdx + 1;
+      if (_seqItems.length > 0 && nextIdx < _seqItems.length) {
+        _seqIdx = nextIdx;
+        currentKey = _seqItems[_seqIdx].key;
+        notify(true);
+
+        // Swap roles: the pre-loaded buffer becomes the new active player
+        _isA = !_isA;
+
+        // play() on an already-loaded player is instant — no decode startup
+        _active()!.play();
+
+        // Move the listener to the new active player.
+        // Its first callback will buffer the next-next ayah into the new buffer.
+        _attachSeqListener();
+      } else {
+        _seqItems = [];
+        _seqIdx = 0;
+        _seqId = null;
+        currentKey = null;
+        notify(false);
+      }
+    }
+  });
+}
+
+// ── public API ────────────────────────────────────────────────────────────────
 
 export function playAudio(key: string, url: string) {
-  _seqItems = [];
-  _seqIdx = 0;
-  _seqId = null;
-  const p = ensurePlayer();
+  _stopSeq();
+  const p = getSolo();
   if (currentKey === key) {
-    if (p.playing) {
-      p.pause();
-      notify(false);
-    } else {
-      // Same file paused — resume from current position instead of restarting
-      p.play();
-      notify(true);
-    }
+    if (p.playing) { p.pause(); notify(false); }
+    else { p.play(); notify(true); }
     return;
   }
   currentKey = key;
@@ -125,53 +118,65 @@ export function playAudio(key: string, url: string) {
   notify(true);
 }
 
+function _stopSeq() {
+  _sub?.remove(); _sub = null;
+  if (_seqItems.length > 0) {
+    _pA?.pause();
+    _pB?.pause();
+    _seqItems = [];
+    _seqIdx = 0;
+    _seqId = null;
+    _bufLoadedFor = -1;
+  }
+}
+
 /** Pause without resetting position or sequence state. */
 export function pauseAudio() {
-  if (!player) return;
-  player.pause();
+  if (_seqItems.length > 0) _active()?.pause();
+  else _solo?.pause();
   notify(false);
 }
 
 /** Resume a paused player (single file or sequence) from where it stopped. */
 export function resumeAudio() {
-  if (!player || !currentKey) return;
-  player.play();
+  if (!currentKey) return;
+  if (_seqItems.length > 0) _active()?.play();
+  else _solo?.play();
   notify(true);
 }
 
 export function playSequence(seqId: string, items: { key: string; url: string }[]) {
   if (!items.length) return;
+  _solo?.pause();
+  _ensureSeqPlayers();
   _seqItems = items;
   _seqIdx = 0;
   _seqId = seqId;
-  _hasPlayedCurrentItem = false;
-  const p = ensurePlayer();
+  _isA = true;
+  _bufLoadedFor = -1;
   currentKey = items[0].key;
-  // Eagerly pre-fetch the second ayah so it is ready the moment the first ends
-  if (items.length > 1) preloadNextUrl(items[1].url);
-  p.replace({ uri: localUri(items[0].url) });
-  p.play();
+  _active()!.replace({ uri: items[0].url });
+  _active()!.play();
   notify(true);
+  // The listener will buffer items[1] into the buffer player on its first callback
+  _attachSeqListener();
 }
 
 export function stopAudio() {
+  _sub?.remove(); _sub = null;
   _seqItems = [];
   _seqIdx = 0;
   _seqId = null;
-  _hasPlayedCurrentItem = false;
-  if (!player) return;
-  player.pause();
+  _bufLoadedFor = -1;
+  _pA?.pause();
+  _pB?.pause();
+  _solo?.pause();
   currentKey = null;
   notify(false);
 }
 
-export function getCurrentAudioKey(): string | null {
-  return currentKey;
-}
-
-export function getCurrentSequenceId(): string | null {
-  return _seqId;
-}
+export function getCurrentAudioKey(): string | null { return currentKey; }
+export function getCurrentSequenceId(): string | null { return _seqId; }
 
 export function subscribeAudio(listener: PlaybackListener): () => void {
   listeners.add(listener);
@@ -183,12 +188,8 @@ export function subscribePosition(listener: PositionListener): () => void {
   return () => positionListeners.delete(listener);
 }
 
-/** Seek the current player to positionSeconds after it loads. */
 export async function seekTo(positionSeconds: number): Promise<void> {
-  if (!player) return;
-  try {
-    await player.seekTo(positionSeconds);
-  } catch {
-    // Ignore seek errors (e.g. called before file loads)
-  }
+  const p = _seqItems.length > 0 ? _active() : _solo;
+  if (!p) return;
+  try { await p.seekTo(positionSeconds); } catch { /* ignore */ }
 }
