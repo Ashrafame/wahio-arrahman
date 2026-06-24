@@ -71,7 +71,14 @@ function _attachSeqListener(): void {
         _bufLoadedFor !== _seqIdx
       ) {
         _bufLoadedFor = _seqIdx;
-        _buffer()?.replace({ uri: _seqItems[nextIdx].url });
+        const buf = _buffer();
+        if (buf) {
+          buf.replace({ uri: _seqItems[nextIdx].url });
+          // On Android, replace() internally calls play() after setting the
+          // source (ExoPlayer behavior). Immediately pause so the buffer
+          // player loads silently without producing sound.
+          buf.pause();
+        }
       }
     }
 
