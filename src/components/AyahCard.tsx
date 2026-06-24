@@ -5,6 +5,34 @@ import * as Clipboard from 'expo-clipboard';
 import { Ayah } from '../lib/quranData';
 import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
 
+// ArefRuqaa and Rakkas lack certain Quran-specific Unicode characters (Koranic
+// annotation signs U+06D6-U+06ED, Extended-A tanween U+08F0-U+08F2, and the
+// small-high sukun U+06E1 used by Rakkas). When the shaping engine encounters a
+// missing glyph, it splits the Arabic text run at that point, causing surrounding
+// letters to lose their medial forms and appear disconnected. We normalize the
+// text for those fonts: replace Extended-A chars with their standard equivalents
+// and remove annotation marks that are absent from the font's glyph set.
+const QURAN_CHAR_NORMALIZE: Record<number, string> = {
+  0x08F0: 'ً', // open fathatan → fathatan
+  0x08F1: 'ٌ', // open dammatan → dammatan
+  0x08F2: 'ٍ', // open kasratan → kasratan
+  0x06E1: 'ْ', // small high sukun (missing in Rakkas) → standard sukun
+  0x065C: '',
+  0x06D6: '', 0x06D7: '', 0x06D8: '', 0x06DA: '', 0x06DB: '',
+  0x06DC: '', 0x06DE: '', 0x06E0: '', 0x06E2: '', 0x06E4: '',
+  0x06E5: '', 0x06E6: '', 0x06E7: '', 0x06E8: '', 0x06E9: '',
+  0x06EC: '', 0x06ED: '',
+};
+
+function normalizeForGenericFont(text: string): string {
+  let out = '';
+  for (const ch of text) {
+    const code = ch.codePointAt(0)!;
+    out += code in QURAN_CHAR_NORMALIZE ? QURAN_CHAR_NORMALIZE[code] : ch;
+  }
+  return out;
+}
+
 interface Props {
   ayah: Ayah;
   highlighted?: boolean;
@@ -31,7 +59,10 @@ export function AyahCard({
   onPlayAudio,
 }: Props) {
   const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, showEnglishQuran, scaleFont, palette } = useSettings();
-  const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
+  const rawArabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
+  const arabicText = (fontFamily === 'ruqa' || fontFamily === 'diwan')
+    ? normalizeForGenericFont(rawArabicText)
+    : rawArabicText;
   const englishMode = !isRTL && showEnglishQuran;
 
   // Warm text shadow that matches the Islamic pattern color — gives the floating depth

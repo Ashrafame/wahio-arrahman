@@ -339,7 +339,8 @@ export default function SettingsScreen() {
             options={[
               { id: 'amiri', label: 'Amiri' },
               { id: 'scheherazade', label: 'Scheherazade' },
-              { id: 'jomhuria', label: 'Jomhuria' },
+              { id: 'diwan', label: 'الديواني' },
+              { id: 'ruqa', label: 'الرقعة' },
             ]}
             value={fontFamily}
             onChange={(v) => setFontFamily(v as FontFamilyId)}

@@ -13,7 +13,7 @@ import {
   buildPalette,
 } from '../theme/colors';
 
-export type FontFamilyId = 'amiri' | 'scheherazade' | 'jomhuria';
+export type FontFamilyId = 'amiri' | 'scheherazade' | 'diwan' | 'ruqa';
 export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
 export type ThemeId = 'light' | 'dark';
 
@@ -102,7 +102,8 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 export const FONT_FAMILY_MAP: Record<FontFamilyId, string> = {
   amiri: 'Amiri-Regular',
   scheherazade: 'ScheherazadeNew-Regular',
-  jomhuria: 'Jomhuria-Regular',
+  diwan: 'Rakkas-Regular',
+  ruqa: 'ArefRuqaa-Regular',
 };
 
 export const FONT_SIZE_MAP: Record<FontSizeId, number> = {
@@ -121,12 +122,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
-          const parsed = JSON.parse(stored);
-          const validFonts: FontFamilyId[] = ['amiri', 'scheherazade', 'jomhuria'];
-          if (parsed.fontFamily && !validFonts.includes(parsed.fontFamily)) {
-            parsed.fontFamily = 'amiri';
-          }
-          setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+          setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
         } else {
           const deviceLang = Localization.getLocales()[0]?.languageCode;
           if (deviceLang && deviceLang !== 'ar') {
