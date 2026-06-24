@@ -307,8 +307,9 @@ export default function SurahScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={[styles.toolbar, { backgroundColor: palette.surface, borderColor: palette.border }]}
-        contentContainerStyle={{ flexDirection: 'row-reverse', gap: 8, paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center' }}
+        contentContainerStyle={{ flexGrow: 1 }}
       >
+        <View style={styles.toolbarChips}>
         <SegmentedToggle
           options={[
             { id: 'hafs', label: isRTL ? 'حفص' : 'Hafs' },
@@ -353,6 +354,7 @@ export default function SurahScreen() {
           onPress={() => router.push('/settings')}
           palette={palette}
         />
+        </View>
       </ScrollView>
 
       <FlatList
@@ -594,6 +596,13 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 11, opacity: 0.85, marginTop: 2 },
   toolbar: {
     borderBottomWidth: 1,
+  },
+  toolbarChips: {
+    flexDirection: 'row-reverse',
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    alignItems: 'center',
   },
   segmented: {
     flexDirection: 'row',
