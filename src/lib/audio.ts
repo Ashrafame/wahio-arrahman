@@ -1,5 +1,6 @@
 import { createAudioPlayer } from 'expo-audio';
 import type { AudioPlayer } from 'expo-audio';
+import { File, Paths } from 'expo-file-system';
 
 type PlaybackListener = (key: string | null, isPlaying: boolean) => void;
 type PositionListener = (positionMs: number, durationMs: number) => void;
@@ -12,6 +13,32 @@ let _seqItems: { key: string; url: string }[] = [];
 let _seqIdx = 0;
 let _seqId: string | null = null;
 let _hasPlayedCurrentItem = false;
+
+// Gapless pre-fetch: remote URL → local cached path (in-memory index)
+const _audioCache = new Map<string, string>();
+let _preloadingUrl: string | null = null;
+
+async function preloadNextUrl(url: string): Promise<void> {
+  if (_audioCache.has(url) || _preloadingUrl === url) return;
+  _preloadingUrl = url;
+  try {
+    const raw = url.split('?')[0].split('/').pop() ?? 'audio.mp3';
+    const name = raw.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const destFile = new File(Paths.cache, name);
+    if (!destFile.exists) {
+      await File.downloadFileAsync(url, destFile);
+    }
+    _audioCache.set(url, destFile.uri);
+  } catch {
+    // Ignore — transition will fall back to streaming the remote URL
+  } finally {
+    if (_preloadingUrl === url) _preloadingUrl = null;
+  }
+}
+
+function localUri(url: string): string {
+  return _audioCache.get(url) ?? url;
+}
 
 function notify(isPlaying: boolean) {
   for (const listener of listeners) listener(currentKey, isPlaying);
@@ -26,10 +53,26 @@ function ensurePlayer(): AudioPlayer {
     player = createAudioPlayer(null, { updateInterval: 250 });
     player.addListener('playbackStatusUpdate', (status) => {
       if (status.playing && status.currentTime > 0) {
-        notifyPosition(Math.round(status.currentTime * 1000), Math.round((status.duration || 0) * 1000));
+        const posMs = Math.round(status.currentTime * 1000);
+        const durMs = Math.round((status.duration || 0) * 1000);
+        notifyPosition(posMs, durMs);
+
         // Confirm the current item has genuinely played (> 0.5 s of real audio)
         if (status.currentTime > 0.5) _hasPlayedCurrentItem = true;
+
+        // When 3 s remain, pre-download the next ayah to local cache so the
+        // transition fires from disk — zero network latency at the boundary.
+        const nextIdx = _seqIdx + 1;
+        if (
+          _seqItems.length > 0 &&
+          nextIdx < _seqItems.length &&
+          durMs > 0 &&
+          durMs - posMs <= 3000
+        ) {
+          preloadNextUrl(_seqItems[nextIdx].url);
+        }
       }
+
       if (status.didJustFinish) {
         // On Android, player.replace() triggers a spurious didJustFinish before
         // the new track has played any audio. Guard: only advance the sequence
@@ -38,17 +81,15 @@ function ensurePlayer(): AudioPlayer {
         // so _hasPlayedCurrentItem is still false at that point.
         if (!_hasPlayedCurrentItem) return;
         _hasPlayedCurrentItem = false;
+
         if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
           _seqIdx++;
           currentKey = _seqItems[_seqIdx].key;
           notify(true);
-          const nextUrl = _seqItems[_seqIdx].url;
-          setTimeout(() => {
-            if (_seqItems.length > 0) {
-              player!.replace({ uri: nextUrl });
-              player!.play();
-            }
-          }, 200);
+          // Use the locally cached file if pre-fetch completed in time;
+          // otherwise stream the remote URL directly (still no added delay).
+          player!.replace({ uri: localUri(_seqItems[_seqIdx].url) });
+          player!.play();
         } else {
           _seqItems = [];
           _seqIdx = 0;
@@ -106,7 +147,9 @@ export function playSequence(seqId: string, items: { key: string; url: string }[
   _hasPlayedCurrentItem = false;
   const p = ensurePlayer();
   currentKey = items[0].key;
-  p.replace({ uri: items[0].url });
+  // Eagerly pre-fetch the second ayah so it is ready the moment the first ends
+  if (items.length > 1) preloadNextUrl(items[1].url);
+  p.replace({ uri: localUri(items[0].url) });
   p.play();
   notify(true);
 }
