@@ -11,7 +11,7 @@ const positionListeners = new Set<PositionListener>();
 let _seqItems: { key: string; url: string }[] = [];
 let _seqIdx = 0;
 let _seqId: string | null = null;
-let _lastFinishHandledAt = 0;
+let _hasPlayedCurrentItem = false;
 
 function notify(isPlaying: boolean) {
   for (const listener of listeners) listener(currentKey, isPlaying);
@@ -27,14 +27,17 @@ function ensurePlayer(): AudioPlayer {
     player.addListener('playbackStatusUpdate', (status) => {
       if (status.playing && status.currentTime > 0) {
         notifyPosition(Math.round(status.currentTime * 1000), Math.round((status.duration || 0) * 1000));
+        // Confirm the current item has genuinely played (> 0.5 s of real audio)
+        if (status.currentTime > 0.5) _hasPlayedCurrentItem = true;
       }
       if (status.didJustFinish) {
-        // On Android, player.replace() triggers a spurious didJustFinish for the
-        // old track. Debounce: ignore any finish event within 1500ms of the last
-        // one we handled. Real ayahs are always longer than 1.5 seconds.
-        const now = Date.now();
-        if (now - _lastFinishHandledAt < 1500) return;
-        _lastFinishHandledAt = now;
+        // On Android, player.replace() triggers a spurious didJustFinish before
+        // the new track has played any audio. Guard: only advance the sequence
+        // when we have confirmed real playback of the current item (> 0.5 s).
+        // Spurious events from replace() always fire before the new file plays,
+        // so _hasPlayedCurrentItem is still false at that point.
+        if (!_hasPlayedCurrentItem) return;
+        _hasPlayedCurrentItem = false;
         if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
           _seqIdx++;
           currentKey = _seqItems[_seqIdx].key;
@@ -100,7 +103,7 @@ export function playSequence(seqId: string, items: { key: string; url: string }[
   _seqItems = items;
   _seqIdx = 0;
   _seqId = seqId;
-  _lastFinishHandledAt = 0;
+  _hasPlayedCurrentItem = false;
   const p = ensurePlayer();
   currentKey = items[0].key;
   p.replace({ uri: items[0].url });
@@ -112,7 +115,7 @@ export function stopAudio() {
   _seqItems = [];
   _seqIdx = 0;
   _seqId = null;
-  _lastFinishHandledAt = 0;
+  _hasPlayedCurrentItem = false;
   if (!player) return;
   player.pause();
   currentKey = null;
