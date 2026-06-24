@@ -11,6 +11,7 @@ const positionListeners = new Set<PositionListener>();
 let _seqItems: { key: string; url: string }[] = [];
 let _seqIdx = 0;
 let _seqId: string | null = null;
+let _seqAdvancing = false;
 
 function notify(isPlaying: boolean) {
   for (const listener of listeners) listener(currentKey, isPlaying);
@@ -28,7 +29,10 @@ function ensurePlayer(): AudioPlayer {
         notifyPosition(Math.round(status.currentTime * 1000), Math.round((status.duration || 0) * 1000));
       }
       if (status.didJustFinish) {
+        // Android fires didJustFinish twice per track — guard against double-advance
+        if (_seqAdvancing) return;
         if (_seqItems.length > 0 && _seqIdx + 1 < _seqItems.length) {
+          _seqAdvancing = true;
           _seqIdx++;
           currentKey = _seqItems[_seqIdx].key;
           notify(true);
@@ -38,11 +42,13 @@ function ensurePlayer(): AudioPlayer {
               player!.replace({ uri: nextUrl });
               player!.play();
             }
+            _seqAdvancing = false;
           }, 200);
         } else {
           _seqItems = [];
           _seqIdx = 0;
           _seqId = null;
+          _seqAdvancing = false;
           currentKey = null;
           notify(false);
         }
@@ -93,6 +99,7 @@ export function playSequence(seqId: string, items: { key: string; url: string }[
   _seqItems = items;
   _seqIdx = 0;
   _seqId = seqId;
+  _seqAdvancing = false;
   const p = ensurePlayer();
   currentKey = items[0].key;
   p.replace({ uri: items[0].url });
@@ -104,6 +111,7 @@ export function stopAudio() {
   _seqItems = [];
   _seqIdx = 0;
   _seqId = null;
+  _seqAdvancing = false;
   if (!player) return;
   player.pause();
   currentKey = null;
