@@ -18,6 +18,7 @@ export default function QiblaScreen() {
   const [qiblaBearing, setQiblaBearing] = useState<number | null>(null);
   const [heading, setHeading] = useState<number | null>(null);
   const [compassSupported, setCompassSupported] = useState(true);
+  const [locationName, setLocationName] = useState<string | null>(null);
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 
   useEffect(() => {
@@ -30,6 +31,17 @@ export default function QiblaScreen() {
         const coords = await getCurrentCoords();
         if (cancelled) return;
         setQiblaBearing(computeQiblaBearing(coords.latitude, coords.longitude));
+
+        try {
+          const geo = await Location.reverseGeocodeAsync({ latitude: coords.latitude, longitude: coords.longitude });
+          if (!cancelled && geo.length > 0) {
+            const { city, region, country } = geo[0];
+            const parts = [city || region, country].filter(Boolean);
+            setLocationName(parts.join('، '));
+          }
+        } catch {
+          // Reverse geocoding is optional — ignore failures
+        }
 
         try {
           const sub = await Location.watchHeadingAsync((h) => {
@@ -100,6 +112,13 @@ export default function QiblaScreen() {
               {t('qiblaBearingLabel')}: {Math.round(qiblaBearing)}°
             </Text>
           ) : null}
+
+          {locationName ? (
+            <View style={styles.locationRow}>
+              <Ionicons name="location-outline" size={15} color={palette.textMuted} />
+              <Text style={{ color: palette.textMuted, fontSize: scaleFont(13) }}>{locationName}</Text>
+            </View>
+          ) : null}
         </View>
       )}
     </View>
@@ -122,4 +141,5 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   notice: { textAlign: 'center', fontSize: 13, lineHeight: 20, paddingHorizontal: 12 },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
 });
