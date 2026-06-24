@@ -307,7 +307,7 @@ export default function SurahScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={[styles.toolbar, { backgroundColor: palette.surface, borderColor: palette.border }]}
-        contentContainerStyle={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: 8, paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center' }}
+        contentContainerStyle={{ flexDirection: 'row-reverse', gap: 8, paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center' }}
       >
         <SegmentedToggle
           options={[
