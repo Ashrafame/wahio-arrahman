@@ -12,7 +12,7 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { chapters, normalizeArabic, getChapter } from '../src/lib/quranData';
+import { chapters, normalizeArabic, normalizeArabicNumerals, getChapter } from '../src/lib/quranData';
 import { useSettings } from '../src/store/SettingsContext';
 import { SurahListItem } from '../src/components/SurahListItem';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../src/data/juz';
@@ -26,7 +26,7 @@ export default function HomeScreen() {
   const [juzOpen, setJuzOpen] = useState(false);
 
   const filteredChapters = useMemo(() => {
-    const trimmed = query.trim();
+    const trimmed = normalizeArabicNumerals(query.trim());
     if (!trimmed) return chapters;
     const normalizedQuery = normalizeArabic(trimmed);
     const lowerQuery = trimmed.toLowerCase();

@@ -170,6 +170,12 @@ export function searchQuran(query: string, qiraah: Qiraah, limit = 100): SearchR
   return all.slice(0, limit);
 }
 
+// Converts Arabic-Indic digits (٠١٢٣٤٥٦٧٨٩) to Western digits so numeric
+// queries work regardless of which digit set the user types.
+export function normalizeArabicNumerals(text: string): string {
+  return text.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660));
+}
+
 export function normalizeArabic(text: string): string {
   return text
     .replace(/[ٱآأإ]/g, 'ا')
@@ -192,7 +198,7 @@ export interface AyahLocation {
 // Used by the verse search screen to provide a direct-navigation shortcut
 // without mixing in surah-name look-ups.
 export function parseAyahReference(query: string): AyahLocation | null {
-  const trimmed = query.trim();
+  const trimmed = normalizeArabicNumerals(query.trim());
   const refMatch = trimmed.match(/^(\d{1,3})\s*[:\-،,]?\s*(\d{1,3})$/);
   if (refMatch) {
     const chapter = Number(refMatch[1]);
@@ -207,7 +213,7 @@ export function parseAyahReference(query: string): AyahLocation | null {
 
 // Parses queries like "2:255", "2 255", "البقرة 255", or a surah name to find a direct jump target.
 export function parseDirectReference(query: string): AyahLocation | { chapter: number } | null {
-  const trimmed = query.trim();
+  const trimmed = normalizeArabicNumerals(query.trim());
   const refMatch = trimmed.match(/^(\d{1,3})\s*[:\-،,]?\s*(\d{1,3})$/);
   if (refMatch) {
     const chapter = Number(refMatch[1]);

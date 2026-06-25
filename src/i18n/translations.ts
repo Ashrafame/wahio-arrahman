@@ -15,8 +15,8 @@ export const STRINGS = {
     en: 'Search surah name...',
   },
   searchVersePlaceholder: {
-    ar: 'بحث عن آية أو كلمة في آية...',
-    en: 'Search a verse or word in a verse...',
+    ar: 'بحث عن آية أو كلمة في آية، أو رقم السورة:رقم الآية مثل 2:255',
+    en: 'Search a verse or word, or reference like 2:255',
   },
   settings: { ar: 'الإعدادات', en: 'Settings' },
   noResults: { ar: 'لا توجد نتائج', en: 'No results found' },
