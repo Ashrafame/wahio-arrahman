@@ -187,12 +187,14 @@ export function parseDirectReference(query: string): AyahLocation | { chapter: n
     if (getChapter(chapter)) return { chapter };
   }
 
-  const byName = chapters.find(
+  // Surah-name matching: require at least 4 characters to avoid short common
+  // words (في، الم، من…) being hijacked into a direct-navigation card.
+  const byName = trimmed.length >= 4 ? chapters.find(
     (c) =>
       normalizeArabic(c.nameArabic).includes(normalizeArabic(trimmed)) ||
       c.nameTransliteration.toLowerCase().includes(trimmed.toLowerCase()) ||
       c.nameTranslationEn.toLowerCase().includes(trimmed.toLowerCase())
-  );
+  ) : undefined;
   if (byName) return { chapter: byName.number };
 
   return null;
