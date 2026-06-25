@@ -35,7 +35,7 @@ export const QALOON_RECITERS: QaloonReciter[] = [
   { id: 'trablsi', nameAr: 'أحمد الطرابلسي', nameEn: 'Ahmed Al-Trabulsi', base: 'https://server10.mp3quran.net/trablsi' },
   { id: 'kshidan', nameAr: 'إبراهيم قشيدان', nameEn: 'Ibrahim Qushaydan', base: 'https://server16.mp3quran.net/i_kshidan/Rewayat-Qalon-A-n-Nafi' },
   { id: 'daawob', nameAr: 'طارق ضعوب', nameEn: 'Tareq Daawob', base: 'https://server10.mp3quran.net/tareq' },
-  { id: 'hudhaifi_qaloon', nameAr: 'علي الحذيفي', nameEn: 'Ali Al-Hudhaifi', base: 'https://server9.mp3quran.net/huthifi_qalon', folder: 'Hudhaify_128kbps' },
+  { id: 'hudhaifi_qaloon', nameAr: 'علي الحذيفي', nameEn: 'Ali Al-Hudhaifi', base: 'https://server9.mp3quran.net/huthifi_qalon' },
 ];
 
 export const DEFAULT_HAFS_RECITER_ID = HAFS_RECITERS[0].id;
