@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getChapter, parseDirectReference, SearchResult, searchQuran } from '../src/lib/quranData';
@@ -10,7 +10,8 @@ import { IslamicPatternBackground } from '../src/components/IslamicPatternBackgr
 export default function SearchScreen() {
   const { isRTL, t, qiraah, palette, language, scaleFont } = useSettings();
   const insets = useSafeAreaInsets();
-  const [query, setQuery] = useState('');
+  const { q: initialQuery } = useLocalSearchParams<{ q?: string }>();
+  const [query, setQuery] = useState(initialQuery ?? '');
 
   const directRef = useMemo(() => parseDirectReference(query), [query]);
   const results = useMemo<SearchResult[]>(() => {

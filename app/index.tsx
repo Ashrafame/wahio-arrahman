@@ -48,6 +48,8 @@ export default function HomeScreen() {
         pathname: '/surah/[number]',
         params: { number: String(ref.chapter), verse: 'verse' in ref ? String(ref.verse) : undefined },
       });
+    } else if (query.trim() && filteredChapters.length === 0) {
+      router.push({ pathname: '/search', params: { q: query.trim() } });
     }
   };
 
@@ -100,7 +102,18 @@ export default function HomeScreen() {
           />
         )}
         ListEmptyComponent={
-          <Text style={[styles.empty, { color: palette.textMuted }]}>{t('noResults')}</Text>
+          query.trim() ? (
+            <Pressable
+              onPress={() => router.push({ pathname: '/search', params: { q: query.trim() } })}
+              style={[styles.searchInVerses, { backgroundColor: palette.surface, borderColor: palette.border }]}
+            >
+              <Ionicons name="search" size={18} color={palette.primary} />
+              <Text style={[styles.searchInVersesText, { color: palette.primary }]}>
+                {isRTL ? `البحث في نص القرآن عن "${query}"` : `Search Quran text for "${query}"`}
+              </Text>
+              <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={16} color={palette.primary} />
+            </Pressable>
+          ) : null
         }
         contentContainerStyle={{ paddingBottom: 24 }}
       />
@@ -176,6 +189,17 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontSize: 15 },
   empty: { textAlign: 'center', marginTop: 40, fontSize: 14 },
+  searchInVerses: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginHorizontal: 12,
+    marginTop: 24,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  searchInVersesText: { flex: 1, fontSize: 14, fontWeight: '600' },
   juzContainer: { flex: 1 },
   juzHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 12 },
   juzTitle: { fontSize: 18, fontWeight: '700', fontFamily: 'Amiri-Bold' },
