@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getChapter, parseDirectReference, SearchResult, searchQuran } from '../src/lib/quranData';
+import { getChapter, parseAyahReference, SearchResult, searchQuran } from '../src/lib/quranData';
 import { useSettings } from '../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 
@@ -13,7 +13,7 @@ export default function SearchScreen() {
   const { q: initialQuery } = useLocalSearchParams<{ q?: string }>();
   const [query, setQuery] = useState(initialQuery ?? '');
 
-  const directRef = useMemo(() => parseDirectReference(query), [query]);
+  const directRef = useMemo(() => parseAyahReference(query), [query]);
   const results = useMemo<SearchResult[]>(() => {
     if (!query.trim() || directRef) return [];
     return searchQuran(query, qiraah, 200);
@@ -55,7 +55,7 @@ export default function SearchScreen() {
           autoFocus
           value={query}
           onChangeText={setQuery}
-          placeholder={t('searchPlaceholder')}
+          placeholder={t('searchVersePlaceholder')}
           placeholderTextColor={palette.textMuted}
           style={[
             styles.searchInput,
@@ -78,13 +78,12 @@ export default function SearchScreen() {
 
       {directRef ? (
         <Pressable
-          onPress={() => goTo(directRef.chapter, 'verse' in directRef ? directRef.verse : undefined)}
+          onPress={() => goTo(directRef.chapter, directRef.verse)}
           style={[styles.directCard, { backgroundColor: palette.surface, borderColor: palette.border }]}
         >
           <Ionicons name="arrow-forward-circle" size={20} color={palette.accent} />
           <Text style={{ color: palette.text, marginLeft: 8 }}>
-            {t('jumpTo')} {getChapter(directRef.chapter)?.nameArabic}
-            {'verse' in directRef ? ` : ${directRef.verse}` : ''}
+            {t('jumpTo')} {getChapter(directRef.chapter)?.nameArabic} : {directRef.verse}
           </Text>
         </Pressable>
       ) : (

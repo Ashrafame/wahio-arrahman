@@ -12,7 +12,7 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { chapters, normalizeArabic, parseDirectReference, getChapter } from '../src/lib/quranData';
+import { chapters, normalizeArabic, getChapter } from '../src/lib/quranData';
 import { useSettings } from '../src/store/SettingsContext';
 import { SurahListItem } from '../src/components/SurahListItem';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../src/data/juz';
@@ -26,31 +26,22 @@ export default function HomeScreen() {
   const [juzOpen, setJuzOpen] = useState(false);
 
   const filteredChapters = useMemo(() => {
-    if (!query.trim()) return chapters;
-    const ref = parseDirectReference(query);
-    if (ref) {
-      return chapters.filter((c) => c.number === ref.chapter);
-    }
-    const normalizedQuery = normalizeArabic(query);
-    const lowerQuery = query.toLowerCase();
+    const trimmed = query.trim();
+    if (!trimmed) return chapters;
+    const normalizedQuery = normalizeArabic(trimmed);
+    const lowerQuery = trimmed.toLowerCase();
     return chapters.filter(
       (c) =>
         normalizeArabic(c.nameArabic).includes(normalizedQuery) ||
         c.nameTransliteration.toLowerCase().includes(lowerQuery) ||
         c.nameTranslationEn.toLowerCase().includes(lowerQuery) ||
-        String(c.number) === query.trim()
+        String(c.number) === trimmed
     );
   }, [query]);
 
   const handleSubmit = () => {
-    const ref = parseDirectReference(query);
-    if (ref) {
-      router.push({
-        pathname: '/surah/[number]',
-        params: { number: String(ref.chapter), verse: 'verse' in ref ? String(ref.verse) : undefined },
-      });
-    } else if (query.trim() && filteredChapters.length === 0) {
-      router.push({ pathname: '/search', params: { q: query.trim() } });
+    if (filteredChapters.length === 1) {
+      router.push({ pathname: '/surah/[number]', params: { number: String(filteredChapters[0].number) } });
     }
   };
 
@@ -84,7 +75,7 @@ export default function HomeScreen() {
           value={query}
           onChangeText={setQuery}
           onSubmitEditing={handleSubmit}
-          placeholder={t('searchPlaceholder')}
+          placeholder={t('searchSurahPlaceholder')}
           placeholderTextColor={palette.textMuted}
           style={[
             styles.searchInput,
@@ -104,16 +95,7 @@ export default function HomeScreen() {
         )}
         ListEmptyComponent={
           query.trim() ? (
-            <Pressable
-              onPress={() => router.push({ pathname: '/search', params: { q: query.trim() } })}
-              style={[styles.searchInVerses, { backgroundColor: palette.surface, borderColor: palette.border }]}
-            >
-              <Ionicons name="search" size={18} color={palette.primary} />
-              <Text style={[styles.searchInVersesText, { color: palette.primary }]}>
-                {isRTL ? `البحث في نص القرآن عن "${query}"` : `Search Quran text for "${query}"`}
-              </Text>
-              <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={16} color={palette.primary} />
-            </Pressable>
+            <Text style={[styles.empty, { color: palette.textMuted }]}>{t('noResults')}</Text>
           ) : null
         }
         contentContainerStyle={{ paddingBottom: 24 }}
@@ -190,17 +172,6 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontSize: 15 },
   empty: { textAlign: 'center', marginTop: 40, fontSize: 14 },
-  searchInVerses: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginHorizontal: 12,
-    marginTop: 24,
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  searchInVersesText: { flex: 1, fontSize: 14, fontWeight: '600' },
   juzContainer: { flex: 1 },
   juzHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 12 },
   juzTitle: { fontSize: 18, fontWeight: '700', fontFamily: 'Amiri-Bold' },

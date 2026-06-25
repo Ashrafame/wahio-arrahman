@@ -10,6 +10,14 @@ export const STRINGS = {
     ar: 'ابحث عن سورة، آية (2:255) أو كلمة...',
     en: 'Search a surah, verse (2:255) or word...',
   },
+  searchSurahPlaceholder: {
+    ar: 'بحث عن اسم السورة...',
+    en: 'Search surah name...',
+  },
+  searchVersePlaceholder: {
+    ar: 'بحث عن آية أو كلمة في آية...',
+    en: 'Search a verse or word in a verse...',
+  },
   settings: { ar: 'الإعدادات', en: 'Settings' },
   noResults: { ar: 'لا توجد نتائج', en: 'No results found' },
   verses: { ar: 'آية', en: 'verses' },

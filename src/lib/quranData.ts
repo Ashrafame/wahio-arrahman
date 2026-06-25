@@ -101,9 +101,11 @@ export interface SearchResult {
 function normalizeArabicExpanded(text: string): string {
   return text
     .replace(/[ٱآأإ]/g, 'ا')
+    .replace(/وٰ/g, 'ا')
     .replace(/ٰ/g, 'ا')
     .replace(/[ً-ٟؐ-ؚۖ-ࣰۭ-ࣿ]/g, '')
-    .replace(/ى/g, 'ي')
+    .replace(/[ىئ]/g, 'ي')
+    .replace(/ؤ/g, 'و')
     .replace(/ة/g, 'ه')
     .replace(/[‌‍‎]/g, '')
     .trim()
@@ -173,7 +175,8 @@ export function normalizeArabic(text: string): string {
     .replace(/[ٱآأإ]/g, 'ا')
     .replace(/ٰ/g, '')
     .replace(/[ً-ٟؐ-ؚۖ-ࣰۭ-ࣿ]/g, '')
-    .replace(/ى/g, 'ي')
+    .replace(/[ىئ]/g, 'ي')
+    .replace(/ؤ/g, 'و')
     .replace(/ة/g, 'ه')
     .replace(/[‌‍‎]/g, '')
     .trim()
@@ -183,6 +186,23 @@ export function normalizeArabic(text: string): string {
 export interface AyahLocation {
   chapter: number;
   verse: number;
+}
+
+// Parses only numeric ayah references like "2:255"; ignores surah names.
+// Used by the verse search screen to provide a direct-navigation shortcut
+// without mixing in surah-name look-ups.
+export function parseAyahReference(query: string): AyahLocation | null {
+  const trimmed = query.trim();
+  const refMatch = trimmed.match(/^(\d{1,3})\s*[:\-،,]?\s*(\d{1,3})$/);
+  if (refMatch) {
+    const chapter = Number(refMatch[1]);
+    const verse = Number(refMatch[2]);
+    const meta = getChapter(chapter);
+    if (meta && verse >= 1 && verse <= meta.versesCount) {
+      return { chapter, verse };
+    }
+  }
+  return null;
 }
 
 // Parses queries like "2:255", "2 255", "البقرة 255", or a surah name to find a direct jump target.
