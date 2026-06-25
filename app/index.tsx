@@ -17,6 +17,7 @@ import { useSettings } from '../src/store/SettingsContext';
 import { SurahListItem } from '../src/components/SurahListItem';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../src/data/juz';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
+import { BookSearchIcon } from '../src/components/BookSearchIcon';
 
 export default function HomeScreen() {
   const { language, isRTL, t, scaleFont, qiraah, palette } = useSettings();
@@ -64,7 +65,7 @@ export default function HomeScreen() {
           <Text style={[styles.subtitle, { color: palette.primaryText, textAlign: isRTL ? 'right' : 'left' }]}>{t('appNameEnglish')}</Text>
         </View>
         <Pressable onPress={() => router.push('/search')} style={styles.iconButton} hitSlop={8}>
-          <Ionicons name="search" size={24} color={palette.primaryText} />
+          <BookSearchIcon size={28} color={palette.primaryText} />
         </Pressable>
         <Pressable onPress={() => setJuzOpen(true)} style={styles.iconButton} hitSlop={8}>
           <Ionicons name="aperture-outline" size={24} color={palette.primaryText} />
