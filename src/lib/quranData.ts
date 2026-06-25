@@ -89,43 +89,73 @@ export interface SearchResult {
   verse: number;
   snippet: string;
   matchedIn: 'arabic' | 'translation';
+  /** How many ayahs in this chapter match the query (Arabic only). */
+  countInSurah: number;
+  /** Total matching ayahs across the whole Quran (Arabic only). */
+  countInQuran: number;
+  /** Total distinct surahs that contain the query (Arabic only). */
+  totalSurahCount: number;
 }
 
 export function searchQuran(query: string, qiraah: Qiraah, limit = 100): SearchResult[] {
   const q = query.trim();
   if (!q) return [];
   const qLower = q.toLowerCase();
-  const normalizedArabic = normalizeArabic(q);
-  const results: SearchResult[] = [];
+  const normalizedQuery = normalizeArabic(q);
   const textMap = qiraah === 'hafs' ? hafsMap : qaloonMap;
 
+  // First pass: scan all ayahs without limit to compute accurate counts
+  const arabicHits: { chapter: number; verse: number; snippet: string }[] = [];
+  const translationHits: { chapter: number; verse: number; snippet: string }[] = [];
+
   for (const key of Object.keys(textMap)) {
-    if (results.length >= limit) break;
     const [chapterStr, verseStr] = key.split(':');
     const chapter = Number(chapterStr);
     const verse = Number(verseStr);
     const arabicText = textMap[key];
-    const normalizedText = normalizeArabic(arabicText);
 
-    if (normalizedArabic && normalizedText.includes(normalizedArabic)) {
-      results.push({ chapter, verse, snippet: arabicText, matchedIn: 'arabic' });
+    if (normalizedQuery && normalizeArabic(arabicText).includes(normalizedQuery)) {
+      arabicHits.push({ chapter, verse, snippet: arabicText });
       continue;
     }
 
     const translation = translationEnMap[key];
     if (translation && translation.toLowerCase().includes(qLower)) {
-      results.push({ chapter, verse, snippet: translation, matchedIn: 'translation' });
+      translationHits.push({ chapter, verse, snippet: translation });
     }
   }
 
-  return results.sort((a, b) => (a.chapter === b.chapter ? a.verse - b.verse : a.chapter - b.chapter));
+  const countInQuran = arabicHits.length;
+  const surahCounts: Record<number, number> = {};
+  for (const h of arabicHits) {
+    surahCounts[h.chapter] = (surahCounts[h.chapter] ?? 0) + 1;
+  }
+  const totalSurahCount = Object.keys(surahCounts).length;
+
+  const all: SearchResult[] = [
+    ...arabicHits.map(h => ({
+      ...h,
+      matchedIn: 'arabic' as const,
+      countInSurah: surahCounts[h.chapter] ?? 0,
+      countInQuran,
+      totalSurahCount,
+    })),
+    ...translationHits.map(h => ({
+      ...h,
+      matchedIn: 'translation' as const,
+      countInSurah: 0,
+      countInQuran: 0,
+      totalSurahCount: 0,
+    })),
+  ].sort((a, b) => a.chapter === b.chapter ? a.verse - b.verse : a.chapter - b.chapter);
+
+  return all.slice(0, limit);
 }
 
-// Strips Arabic diacritics (tashkeel) so search ignores them.
 export function normalizeArabic(text: string): string {
   return text
-    .replace(/[ً-ٟؐ-ؚۖ-ࣰۭ-ࣿ]/g, '')
     .replace(/[ٱآأإ]/g, 'ا')
+    .replace(/[ً-ٟؐ-ؚۖ-ࣰۭ-ࣿ]/g, '')
     .replace(/ى/g, 'ي')
     .replace(/ة/g, 'ه')
     .replace(/[‌‍‎]/g, '')
