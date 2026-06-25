@@ -21,7 +21,17 @@ function notifyPosition(posMs: number, durMs: number) {
 // ── solo player (single-file playback) ────────────────────────────────────────
 let _solo: AudioPlayer | null = null;
 function getSolo(): AudioPlayer {
-  if (!_solo) _solo = createAudioPlayer(null, { updateInterval: 250 });
+  if (!_solo) {
+    _solo = createAudioPlayer(null, { updateInterval: 250 });
+    _solo.addListener('playbackStatusUpdate', (status) => {
+      if (status.playing && status.currentTime > 0) {
+        notifyPosition(
+          Math.round(status.currentTime * 1000),
+          Math.round((status.duration || 0) * 1000),
+        );
+      }
+    });
+  }
   return _solo;
 }
 
