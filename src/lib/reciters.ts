@@ -20,13 +20,14 @@ export interface QaloonReciter {
 
 export const HAFS_RECITERS: HafsReciter[] = [
   { id: 'muaiqly', nameAr: 'ماهر المعيقلي', nameEn: 'Maher Al-Muaiqly', folder: 'Maher_AlMuaiqly_64kbps' },
-  { id: 'alafasy', nameAr: 'مشاري العفاسي', nameEn: 'Mishary Alafasy', folder: 'Alafasy_128kbps' },
   { id: 'husary', nameAr: 'محمود خليل الحصري', nameEn: 'Mahmoud Al-Husary', folder: 'Husary_128kbps' },
   { id: 'sudais', nameAr: 'عبدالرحمن السديس', nameEn: 'Abdurrahman As-Sudais', folder: 'Abdurrahmaan_As-Sudais_192kbps' },
   { id: 'minshawy', nameAr: 'محمد صديق المنشاوي', nameEn: 'Mohamed Siddiq Al-Minshawy', folder: 'Minshawy_Murattal_128kbps' },
   { id: 'abdulbasit', nameAr: 'عبدالباسط عبدالصمد', nameEn: 'Abdul Basit Abdul Samad', folder: 'Abdul_Basit_Murattal_192kbps' },
   { id: 'ghamadi', nameAr: 'سعد الغامدي', nameEn: 'Saad Al-Ghamadi', folder: 'Ghamadi_40kbps' },
   { id: 'dussary', nameAr: 'ياسر الدوسري', nameEn: 'Yasser Ad-Dussary', folder: 'Yasser_Ad-Dussary_128kbps' },
+  { id: 'qasim', nameAr: 'محسن القاسم', nameEn: 'Muhsin Al-Qasim', folder: 'Muhsin_Al_Qasim_192kbps' },
+  { id: 'alafasy', nameAr: 'مشاري العفاسي', nameEn: 'Mishary Alafasy', folder: 'Alafasy_128kbps' },
 ];
 
 export const QALOON_RECITERS: QaloonReciter[] = [
