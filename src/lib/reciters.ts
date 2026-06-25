@@ -12,8 +12,10 @@ export interface QaloonReciter {
   id: string;
   nameAr: string;
   nameEn: string;
-  /** mp3quran.net server base; files are served as {base}/{SSS}.mp3 (whole surah, no per-ayah split) */
+  /** mp3quran.net server base; files are served as {base}/{SSS}.mp3 (whole surah) */
   base: string;
+  /** everyayah.com folder; when present, per-ayah files {folder}/{SSS}{AAA}.mp3 are used instead */
+  folder?: string;
 }
 
 export const HAFS_RECITERS: HafsReciter[] = [
@@ -33,6 +35,7 @@ export const QALOON_RECITERS: QaloonReciter[] = [
   { id: 'trablsi', nameAr: 'أحمد الطرابلسي', nameEn: 'Ahmed Al-Trabulsi', base: 'https://server10.mp3quran.net/trablsi' },
   { id: 'kshidan', nameAr: 'إبراهيم قشيدان', nameEn: 'Ibrahim Qushaydan', base: 'https://server16.mp3quran.net/i_kshidan/Rewayat-Qalon-A-n-Nafi' },
   { id: 'daawob', nameAr: 'طارق ضعوب', nameEn: 'Tareq Daawob', base: 'https://server10.mp3quran.net/tareq' },
+  { id: 'hudhaifi_qaloon', nameAr: 'علي الحذيفي', nameEn: 'Ali Al-Hudhaifi', base: 'https://server9.mp3quran.net/huthifi_qalon', folder: 'Hudhaify_128kbps' },
 ];
 
 export const DEFAULT_HAFS_RECITER_ID = HAFS_RECITERS[0].id;
@@ -54,8 +57,7 @@ export interface AyahAudio {
   url: string;
   /**
    * 'ayah' — url plays exactly the tapped ayah.
-   * 'surah' — url plays the whole surah from its start (Qaloon has no verified
-   * per-ayah audio source; this is an inherent limitation, not a bug).
+   * 'surah' — url plays the whole surah from its start (most Qaloon reciters).
    */
   granularity: 'ayah' | 'surah';
 }
@@ -75,6 +77,12 @@ export function getAyahAudioUrl(
   }
 
   const reciter = QALOON_RECITERS.find((r) => r.id === reciterId) ?? QALOON_RECITERS[0];
+  if (reciter.folder) {
+    return {
+      url: `https://everyayah.com/data/${reciter.folder}/${pad3(chapter)}${pad3(verse)}.mp3`,
+      granularity: 'ayah',
+    };
+  }
   return {
     url: `${reciter.base}/${pad3(chapter)}.mp3`,
     granularity: 'surah',
