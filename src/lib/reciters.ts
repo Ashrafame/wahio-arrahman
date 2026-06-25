@@ -31,6 +31,7 @@ export const HAFS_RECITERS: HafsReciter[] = [
 ];
 
 export const QALOON_RECITERS: QaloonReciter[] = [
+  { id: 'dokali', nameAr: 'الدوكالي محمد العالم', nameEn: 'Al-Dukali Muhammad Al-Alim', base: 'https://server7.mp3quran.net/dokali' },
   { id: 'deban', nameAr: 'أحمد ديبان', nameEn: 'Ahmad Deban', base: 'https://server16.mp3quran.net/deban/Rewayat-Qalon-A-n-Nafi' },
   { id: 'husary_qaloon', nameAr: 'محمود خليل الحصري', nameEn: 'Mahmoud Al-Husary', base: 'https://server13.mp3quran.net/husr/Rewayat-Qalon-A-n-Nafi' },
   { id: 'trablsi', nameAr: 'أحمد الطرابلسي', nameEn: 'Ahmed Al-Trabulsi', base: 'https://server10.mp3quran.net/trablsi' },
