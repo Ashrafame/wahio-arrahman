@@ -97,6 +97,19 @@ export interface SearchResult {
   totalSurahCount: number;
 }
 
+// Converts dagger alef (ٰ) to alef, enabling matches for words like صراط and مالك.
+function normalizeArabicExpanded(text: string): string {
+  return text
+    .replace(/[ٱآأإ]/g, 'ا')
+    .replace(/ٰ/g, 'ا')
+    .replace(/[ً-ٟؐ-ؚۖ-ࣰۭ-ࣿ]/g, '')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/[‌‍‎]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
 export function searchQuran(query: string, qiraah: Qiraah, limit = 100): SearchResult[] {
   const q = query.trim();
   if (!q) return [];
@@ -114,7 +127,10 @@ export function searchQuran(query: string, qiraah: Qiraah, limit = 100): SearchR
     const verse = Number(verseStr);
     const arabicText = textMap[key];
 
-    if (normalizedQuery && normalizeArabic(arabicText).includes(normalizedQuery)) {
+    if (normalizedQuery && (
+      normalizeArabic(arabicText).includes(normalizedQuery) ||
+      normalizeArabicExpanded(arabicText).includes(normalizedQuery)
+    )) {
       arabicHits.push({ chapter, verse, snippet: arabicText });
       continue;
     }
@@ -155,6 +171,7 @@ export function searchQuran(query: string, qiraah: Qiraah, limit = 100): SearchR
 export function normalizeArabic(text: string): string {
   return text
     .replace(/[ٱآأإ]/g, 'ا')
+    .replace(/ٰ/g, '')
     .replace(/[ً-ٟؐ-ؚۖ-ࣰۭ-ࣿ]/g, '')
     .replace(/ى/g, 'ي')
     .replace(/ة/g, 'ه')
