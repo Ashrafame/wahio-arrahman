@@ -24,7 +24,8 @@
         {
           "locationWhenInUsePermission": "يستخدم التطبيق موقعك الحالي لتحديد اتجاه القبلة ومواقيت الصلاة بدقة."
         }
-      ]
+      ],
+      "./plugins/withAndroidAudioNoCapture"
     ],
     "ios": {
       "supportsTablet": true,
