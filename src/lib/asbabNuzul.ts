@@ -23,3 +23,30 @@ export function getAsbabNuzul(chapter: number, verse: number): string | null {
 export function hasAsbabNuzul(chapter: number, verse: number): boolean {
   return !!asbabMap[`${chapter}:${verse}`];
 }
+
+export interface AsbabSurahGroup {
+  chapter: number;
+  /** Ayah numbers in this surah that have a recorded sabab, ascending. */
+  verses: number[];
+}
+
+/**
+ * All verses that have a recorded sabab, grouped by surah and sorted —
+ * used to build the Asbab al-Nuzul index screen.
+ */
+export function getAsbabIndex(): AsbabSurahGroup[] {
+  const bySurah: Record<number, number[]> = {};
+  for (const key of Object.keys(asbabMap)) {
+    const [s, a] = key.split(':').map(Number);
+    (bySurah[s] ??= []).push(a);
+  }
+  return Object.keys(bySurah)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .map((chapter) => ({ chapter, verses: bySurah[chapter].sort((a, b) => a - b) }));
+}
+
+/** Total number of verses that have a recorded sabab. */
+export function getAsbabCount(): number {
+  return Object.keys(asbabMap).length;
+}

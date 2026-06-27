@@ -38,6 +38,7 @@ function RootStack() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="surah/[number]" options={{ headerShown: false }} />
         <Stack.Screen name="search" options={{ headerShown: false }} />
+        <Stack.Screen name="asbab" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="tools/index" options={{ headerShown: false }} />
         <Stack.Screen name="tools/prayer-times" options={{ headerShown: false }} />

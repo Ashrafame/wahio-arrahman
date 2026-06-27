@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/SettingsContext';
 import { StringKey } from '../../src/i18n/translations';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
+import { AsbabIcon } from '../../src/components/AsbabIcon';
 
 type ToolItem = {
   titleKey: StringKey;
@@ -13,9 +14,11 @@ type ToolItem = {
   color: string;
   image?: ImageSourcePropType;
   icon?: keyof typeof Ionicons.glyphMap;
+  Component?: React.ComponentType<{ size?: number; color?: string }>;
 };
 
 const TOOLS: ToolItem[] = [
+  { titleKey: 'asbabNuzul', Component: AsbabIcon, route: '/asbab', color: '#6B4423' },
   { titleKey: 'prayerTimes', image: require('../../assets/icons/prayer_times.png'), route: '/tools/prayer-times', color: '#0F6B5C' },
   { titleKey: 'qibla', image: require('../../assets/icons/qibla.png'), route: '/tools/qibla', color: '#2E4374' },
   { titleKey: 'tasbih', image: require('../../assets/icons/tasbih.png'), route: '/tools/tasbih', color: '#B07D2B' },
@@ -48,7 +51,9 @@ export default function ToolsScreen() {
             onPress={() => router.push(tool.route as any)}
             style={styles.card}
           >
-            {tool.image ? (
+            {tool.Component ? (
+              <tool.Component size={48} color={tool.color} />
+            ) : tool.image ? (
               <Image source={tool.image} style={[styles.toolImage, { tintColor: tool.color }]} />
             ) : (
               <Ionicons name={tool.icon!} size={40} color={tool.color} />
