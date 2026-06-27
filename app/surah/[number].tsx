@@ -424,6 +424,7 @@ export default function SurahScreen() {
             tafsirText={tafsirMap[item.verse]}
             tafsirLoading={tafsirLoading}
             tafsirError={tafsirError}
+            tafsirEditionName={currentEditionName(isRTL ? 'ar' : 'en')}
             hasAsbab={hasAsbabNuzul(chapterNumber, item.verse)}
             showAsbab={openAsbabVerses.has(item.verse)}
             onToggleAsbab={() => toggleAsbab(item.verse)}

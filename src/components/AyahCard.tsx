@@ -40,6 +40,8 @@ interface Props {
   tafsirText?: string | null;
   tafsirLoading?: boolean;
   tafsirError?: boolean;
+  /** Display name of the active tafsir edition (e.g. "تفسير ابن كثير"). */
+  tafsirEditionName?: string;
   showTafsir: boolean;
   onToggleTafsir: () => void;
   /** Asbab al-Nuzul text for this ayah, or null when none is recorded. */
@@ -59,6 +61,7 @@ export function AyahCard({
   tafsirText,
   tafsirLoading,
   tafsirError,
+  tafsirEditionName,
   showTafsir,
   onToggleTafsir,
   asbabText,
@@ -175,6 +178,14 @@ export function AyahCard({
 
       {showTafsir ? (
         <View style={[styles.tafsirBox, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+          {tafsirEditionName ? (
+            <View style={[styles.asbabHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              <Ionicons name="book" size={15} color={palette.accent} />
+              <Text style={[styles.asbabTitle, { color: palette.accent, fontFamily: isRTL ? 'Cairo-Variable' : undefined }]}>
+                {tafsirEditionName}
+              </Text>
+            </View>
+          ) : null}
           {tafsirLoading ? (
             <ActivityIndicator color={palette.primary} />
           ) : tafsirError ? (
