@@ -35,6 +35,8 @@ export const STRINGS = {
   showEnglishQuran: { ar: 'إظهار القرآن بالإنجليزية كنص أساسي', en: 'Show English Quran as primary text' },
   tafsir: { ar: 'التفسير', en: 'Tafsir' },
   selectTafsir: { ar: 'اختر التفسير', en: 'Select Tafsir' },
+  asbabNuzul: { ar: 'سبب النزول', en: 'Reason for Revelation' },
+  asbabSource: { ar: 'المصدر: مركز تفسير للدراسات القرآنية', en: 'Source: Tafsir Center for Quranic Studies' },
   language: { ar: 'اللغة', en: 'Language' },
   theme: { ar: 'المظهر', en: 'Theme' },
   light: { ar: 'فاتح', en: 'Light' },

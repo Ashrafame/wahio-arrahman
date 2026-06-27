@@ -42,6 +42,12 @@ interface Props {
   tafsirError?: boolean;
   showTafsir: boolean;
   onToggleTafsir: () => void;
+  /** Asbab al-Nuzul text for this ayah, or null when none is recorded. */
+  asbabText?: string | null;
+  /** Whether this ayah has a recorded sabab (controls icon visibility). */
+  hasAsbab?: boolean;
+  showAsbab?: boolean;
+  onToggleAsbab?: () => void;
   isPlaying?: boolean;
   onPlayAudio?: () => void;
 }
@@ -55,6 +61,10 @@ export function AyahCard({
   tafsirError,
   showTafsir,
   onToggleTafsir,
+  asbabText,
+  hasAsbab,
+  showAsbab,
+  onToggleAsbab,
   isPlaying,
   onPlayAudio,
 }: Props) {
@@ -115,6 +125,15 @@ export function AyahCard({
               color={showTafsir ? palette.accent : palette.textMuted}
             />
           </Pressable>
+          {hasAsbab && onToggleAsbab ? (
+            <Pressable onPress={onToggleAsbab} style={styles.actionButton} hitSlop={8}>
+              <Ionicons
+                name={showAsbab ? 'document-text' : 'document-text-outline'}
+                size={18}
+                color={showAsbab ? palette.accent : palette.textMuted}
+              />
+            </Pressable>
+          ) : null}
         </View>
       </View>
 
@@ -179,6 +198,40 @@ export function AyahCard({
           )}
         </View>
       ) : null}
+
+      {showAsbab && asbabText ? (
+        <View style={[styles.asbabBox, { backgroundColor: palette.surfaceAlt, borderColor: palette.accent + '55' }]}>
+          <View style={[styles.asbabHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Ionicons name="document-text" size={15} color={palette.accent} />
+            <Text style={[styles.asbabTitle, { color: palette.accent, fontFamily: isRTL ? 'Cairo-Variable' : undefined }]}>
+              {t('asbabNuzul')}
+            </Text>
+          </View>
+          <Text
+            style={[
+              styles.tafsirText,
+              {
+                color: palette.text,
+                textAlign: isRTL ? 'right' : 'left',
+                writingDirection: isRTL ? 'rtl' : 'ltr',
+                fontFamily: isRTL ? 'Cairo-Variable' : undefined,
+                fontSize: scaleFont(15),
+                lineHeight: scaleFont(15) * 1.7,
+              },
+            ]}
+          >
+            {asbabText}
+          </Text>
+          <Text
+            style={[
+              styles.asbabSource,
+              { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left', fontSize: scaleFont(11) },
+            ]}
+          >
+            {t('asbabSource')}
+          </Text>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -232,5 +285,24 @@ const styles = StyleSheet.create({
   tafsirText: {
     fontSize: 15,
     lineHeight: 24,
+  },
+  asbabBox: {
+    marginTop: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 10,
+  },
+  asbabHeader: {
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  asbabTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  asbabSource: {
+    marginTop: 8,
+    fontStyle: 'italic',
   },
 });

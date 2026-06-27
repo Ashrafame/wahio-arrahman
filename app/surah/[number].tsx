@@ -15,6 +15,7 @@ import { Ayah, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/qu
 import { Palette } from '../../src/theme/colors';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../../src/data/juz';
 import { fetchSurahTafsir, TAFSIR_EDITIONS } from '../../src/lib/tafsirRemote';
+import { getAsbabNuzul, hasAsbabNuzul } from '../../src/lib/asbabNuzul';
 import { useSettings } from '../../src/store/SettingsContext';
 import { AyahCard } from '../../src/components/AyahCard';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
@@ -80,6 +81,7 @@ export default function SurahScreen() {
   }, [tafsirEdition, language]);
 
   const [openTafsirVerses, setOpenTafsirVerses] = useState<Set<number>>(new Set());
+  const [openAsbabVerses, setOpenAsbabVerses] = useState<Set<number>>(new Set());
   const [tafsirMap, setTafsirMap] = useState<Record<number, string>>({});
   const [tafsirLoading, setTafsirLoading] = useState(false);
   const [tafsirError, setTafsirError] = useState(false);
@@ -194,6 +196,15 @@ export default function SurahScreen() {
 
   const toggleTafsir = (verse: number) => {
     setOpenTafsirVerses((prev) => {
+      const next = new Set(prev);
+      if (next.has(verse)) next.delete(verse);
+      else next.add(verse);
+      return next;
+    });
+  };
+
+  const toggleAsbab = (verse: number) => {
+    setOpenAsbabVerses((prev) => {
       const next = new Set(prev);
       if (next.has(verse)) next.delete(verse);
       else next.add(verse);
@@ -413,6 +424,10 @@ export default function SurahScreen() {
             tafsirText={tafsirMap[item.verse]}
             tafsirLoading={tafsirLoading}
             tafsirError={tafsirError}
+            hasAsbab={hasAsbabNuzul(chapterNumber, item.verse)}
+            showAsbab={openAsbabVerses.has(item.verse)}
+            onToggleAsbab={() => toggleAsbab(item.verse)}
+            asbabText={getAsbabNuzul(chapterNumber, item.verse)}
             isPlaying={isAyahPlaying(item.verse)}
             onPlayAudio={qiraah === 'hafs' ? () => handlePlayAyah(item.verse) : undefined}
           />
