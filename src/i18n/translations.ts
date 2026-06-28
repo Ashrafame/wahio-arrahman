@@ -36,6 +36,7 @@ export const STRINGS = {
   tafsir: { ar: 'التفسير', en: 'Tafsir' },
   selectTafsir: { ar: 'اختر التفسير', en: 'Select Tafsir' },
   asbabNuzul: { ar: 'سبب النزول', en: 'Reason for Revelation' },
+  asbabNuzulTitle: { ar: 'أسباب النزول', en: 'Reasons for Revelation' },
   asbabSource: { ar: 'المصدر: مركز تفسير للدراسات القرآنية', en: 'Source: Tafsir Center for Quranic Studies' },
   language: { ar: 'اللغة', en: 'Language' },
   theme: { ar: 'المظهر', en: 'Theme' },

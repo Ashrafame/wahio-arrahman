@@ -54,7 +54,7 @@ export default function AsbabScreen() {
         </Pressable>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <AsbabIcon size={22} color={palette.primaryText} />
-          <Text style={[styles.headerTitle, { color: palette.primaryText }]}>{t('asbabNuzul')}</Text>
+          <Text style={[styles.headerTitle, { color: palette.primaryText }]}>{t('asbabNuzulTitle')}</Text>
         </View>
         <View style={{ width: 32 }} />
       </View>
