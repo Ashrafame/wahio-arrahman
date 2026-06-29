@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, StyleSheet } from 'react-native';
 
-const SPLASH_DURATION_MS = 7000;
+const SPLASH_DURATION_MS = 1800;
 const FADE_DURATION_MS   = 600;
 const BG_COLOR           = '#324B1A';
 
