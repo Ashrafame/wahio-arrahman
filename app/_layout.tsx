@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SettingsProvider, useSettings } from '../src/store/SettingsContext';
 import { getPalette } from '../src/theme/colors';
 import { SplashOverlay } from '../src/components/SplashOverlay';
+import { ErrorBoundary } from '../src/components/ErrorBoundary';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -66,15 +67,34 @@ export default function RootLayout() {
     'ArefRuqaa-Regular': require('../assets/fonts/ArefRuqaa-Regular.ttf'),
   });
 
-  if (!fontsLoaded && !fontError) return null;
+  // Safety net: never block the whole app on the splash forever if native font
+  // loading stalls in a release build. After a short wait we render anyway and
+  // fall back to system fonts (custom fonts apply once they finish loading).
+  const [fontTimedOut, setFontTimedOut] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setFontTimedOut(true), 3000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const canRender = fontsLoaded || !!fontError || fontTimedOut;
+
+  // Hide the native splash as soon as we're willing to render, so a stalled
+  // dependency downstream can never keep it up indefinitely.
+  useEffect(() => {
+    if (canRender) SplashScreen.hideAsync().catch(() => {});
+  }, [canRender]);
+
+  if (!canRender) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <SettingsProvider>
-          <RootStack />
-        </SettingsProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <SettingsProvider>
+            <RootStack />
+          </SettingsProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
