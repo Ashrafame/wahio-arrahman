@@ -30,10 +30,18 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.wahioarrahman.app"
+      "bundleIdentifier": "com.wahioarrahman.app",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
     },
     "android": {
       "package": "com.wahioarrahman.app",
+      "permissions": [
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#324B1A",
         "foregroundImage": "./assets/android-icon-foreground.png",

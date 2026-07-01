@@ -10,6 +10,7 @@ import { SettingsProvider, useSettings } from '../src/store/SettingsContext';
 import { getPalette } from '../src/theme/colors';
 import { SplashOverlay } from '../src/components/SplashOverlay';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
+import { KeepAwakeWhilePlaying } from '../src/components/KeepAwakeWhilePlaying';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -51,6 +52,7 @@ function RootStack() {
         <Stack.Screen name="tools/riwayat" options={{ headerShown: false }} />
         <Stack.Screen name="about" options={{ headerShown: false }} />
       </Stack>
+      <KeepAwakeWhilePlaying />
       <SplashOverlay />
     </>
   );

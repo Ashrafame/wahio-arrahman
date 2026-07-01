@@ -1,5 +1,21 @@
-import { createAudioPlayer } from 'expo-audio';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import type { AudioPlayer } from 'expo-audio';
+
+// Configure the audio session once so recitation:
+//  • keeps playing when the screen locks or the app is backgrounded
+//    (shouldPlayInBackground) — the phone can be pocketed, screen off.
+//  • plays even when the device ring switch is on silent (playsInSilentMode),
+//    which matters a lot for Quran listening.
+let _audioModeReady: Promise<void> | null = null;
+function ensureAudioMode(): Promise<void> {
+  if (!_audioModeReady) {
+    _audioModeReady = setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+    }).catch(() => { /* best effort; playback still works foregrounded */ });
+  }
+  return _audioModeReady;
+}
 
 type PlaybackListener = (key: string | null, isPlaying: boolean) => void;
 type PositionListener = (positionMs: number, durationMs: number) => void;
@@ -122,6 +138,7 @@ function _attachSeqListener(): void {
 // ── public API ────────────────────────────────────────────────────────────────
 
 export function playAudio(key: string, url: string) {
+  ensureAudioMode();
   _stopSeq();
   const p = getSolo();
   if (currentKey === key) {
@@ -164,6 +181,7 @@ export function resumeAudio() {
 
 export function playSequence(seqId: string, items: { key: string; url: string }[]) {
   if (!items.length) return;
+  ensureAudioMode();
   _solo?.pause();
   _ensureSeqPlayers();
   _seqItems = items;
