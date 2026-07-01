@@ -11,6 +11,7 @@ import { getPalette } from '../src/theme/colors';
 import { SplashOverlay } from '../src/components/SplashOverlay';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { KeepAwakeWhilePlaying } from '../src/components/KeepAwakeWhilePlaying';
+import { ensureAudioMode } from '../src/lib/audio';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -23,6 +24,13 @@ function RootStack() {
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [ready]);
+
+  // Configure the audio session for background + silent-mode playback once at
+  // startup, so the session category is already 'playback' before any tap —
+  // avoids a race where playback could start in a non-background category.
+  useEffect(() => {
+    ensureAudioMode();
+  }, []);
 
   if (!ready) return null;
 

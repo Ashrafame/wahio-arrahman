@@ -7,7 +7,7 @@ import type { AudioPlayer } from 'expo-audio';
 //  • plays even when the device ring switch is on silent (playsInSilentMode),
 //    which matters a lot for Quran listening.
 let _audioModeReady: Promise<void> | null = null;
-function ensureAudioMode(): Promise<void> {
+export function ensureAudioMode(): Promise<void> {
   if (!_audioModeReady) {
     _audioModeReady = setAudioModeAsync({
       playsInSilentMode: true,
