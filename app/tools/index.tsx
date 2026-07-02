@@ -24,6 +24,7 @@ const TOOLS: ToolItem[] = [
   { titleKey: 'azkar', image: require('../../assets/icons/riwayat.png'), route: '/tools/azkar', color: '#0F4C3A' },
   { titleKey: 'hijriCalendar', image: require('../../assets/icons/hijri_calendar.png'), route: '/tools/hijri-calendar', color: '#7A2E3A' },
   { titleKey: 'riwayat', image: require('../../assets/icons/azkar.png'), route: '/tools/riwayat', color: '#3D5A6C' },
+  { titleKey: 'naflPrayers', icon: 'moon-outline', route: '/nafl', color: '#1F7A5A' },
   { titleKey: 'asbabNuzulTitle', Component: AsbabIcon, route: '/asbab', color: '#6B4423' },
 ];
 
