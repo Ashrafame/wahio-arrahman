@@ -5,6 +5,7 @@ import { Language, StringKey, translate } from '../i18n/translations';
 import { Qiraah } from '../lib/quranData';
 import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
 import { CalculationMethodId, DEFAULT_CALCULATION_METHOD } from '../lib/prayerTimes';
+import { AthanMode } from '../lib/notifications';
 import {
   Palette,
   BgColorId,
@@ -36,6 +37,13 @@ interface Settings {
   patternStyleId: PatternStyleId;
   customPrimaryColor: string | null;
   customBgColor: string | null;
+  // Notifications
+  notifPrayer: boolean;
+  notifReading: boolean;
+  notifTahlil: boolean;
+  notifGratitude: boolean;
+  athanMode: AthanMode;
+  athanSound: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -56,6 +64,12 @@ const DEFAULT_SETTINGS: Settings = {
   patternStyleId: 'khatam',
   customPrimaryColor: null,
   customBgColor: null,
+  notifPrayer: true,
+  notifReading: true,
+  notifTahlil: true,
+  notifGratitude: true,
+  athanMode: 'notification',
+  athanSound: 'default',
 };
 
 const STORAGE_KEY = 'wahio-arrahman:settings';
@@ -84,6 +98,12 @@ interface SettingsContextValue extends Settings {
   setCustomPrimaryColor: (color: string | null) => void;
   setCustomBgColor: (color: string | null) => void;
   resetAppearance: () => void;
+  setNotifPrayer: (v: boolean) => void;
+  setNotifReading: (v: boolean) => void;
+  setNotifTahlil: (v: boolean) => void;
+  setNotifGratitude: (v: boolean) => void;
+  setAthanMode: (m: AthanMode) => void;
+  setAthanSound: (id: string) => void;
   ready: boolean;
 }
 
@@ -180,6 +200,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         customPrimaryColor: null,
         customBgColor: null,
       })),
+      setNotifPrayer: (notifPrayer) => setSettings((s) => ({ ...s, notifPrayer })),
+      setNotifReading: (notifReading) => setSettings((s) => ({ ...s, notifReading })),
+      setNotifTahlil: (notifTahlil) => setSettings((s) => ({ ...s, notifTahlil })),
+      setNotifGratitude: (notifGratitude) => setSettings((s) => ({ ...s, notifGratitude })),
+      setAthanMode: (athanMode) => setSettings((s) => ({ ...s, athanMode })),
+      setAthanSound: (athanSound) => setSettings((s) => ({ ...s, athanSound })),
     };
   }, [settings, ready]);
 

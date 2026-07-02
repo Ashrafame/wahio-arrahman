@@ -11,6 +11,7 @@ import { getPalette } from '../src/theme/colors';
 import { SplashOverlay } from '../src/components/SplashOverlay';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { KeepAwakeWhilePlaying } from '../src/components/KeepAwakeWhilePlaying';
+import { NotificationsManager } from '../src/components/NotificationsManager';
 import { ensureAudioMode } from '../src/lib/audio';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -63,6 +64,7 @@ function RootStack() {
         <Stack.Screen name="about" options={{ headerShown: false }} />
       </Stack>
       <KeepAwakeWhilePlaying />
+      <NotificationsManager />
       <SplashOverlay />
     </>
   );

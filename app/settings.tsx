@@ -281,6 +281,16 @@ export default function SettingsScreen() {
     setCustomPrimaryColor,
     setCustomBgColor,
     resetAppearance,
+    notifPrayer,
+    notifReading,
+    notifTahlil,
+    notifGratitude,
+    athanMode,
+    setNotifPrayer,
+    setNotifReading,
+    setNotifTahlil,
+    setNotifGratitude,
+    setAthanMode,
   } = useSettings();
   const insets = useSafeAreaInsets();
 
@@ -423,6 +433,72 @@ export default function SettingsScreen() {
             </Pressable>
           </Section>
         )}
+
+        {/* ── Notifications ───────────────────────────────────────────────── */}
+        <Section title={t('notifications')} palette={palette} isRTL={isRTL}>
+          <View style={{ gap: 0 }}>
+            {([
+              { on: notifPrayer, set: setNotifPrayer, label: t('notifPrayerLabel'), icon: 'notifications-outline' },
+              { on: notifReading, set: setNotifReading, label: t('notifReadingLabel'), icon: 'book-outline' },
+              { on: notifTahlil, set: setNotifTahlil, label: t('notifTahlilLabel'), icon: 'sunny-outline' },
+              { on: notifGratitude, set: setNotifGratitude, label: t('notifGratitudeLabel'), icon: 'heart-outline' },
+            ] as const).map((row) => (
+              <Pressable
+                key={row.label}
+                onPress={() => row.set(!row.on)}
+                style={[styles.switchRow, { flexDirection: isRTL ? 'row-reverse' : 'row', borderColor: palette.border }]}
+              >
+                <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                  <Ionicons name={row.icon as any} size={18} color={palette.textMuted} />
+                  <Text style={{ color: palette.text, textAlign: isRTL ? 'right' : 'left' }}>{row.label}</Text>
+                </View>
+                <Ionicons
+                  name={row.on ? 'checkbox' : 'square-outline'}
+                  size={22}
+                  color={row.on ? palette.primary : palette.textMuted}
+                />
+              </Pressable>
+            ))}
+
+            {/* Athan alert style */}
+            <Text style={[styles.subLabel, { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left', marginTop: 14 }]}>
+              {t('athanModeLabel')}
+            </Text>
+            <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: 8, marginTop: 8 }}>
+              {([
+                { id: 'athan', label: t('athanModeAthan') },
+                { id: 'notification', label: t('athanModeNotification') },
+                { id: 'beep', label: t('athanModeBeep') },
+              ] as const).map((opt) => {
+                const active = athanMode === opt.id;
+                return (
+                  <Pressable
+                    key={opt.id}
+                    onPress={() => setAthanMode(opt.id)}
+                    style={{
+                      flex: 1,
+                      alignItems: 'center',
+                      paddingVertical: 10,
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      borderColor: active ? palette.primary : palette.border,
+                      backgroundColor: active ? palette.primary + '1A' : 'transparent',
+                    }}
+                  >
+                    <Text style={{ color: active ? palette.primary : palette.text, fontWeight: active ? '800' : '600', fontSize: 13 }}>
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            {athanMode === 'athan' ? (
+              <Text style={{ color: palette.textMuted, fontSize: 12, marginTop: 8, textAlign: isRTL ? 'right' : 'left' }}>
+                {t('athanComingSoon')}
+              </Text>
+            ) : null}
+          </View>
+        </Section>
 
         {/* ── Appearance ──────────────────────────────────────────────────── */}
         <Section title={t('appearance')} palette={palette} isRTL={isRTL}>
