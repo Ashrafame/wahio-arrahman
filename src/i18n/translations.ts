@@ -81,6 +81,10 @@ export const STRINGS = {
   maghrib: { ar: 'المغرب', en: 'Maghrib' },
   isha: { ar: 'العشاء', en: 'Isha' },
   calculationMethod: { ar: 'طريقة الحساب', en: 'Calculation Method' },
+  nextPrayer: { ar: 'الصلاة القادمة', en: 'Next Prayer' },
+  remainingTime: { ar: 'المتبقّي', en: 'Remaining' },
+  comingDays: { ar: 'الأيام القادمة', en: 'Upcoming Days' },
+  afterX: { ar: 'بعد', en: 'in' },
   locationRequired: {
     ar: 'هذه الأداة تحتاج إلى إذن الوصول للموقع لتعمل بدقة.',
     en: 'This tool needs location access to work accurately.',
