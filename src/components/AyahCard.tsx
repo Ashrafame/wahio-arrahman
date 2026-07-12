@@ -218,29 +218,38 @@ export function AyahCard({
               {t('asbabNuzul')}
             </Text>
           </View>
-          <Text
-            style={[
-              styles.tafsirText,
-              {
-                color: palette.text,
-                textAlign: isRTL ? 'right' : 'left',
-                writingDirection: isRTL ? 'rtl' : 'ltr',
-                fontFamily: isRTL ? 'Cairo-Variable' : undefined,
-                fontSize: scaleFont(15),
-                lineHeight: scaleFont(15) * 1.7,
-              },
-            ]}
-          >
-            {asbabText}
-          </Text>
-          <Text
-            style={[
-              styles.asbabSource,
-              { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left', fontSize: scaleFont(11) },
-            ]}
-          >
-            {t('asbabSource')}
-          </Text>
+          {isRTL ? (
+            <>
+              <Text
+                style={[
+                  styles.tafsirText,
+                  {
+                    color: palette.text,
+                    textAlign: 'right',
+                    writingDirection: 'rtl',
+                    fontFamily: 'Cairo-Variable',
+                    fontSize: scaleFont(15),
+                    lineHeight: scaleFont(15) * 1.7,
+                  },
+                ]}
+              >
+                {asbabText}
+              </Text>
+              <Text
+                style={[styles.asbabSource, { color: palette.textMuted, textAlign: 'right', fontSize: scaleFont(11) }]}
+              >
+                {t('asbabSource')}
+              </Text>
+            </>
+          ) : (
+            // Asbab al-Nuzul content exists in Arabic only (authentic source with
+            // isnad); rather than dump Arabic on an English reader, explain it.
+            <Text
+              style={[styles.tafsirText, { color: palette.textMuted, textAlign: 'left', fontSize: scaleFont(14), lineHeight: scaleFont(14) * 1.6 }]}
+            >
+              {t('asbabArabicOnly')}
+            </Text>
+          )}
         </View>
       ) : null}
     </Pressable>

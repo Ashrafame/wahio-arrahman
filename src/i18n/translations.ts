@@ -41,6 +41,10 @@ export const STRINGS = {
   naflHow: { ar: 'كيفية أدائها', en: 'How it is performed' },
   naflEvidence: { ar: 'الأدلة', en: 'Evidence' },
   asbabSource: { ar: 'المصدر: مركز تفسير للدراسات القرآنية', en: 'Source: Tafsir Center for Quranic Studies' },
+  asbabArabicOnly: {
+    ar: 'سبب النزول متوفر بالعربية.',
+    en: 'The occasion of revelation for this verse is currently available in Arabic only. Switch the app language to Arabic to read it.',
+  },
   language: { ar: 'اللغة', en: 'Language' },
   theme: { ar: 'المظهر', en: 'Theme' },
   light: { ar: 'فاتح', en: 'Light' },
