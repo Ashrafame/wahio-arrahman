@@ -394,6 +394,8 @@ export default function SurahScreen() {
 
       <FlatList
         ref={listRef}
+        style={styles.list}
+        contentInsetAdjustmentBehavior="never"
         data={ayahs}
         keyExtractor={(item) => item.key}
         initialNumToRender={targetVerse ? Math.max(15, (ayahs.findIndex(a => a.verse === targetVerse) ?? 0) + 5) : 15}
@@ -626,6 +628,7 @@ function ToolbarChip({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  list: { flex: 1 },
   header: {
     alignItems: 'center',
     paddingHorizontal: 12,
