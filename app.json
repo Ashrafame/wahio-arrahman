@@ -27,6 +27,7 @@
         }
       ],
       "./plugins/withAndroidAudioNoCapture",
+      "./plugins/withAndroidNoRtl",
       [
         "expo-notifications",
         {

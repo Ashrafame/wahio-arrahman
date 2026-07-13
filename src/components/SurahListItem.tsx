@@ -67,9 +67,14 @@ const styles = StyleSheet.create({
   },
   nameArabic: {
     fontSize: 20,
+    // Android adds large intrinsic vertical padding for Arabic fonts (Amiri),
+    // which iOS ignores — this removes it so row heights match iOS.
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   meta: {
     fontSize: 12,
     marginTop: 2,
+    includeFontPadding: false,
   },
 });
