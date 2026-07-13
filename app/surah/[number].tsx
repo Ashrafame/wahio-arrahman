@@ -640,6 +640,13 @@ const styles = StyleSheet.create({
   toolbar: {
     borderBottomWidth: 1,
     height: 54,
+    // Hard-pin the height: without maxHeight + flexGrow/flexShrink 0, this
+    // horizontal ScrollView stretches vertically to swallow the empty space
+    // whenever the ayah list doesn't fill the screen (short surahs), producing
+    // a large blank band under the toolbar.
+    maxHeight: 54,
+    flexGrow: 0,
+    flexShrink: 0,
   },
   toolbarChips: {
     flexDirection: 'row-reverse',
