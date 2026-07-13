@@ -338,11 +338,11 @@ export default function SurahScreen() {
         </View>
       </View>
 
+      <View style={[styles.toolbar, { backgroundColor: palette.surface, borderColor: palette.border }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={[styles.toolbar, { backgroundColor: palette.surface, borderColor: palette.border }]}
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{ flexGrow: 1, alignItems: 'center' }}
       >
         <View style={styles.toolbarChips}>
         <SegmentedToggle
@@ -391,6 +391,7 @@ export default function SurahScreen() {
         />
         </View>
       </ScrollView>
+      </View>
 
       <FlatList
         ref={listRef}
