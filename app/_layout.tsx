@@ -1,13 +1,10 @@
 import 'react-native-gesture-handler';
-import { I18nManager } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
-// This app handles right-to-left layout manually (via the `isRTL` setting on
-// every screen), so we keep the native layout direction pinned to LTR. Without
-// this, an Arabic-locale device turns on native RTL and double-flips our manual
-// direction. Harmless on iOS (already LTR here); the real Android fix is the
-// withAndroidNoRtl config plugin, this is a JS-side safety net.
-I18nManager.allowRTL(false);
+// Note: RTL is handled entirely at the native level on Android via the
+// withAndroidNoRtl config plugin (android:supportsRtl="false"). We deliberately
+// do NOT toggle I18nManager at JS runtime — doing so glitches FlatList content
+// insets (a phantom gap above the content) and would also alter iOS.
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { Stack } from 'expo-router';
