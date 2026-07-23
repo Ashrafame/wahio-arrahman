@@ -3,6 +3,17 @@ export type Language = 'ar' | 'en';
 export const STRINGS = {
   appNameArabic: { ar: 'وَحْيُ الرَّحْمَن', en: 'وَحْيُ الرَّحْمَن' },
   appNameEnglish: { ar: "Wahio Arr'ah'maan", en: "Wahio Arr'ah'maan" },
+  updateTitle: { ar: 'تتوفّر نسخة جديدة', en: 'A new version is available' },
+  updateBody: {
+    ar: 'صدرت نسخة أحدث من وحي الرحمن بتحسينات ومزايا جديدة. ننصحك بالتحديث.',
+    en: 'A newer version of Wahio Arr’ahmaan is available with improvements and new features. We recommend updating.',
+  },
+  updateNow: { ar: 'تحديث الآن', en: 'Update now' },
+  updateLater: { ar: 'لاحقًا', en: 'Later' },
+  updateMandatory: {
+    ar: 'هذا التحديث مطلوب للمتابعة.',
+    en: 'This update is required to continue.',
+  },
   home: { ar: 'الرئيسية', en: 'Home' },
   surahs: { ar: 'السور', en: 'Surahs' },
   search: { ar: 'بحث', en: 'Search' },
