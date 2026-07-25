@@ -6,8 +6,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 import { Palette } from '../src/theme/colors';
+import { currentAppVersion } from '../src/lib/appUpdate';
 
-const APP_VERSION = '1.0.0';
+// Read from app.json (via expo-constants) so it always matches the real build.
+const APP_VERSION = currentAppVersion();
 const DEVELOPER_AR = 'اشرف بن الاشهر';
 const DEVELOPER_EN = 'Ashraf Ben Lashher';
 const YEAR = '2025';
