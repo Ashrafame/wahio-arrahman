@@ -9,7 +9,7 @@ import Constants from 'expo-constants';
 //
 // Leave it empty ('') to skip the manifest; on iOS the app then falls back to
 // Apple's public lookup API automatically (works once the app is on the store).
-export const VERSION_MANIFEST_URL = '';
+export const VERSION_MANIFEST_URL = 'https://gist.githubusercontent.com/Ashrafame/61c2be57b0ab62273b73d59427dc0483/raw/version.json';
 
 // Used only for the iOS App Store fallback lookup.
 const IOS_BUNDLE_ID = 'com.wahioarrahman.app';
