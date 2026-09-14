@@ -27,16 +27,27 @@ const GRATITUDE_AT = { hour: 17, minute: 0 }; // late afternoon
 const READING_AT = { hour: 20, minute: 30 };  // evening
 
 // ── Athan sound registry ──────────────────────────────────────────────────────
-// Future muezzin recordings plug in here: drop the file in assets/sounds/, add its
-// filename to app.json → expo-notifications → "sounds", then map the setting value
-// to the bundled filename below. Until then everything falls back to the OS sound.
+// Maps a muezzin id (the `athanSound` setting) to the bundled ≤30s notification
+// clip declared in app.json → expo-notifications → "sounds". iOS caps custom
+// notification sounds at 30s, so these are short clips; the FULL athan is played
+// in-app by AthanPlayer. Add a new muezzin by dropping athan_<id>_notif.wav in
+// assets/sounds/, listing it in app.json "sounds", and mapping it here + in
+// AthanPlayer's ATHAN_FULL + MUEZZINS in SettingsContext.
 export const ATHAN_SOUNDS: Record<string, string | undefined> = {
   default: undefined, // undefined → OS default notification sound
-  // 'ashraf':   'athan_ashraf.wav',
-  // 'muezzin2': 'athan_2.wav',
-  // 'muezzin3': 'athan_3.wav',
-  // 'muezzin4': 'athan_4.wav',
+  ash: 'athan_ash_notif.wav',
 };
+
+// Muezzins the user can choose from in Settings (athan mode). Add licensed
+// recordings here as they become available.
+export interface Muezzin {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+}
+export const MUEZZINS: Muezzin[] = [
+  { id: 'ash', nameAr: 'أذان الشيخ أشرف', nameEn: 'Sheikh Ashraf' },
+];
 
 const PRAYER_KEYS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const;
 const PRAYER_LABELS: Record<(typeof PRAYER_KEYS)[number], { ar: string; en: string }> = {
@@ -47,14 +58,20 @@ const PRAYER_LABELS: Record<(typeof PRAYER_KEYS)[number], { ar: string; en: stri
   isha: { ar: 'العشاء', en: 'Isha' },
 };
 
-// How a foreground notification behaves while the app is open.
+// How a foreground notification behaves while the app is open. For a prayer
+// notification in athan mode we suppress the OS clip and let AthanPlayer play
+// the FULL athan in-app instead (avoids the 30s clip and the full athan
+// overlapping).
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    const isAthan = (notification.request.content.data as any)?.athan === true;
+    return {
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: !isAthan,
+      shouldSetBadge: false,
+    };
+  },
 });
 
 export async function ensurePermissions(): Promise<boolean> {
@@ -93,10 +110,11 @@ function scheduleDate(
   title: string,
   body: string,
   sound: string,
-  channelId: 'prayer' | 'reminders'
+  channelId: 'prayer' | 'reminders',
+  data?: Record<string, unknown>
 ) {
   return Notifications.scheduleNotificationAsync({
-    content: { title, body, sound },
+    content: { title, body, sound, data: data ?? {} },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when, channelId },
   });
 }
@@ -144,7 +162,12 @@ export async function rescheduleAll(
         const label = PRAYER_LABELS[key][lang];
         const title = lang === 'ar' ? 'حان وقت الصلاة' : 'Prayer Time';
         const body = lang === 'ar' ? `حان الآن وقت صلاة ${label}` : `It is now time for the ${label} prayer`;
-        await scheduleDate(when, title, body, psound, 'prayer');
+        await scheduleDate(when, title, body, psound, 'prayer', {
+          type: 'prayer',
+          prayer: key,
+          athan: prefs.athanMode === 'athan',
+          athanSound: prefs.athanSound,
+        });
       }
     }
 

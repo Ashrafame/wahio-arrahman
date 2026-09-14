@@ -3,7 +3,7 @@ import { Animated, Image, StyleSheet } from 'react-native';
 
 const SPLASH_DURATION_MS = 1800;
 const FADE_DURATION_MS   = 600;
-const BG_COLOR           = '#324B1A';
+const BG_COLOR           = '#183018';
 
 /**
  * In-app splash overlay that shows the full-screen splash artwork on top of the

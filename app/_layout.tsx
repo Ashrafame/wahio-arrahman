@@ -17,6 +17,7 @@ import { SplashOverlay } from '../src/components/SplashOverlay';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { KeepAwakeWhilePlaying } from '../src/components/KeepAwakeWhilePlaying';
 import { NotificationsManager } from '../src/components/NotificationsManager';
+import { AthanPlayer } from '../src/components/AthanPlayer';
 import { UpdatePrompt } from '../src/components/UpdatePrompt';
 import { ensureAudioMode } from '../src/lib/audio';
 
@@ -71,6 +72,7 @@ function RootStack() {
       </Stack>
       <KeepAwakeWhilePlaying />
       <NotificationsManager />
+      <AthanPlayer />
       <UpdatePrompt />
       <SplashOverlay />
     </>

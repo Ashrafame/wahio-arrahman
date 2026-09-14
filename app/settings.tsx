@@ -12,6 +12,7 @@ import {
   useSettings,
 } from '../src/store/SettingsContext';
 import { Qiraah } from '../src/lib/quranData';
+import { MUEZZINS } from '../src/lib/notifications';
 import {
   Palette,
   PrimaryColorId,
@@ -286,11 +287,13 @@ export default function SettingsScreen() {
     notifTahlil,
     notifGratitude,
     athanMode,
+    athanSound,
     setNotifPrayer,
     setNotifReading,
     setNotifTahlil,
     setNotifGratitude,
     setAthanMode,
+    setAthanSound,
   } = useSettings();
   const insets = useSafeAreaInsets();
 
@@ -493,9 +496,45 @@ export default function SettingsScreen() {
               })}
             </View>
             {athanMode === 'athan' ? (
-              <Text style={{ color: palette.textMuted, fontSize: 12, marginTop: 8, textAlign: isRTL ? 'right' : 'left' }}>
-                {t('athanComingSoon')}
-              </Text>
+              <View style={{ marginTop: 12 }}>
+                <Text style={[styles.subLabel, { color: palette.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
+                  {t('muezzin')}
+                </Text>
+                <View style={{ gap: 8, marginTop: 8 }}>
+                  {MUEZZINS.map((m) => {
+                    const active = athanSound === m.id;
+                    return (
+                      <Pressable
+                        key={m.id}
+                        onPress={() => setAthanSound(m.id)}
+                        style={{
+                          flexDirection: isRTL ? 'row-reverse' : 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingVertical: 12,
+                          paddingHorizontal: 14,
+                          borderRadius: 10,
+                          borderWidth: 1,
+                          borderColor: active ? palette.primary : palette.border,
+                          backgroundColor: active ? palette.primary + '1A' : 'transparent',
+                        }}
+                      >
+                        <Text style={{ color: active ? palette.primary : palette.text, fontWeight: active ? '800' : '600' }}>
+                          {isRTL ? m.nameAr : m.nameEn}
+                        </Text>
+                        <Ionicons
+                          name={active ? 'radio-button-on' : 'radio-button-off'}
+                          size={20}
+                          color={active ? palette.primary : palette.textMuted}
+                        />
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={{ color: palette.textMuted, fontSize: 12, marginTop: 10, textAlign: isRTL ? 'right' : 'left' }}>
+                  {t('athanNote')}
+                </Text>
+              </View>
             ) : null}
           </View>
         </Section>

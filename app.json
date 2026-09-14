@@ -17,7 +17,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#324B1A",
+          "backgroundColor": "#183018",
           "image": "./assets/splash.png",
           "resizeMode": "cover",
           "enableFullScreenImage_legacy": true
@@ -35,7 +35,9 @@
         "expo-notifications",
         {
           "color": "#324B1A",
-          "sounds": []
+          "sounds": [
+            "./assets/sounds/athan_ash_notif.wav"
+          ]
         }
       ]
     ],

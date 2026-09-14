@@ -68,8 +68,8 @@ const DEFAULT_SETTINGS: Settings = {
   notifReading: true,
   notifTahlil: true,
   notifGratitude: true,
-  athanMode: 'notification',
-  athanSound: 'default',
+  athanMode: 'athan',
+  athanSound: 'ash',
 };
 
 const STORAGE_KEY = 'wahio-arrahman:settings';

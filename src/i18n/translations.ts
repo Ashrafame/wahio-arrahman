@@ -110,6 +110,8 @@ export const STRINGS = {
   athanModeNotification: { ar: 'إشعار', en: 'Notification' },
   athanModeBeep: { ar: 'نغمة قصيرة', en: 'Beep' },
   athanComingSoon: { ar: 'أصوات المؤذنين ستُضاف قريبًا بإذن الله', en: 'Muezzin voices coming soon, in shā’ Allah' },
+  muezzin: { ar: 'اختر المؤذّن', en: 'Choose the muezzin' },
+  athanNote: { ar: 'يُشغَّل الأذان كاملًا داخل التطبيق عند فتحه وقت الصلاة أو عند الضغط على الإشعار. وأثناء إغلاق التطبيق يُشغِّل الإشعار مقطعًا قصيرًا (~٣٠ ثانية) وفق قيود النظام.', en: 'The full athan plays inside the app when opened at prayer time or when you tap the notification. While the app is closed, the notification plays a short clip (~30s) due to system limits.' },
   locationRequired: {
     ar: 'هذه الأداة تحتاج إلى إذن الوصول للموقع لتعمل بدقة.',
     en: 'This tool needs location access to work accurately.',
