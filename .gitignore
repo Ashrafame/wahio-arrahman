@@ -28,6 +28,12 @@ yarn-error.*
 
 # macOS
 .DS_Store
+
+# stray / nested project copies and dev-only files (never ship to builds)
+/wahio-arrahman/
+Wahio Arrahmaan Screens/
+app copy.json
+refresh-wahio.sh
 *.pem
 
 # local env files
