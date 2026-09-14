@@ -32,6 +32,7 @@ export function AthanPlayer() {
       await ensureAudioMode();
       stopAthanPreview(); // don't overlap with a Settings preview
       try {
+        playerRef.current?.pause();
         playerRef.current?.remove();
       } catch {
         /* ignore */
@@ -58,6 +59,7 @@ export function AthanPlayer() {
       received.remove();
       response.remove();
       try {
+        playerRef.current?.pause();
         playerRef.current?.remove();
       } catch {
         /* ignore */

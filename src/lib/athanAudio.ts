@@ -30,14 +30,22 @@ export function currentAthanPreview(): string | null {
 }
 
 export function stopAthanPreview(): void {
-  try {
-    _preview?.remove();
-  } catch {
-    /* ignore */
-  }
+  const p = _preview;
   _preview = null;
   _previewId = null;
   notify(null);
+  // pause() actually halts the audio; remove() only releases the player and
+  // does NOT reliably stop playback on its own.
+  try {
+    p?.pause();
+  } catch {
+    /* ignore */
+  }
+  try {
+    p?.remove();
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Play the athan for `id`, or stop it if it's already the one playing. */
