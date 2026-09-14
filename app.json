@@ -18,16 +18,16 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#183018",
+          "enableFullScreenImage_legacy": true,
           "ios": {
             "backgroundColor": "#183018",
             "image": "./assets/splash.png",
-            "resizeMode": "cover",
-            "enableFullScreenImage_legacy": true
+            "resizeMode": "cover"
           },
           "android": {
             "backgroundColor": "#183018",
             "image": "./assets/android-splash-icon.png",
-            "imageWidth": 240,
+            "imageWidth": 288,
             "resizeMode": "contain"
           }
         }
