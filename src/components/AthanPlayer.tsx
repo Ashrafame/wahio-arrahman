@@ -4,12 +4,7 @@ import { createAudioPlayer } from 'expo-audio';
 import type { AudioPlayer } from 'expo-audio';
 import { useSettings } from '../store/SettingsContext';
 import { ensureAudioMode } from '../lib/audio';
-
-// Full-length athan recordings (played in-app). Keyed by the `athanSound` id,
-// matching MUEZZINS / ATHAN_SOUNDS. Add licensed recordings here as they ship.
-const ATHAN_FULL: Record<string, any> = {
-  ash: require('../../assets/sounds/athan_ash.mp3'),
-};
+import { ATHAN_FULL, stopAthanPreview } from '../lib/athanAudio';
 
 /**
  * Plays the FULL athan in-app when a prayer notification arrives while the app
@@ -35,6 +30,7 @@ export function AthanPlayer() {
     lastPlayed.current = now;
     try {
       await ensureAudioMode();
+      stopAthanPreview(); // don't overlap with a Settings preview
       try {
         playerRef.current?.remove();
       } catch {

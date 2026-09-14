@@ -46,7 +46,7 @@ export interface Muezzin {
   nameEn: string;
 }
 export const MUEZZINS: Muezzin[] = [
-  { id: 'ash', nameAr: 'أذان الشيخ أشرف', nameEn: 'Sheikh Ashraf' },
+  { id: 'ash', nameAr: 'أذان التطبيق… إفتراضي', nameEn: 'App athan… default' },
 ];
 
 const PRAYER_KEYS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const;

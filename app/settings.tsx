@@ -13,6 +13,7 @@ import {
 } from '../src/store/SettingsContext';
 import { Qiraah } from '../src/lib/quranData';
 import { MUEZZINS } from '../src/lib/notifications';
+import { toggleAthanPreview, onAthanPreviewChange, currentAthanPreview, stopAthanPreview } from '../src/lib/athanAudio';
 import {
   Palette,
   PrimaryColorId,
@@ -297,6 +298,15 @@ export default function SettingsScreen() {
   } = useSettings();
   const insets = useSafeAreaInsets();
 
+  const [athanPreview, setAthanPreview] = useState<string | null>(currentAthanPreview());
+  useEffect(() => {
+    const unsub = onAthanPreviewChange(setAthanPreview);
+    return () => {
+      unsub();
+      stopAthanPreview(); // stop any preview when leaving Settings
+    };
+  }, []);
+
   const [colorPickerTarget, setColorPickerTarget] = useState<'primary' | 'bg' | null>(null);
 
   const handleColorConfirm = (hex: string) => {
@@ -503,6 +513,7 @@ export default function SettingsScreen() {
                 <View style={{ gap: 8, marginTop: 8 }}>
                   {MUEZZINS.map((m) => {
                     const active = athanSound === m.id;
+                    const previewing = athanPreview === m.id;
                     return (
                       <Pressable
                         key={m.id}
@@ -519,9 +530,29 @@ export default function SettingsScreen() {
                           backgroundColor: active ? palette.primary + '1A' : 'transparent',
                         }}
                       >
-                        <Text style={{ color: active ? palette.primary : palette.text, fontWeight: active ? '800' : '600' }}>
-                          {isRTL ? m.nameAr : m.nameEn}
-                        </Text>
+                        <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                          <Pressable
+                            onPress={() => toggleAthanPreview(m.id)}
+                            hitSlop={10}
+                            style={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: 19,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: previewing ? palette.primary : palette.primary + '22',
+                            }}
+                          >
+                            <Ionicons
+                              name={previewing ? 'stop' : 'play'}
+                              size={18}
+                              color={previewing ? palette.primaryText : palette.primary}
+                            />
+                          </Pressable>
+                          <Text style={{ color: active ? palette.primary : palette.text, fontWeight: active ? '800' : '600', textAlign: isRTL ? 'right' : 'left' }}>
+                            {isRTL ? m.nameAr : m.nameEn}
+                          </Text>
+                        </View>
                         <Ionicons
                           name={active ? 'radio-button-on' : 'radio-button-off'}
                           size={20}
