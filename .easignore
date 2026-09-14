@@ -1,0 +1,4 @@
+# Files kept in the repo but excluded from EAS build uploads (keeps builds lean).
+Wahio Arrahmaan Screens/
+app copy.json
+refresh-wahio.sh
