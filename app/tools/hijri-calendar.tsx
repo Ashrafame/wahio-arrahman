@@ -255,8 +255,12 @@ export default function HijriCalendarScreen() {
 
       {/* Event detail modal */}
       <Modal visible={!!modalEvent} transparent animationType="fade" onRequestClose={() => setModalEvent(null)}>
-        <Pressable style={styles.backdrop} onPress={() => setModalEvent(null)}>
-          <Pressable style={[styles.modalCard, { backgroundColor: palette.surface }]} onPress={() => {}}>
+        <View style={styles.backdrop}>
+          {/* Tap-outside-to-dismiss layer BEHIND the card, so the card's
+              ScrollView keeps its scroll gesture (a Pressable wrapping the card
+              was stealing it on Android). */}
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalEvent(null)} />
+          <View style={[styles.modalCard, { backgroundColor: palette.surface }]}>
             <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <View style={{ flex: 1, marginEnd: 10 }}>
                 <Text style={[styles.modalTitle, { color: palette.text, textAlign: isRTL ? 'right' : 'left', fontSize: scaleFont(17) }]}>
@@ -271,7 +275,11 @@ export default function HijriCalendarScreen() {
               </Pressable>
             </View>
             <View style={[styles.divider, { backgroundColor: palette.border }]} />
-            <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+            <ScrollView
+              style={{ maxHeight: 340 }}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator
+            >
               <Text style={[styles.modalDesc, { color: palette.text, textAlign: isRTL ? 'right' : 'left', fontSize: scaleFont(14), lineHeight: scaleFont(26) }]}>
                 {language === 'ar' ? modalEvent?.descriptionAr : modalEvent?.descriptionEn}
               </Text>
@@ -283,8 +291,8 @@ export default function HijriCalendarScreen() {
                 </Text>
               </View>
             )}
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </View>
   );
