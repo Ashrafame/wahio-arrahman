@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Localization from 'expo-localization';
 import { Language, StringKey, translate } from '../i18n/translations';
 import { Qiraah } from '../lib/quranData';
 import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
@@ -143,12 +142,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
           setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
-        } else {
-          const deviceLang = Localization.getLocales()[0]?.languageCode;
-          if (deviceLang && deviceLang !== 'ar') {
-            setSettings((s) => ({ ...s, language: 'en', showEnglishQuran: true }));
-          }
         }
+        // First launch keeps the defaults (Arabic UI, medium Quran font); the
+        // user can switch language/size any time in Settings.
       } finally {
         setReady(true);
       }

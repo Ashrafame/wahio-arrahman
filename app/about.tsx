@@ -81,7 +81,7 @@ export default function AboutScreen() {
         >
           <BodyText ar={ar} scaleFont={scaleFont} palette={palette}>
             {ar
-              ? 'وَحْيُ الرَّحْمَن منصة دعوية تعليمية تهدف إلى تقديم القرآن الكريم بلغات متعددة، ليتمكن كل إنسان — مسلماً كان أم غير مسلم — من قراءة كلام الله وفهمه مباشرةً.\n\nالمسلم الحق يؤمن بجميع الأنبياء والمرسلين من آدم وإبراهيم وموسى وعيسى وحتى محمد ﷺ دون تفريق أو تمييز، ويحمل رسالة السلام والرحمة والمحبة للبشرية جمعاء. هذا ما يدعو إليه هذا التطبيق.'
+              ? 'وَحْيُ الرَّحْمَن منصة دعوية تعليمية تهدف إلى تقديم القرآن الكريم بالعربي والإنجليزي، ليتمكن العديد من الناس حول العالم — مسلمين أو غير مسلمين — من قراءة كلام الله وفهمه مباشرةً.\n\nالمسلم الحق هو من يؤمن بجميع الأنبياء والمرسلين من آدم وإبراهيم وموسى وعيسى إلى محمد ﷺ دون تفريق أو تمييز، ويحمل رسالة السلام والرحمة والعدل للبشرية جمعاء. هذا ما يدعو إليه هذا التطبيق.'
               : 'Wahio Arr\'ah\'maan is a free educational and outreach (da\'wa) app that makes the Holy Quran accessible to everyone — Muslim and non-Muslim alike.\n\nA true Muslim believes in all prophets: from Adam, Abraham, Moses, and Jesus, to Muhammad ﷺ — without distinction. Islam\'s message is one of peace, mercy, and compassion for all of humanity. This app is an invitation to read and understand that message directly from its source.'}
           </BodyText>
         </AboutSection>

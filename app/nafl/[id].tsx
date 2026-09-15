@@ -31,6 +31,10 @@ export default function NaflDetailScreen() {
   const color = RULING_COLOR[prayer.ruling];
   const align = isRTL ? 'right' : 'left';
   const arFont = isRTL ? 'Cairo-Variable' : undefined;
+  // Inner content uses Scheherazade (a naskh face); it renders smaller than
+  // Cairo, so bump the size a little for comfortable reading.
+  const contentFont = isRTL ? 'ScheherazadeNew-Regular' : undefined;
+  const contentSize = scaleFont(isRTL ? 18 : 15);
 
   const Block = ({ icon, label, body }: { icon: string; label: string; body: string }) => (
     <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
@@ -38,7 +42,7 @@ export default function NaflDetailScreen() {
         <Ionicons name={icon as any} size={16} color={color} />
         <Text style={[styles.cardLabel, { color, fontFamily: arFont }]}>{label}</Text>
       </View>
-      <Text style={[styles.cardBody, { color: palette.text, textAlign: align, writingDirection: isRTL ? 'rtl' : 'ltr', fontFamily: arFont, fontSize: scaleFont(15), lineHeight: scaleFont(15) * 1.85 }]}>
+      <Text style={[styles.cardBody, { color: palette.text, textAlign: align, writingDirection: isRTL ? 'rtl' : 'ltr', fontFamily: contentFont, fontSize: contentSize, lineHeight: contentSize * 1.75 }]}>
         {body}
       </Text>
     </View>
