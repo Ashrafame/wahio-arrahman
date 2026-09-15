@@ -27,12 +27,6 @@ function RootStack() {
   const { theme, ready } = useSettings();
   const palette = getPalette(theme);
 
-  useEffect(() => {
-    if (ready) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [ready]);
-
   // Configure the audio session for background + silent-mode playback once at
   // startup, so the session category is already 'playback' before any tap —
   // avoids a race where playback could start in a non-background category.
@@ -101,10 +95,13 @@ export default function RootLayout() {
 
   const canRender = fontsLoaded || !!fontError || fontTimedOut;
 
-  // Hide the native splash as soon as we're willing to render, so a stalled
-  // dependency downstream can never keep it up indefinitely.
+  // The SplashOverlay hides the native splash once it has actually painted, so
+  // there is no white flash between the native splash and the first JS frame.
+  // This is only a safety net in case that overlay never mounts.
   useEffect(() => {
-    if (canRender) SplashScreen.hideAsync().catch(() => {});
+    if (!canRender) return;
+    const t = setTimeout(() => SplashScreen.hideAsync().catch(() => {}), 6000);
+    return () => clearTimeout(t);
   }, [canRender]);
 
   if (!canRender) return null;
