@@ -37,9 +37,19 @@ export function AthanPlayer() {
       } catch {
         /* ignore */
       }
-      const p = createAudioPlayer(src);
+      const p = createAudioPlayer(src, { updateInterval: 500 });
       playerRef.current = p;
-      p.play();
+      let started = false;
+      p.addListener('playbackStatusUpdate', (status) => {
+        if (playerRef.current !== p) return;
+        // Play only once the bundled mp3 is loaded (immediate play() is a
+        // silent no-op before it loads).
+        if (!started && status.isLoaded) {
+          started = true;
+          try { p.play(); } catch { /* ignore */ }
+        }
+      });
+      try { p.play(); } catch { /* in case already loaded */ }
     } catch {
       /* best effort */
     }

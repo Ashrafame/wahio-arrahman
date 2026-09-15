@@ -59,14 +59,25 @@ export async function toggleAthanPreview(id: string): Promise<void> {
   if (!src) return;
   try {
     await ensureAudioMode();
-    const p = createAudioPlayer(src, { updateInterval: 400 });
+    const p = createAudioPlayer(src, { updateInterval: 300 });
     _preview = p;
     _previewId = id;
     notify(id);
+    let started = false;
     p.addListener('playbackStatusUpdate', (status) => {
-      if (status.didJustFinish) stopAthanPreview();
+      if (_preview !== p) return; // a newer preview replaced this one
+      if (status.didJustFinish) {
+        stopAthanPreview();
+        return;
+      }
+      // Start only once the asset is actually loaded — calling play() before
+      // the bundled mp3 finishes loading is a silent no-op.
+      if (!started && status.isLoaded) {
+        started = true;
+        try { p.play(); } catch { /* ignore */ }
+      }
     });
-    p.play();
+    try { p.play(); } catch { /* in case it's already loaded */ }
   } catch {
     stopAthanPreview();
   }
