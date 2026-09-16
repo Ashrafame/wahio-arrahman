@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>الدعم والمساعدة · وَحْيُ الرَّحْمَن</title>
+  <meta name="description" content="صفحة الدعم والتواصل لتطبيق وَحْيُ الرَّحْمَن — Wahio Arr'ahmaan" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-deep: #16301a;
+      --green: #24451b;
+      --green-soft: #35602a;
+      --gold: #c9a24b;
+      --gold-soft: #e6c877;
+      --cream: #f7f3e8;
+      --cream-card: #fffdf7;
+      --ink: #2a2a22;
+      --muted: #6b6a5c;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cairo', 'Amiri', system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(201,162,75,0.10), transparent 60%),
+        linear-gradient(160deg, var(--green-deep) 0%, var(--green) 40%, #1a3a1e 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 18px 60px;
+      line-height: 1.85;
+    }
+
+    /* ─── Header / medallion ─── */
+    .crest {
+      width: 108px; height: 108px;
+      border-radius: 26px;
+      background: linear-gradient(145deg, var(--green-soft), var(--green-deep));
+      border: 2px solid var(--gold);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 0 0 6px rgba(201,162,75,0.12);
+      display: grid; place-items: center;
+      margin-bottom: 18px;
+    }
+    .crest span { font-family: 'Amiri', serif; font-size: 34px; color: var(--gold-soft); font-weight: 700; }
+
+    .app-title {
+      font-family: 'Amiri', serif;
+      color: var(--gold-soft);
+      font-size: clamp(26px, 6vw, 38px);
+      font-weight: 700;
+      text-align: center;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      letter-spacing: 0.5px;
+    }
+    .app-subtitle {
+      color: rgba(247,243,232,0.72);
+      font-size: 15px;
+      text-align: center;
+      margin-top: 6px;
+      margin-bottom: 30px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Card ─── */
+    .card {
+      width: 100%;
+      max-width: 680px;
+      background: var(--cream-card);
+      border-radius: 22px;
+      padding: 34px 30px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.30);
+      border: 1px solid rgba(201,162,75,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute; inset: 0 0 auto 0; height: 5px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-soft), var(--gold));
+    }
+
+    h1 {
+      font-family: 'Amiri', serif;
+      color: var(--green);
+      font-size: 27px;
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .lead {
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 26px;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,162,75,0.5), transparent);
+      margin: 26px 0;
+    }
+
+    h2 {
+      color: var(--green-soft);
+      font-size: 19px;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    /* ─── Contact rows ─── */
+    .contact {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--cream);
+      border: 1px solid rgba(201,162,75,0.28);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      text-decoration: none;
+      color: var(--ink);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .contact:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(36,69,27,0.14);
+      border-color: var(--gold);
+    }
+    .contact .ic {
+      width: 44px; height: 44px; flex: none;
+      border-radius: 12px;
+      background: linear-gradient(145deg, var(--green-soft), var(--green));
+      display: grid; place-items: center;
+      color: var(--gold-soft); font-size: 20px;
+    }
+    .contact .txt small { display: block; color: var(--muted); font-size: 13px; }
+    .contact .txt b { font-size: 16px; color: var(--green); }
+
+    /* ─── FAQ ─── */
+    .faq { margin-top: 8px; }
+    .faq details {
+      background: var(--cream);
+      border: 1px solid rgba(201,162,75,0.28);
+      border-radius: 14px;
+      padding: 4px 18px;
+      margin-bottom: 12px;
+    }
+    .faq summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--green);
+      padding: 14px 0;
+      list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: "+"; color: var(--gold); font-size: 22px; font-weight: 700; }
+    .faq details[open] summary::after { content: "−"; }
+    .faq p { color: var(--muted); padding: 0 0 16px; font-size: 15px; }
+
+    /* ─── English block ─── */
+    .en {
+      direction: ltr; text-align: left;
+      margin-top: 4px;
+    }
+    .en h2 { font-size: 17px; }
+    .en .lead { font-size: 15px; }
+
+    footer {
+      color: rgba(247,243,232,0.6);
+      font-size: 13px;
+      text-align: center;
+      margin-top: 34px;
+      line-height: 1.9;
+    }
+    footer .bismillah { font-family: 'Amiri', serif; color: var(--gold-soft); font-size: 18px; display: block; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+  <div class="crest"><span>وَحْي</span></div>
+  <div class="app-title">وَحْيُ الرَّحْمَن</div>
+  <div class="app-subtitle">Wahio Arr'ahmaan · الدعم والمساعدة</div>
+
+  <main class="card">
+    <h1>الدعم والمساعدة</h1>
+    <p class="lead">نسعد بخدمتك ومساعدتك. إذا واجهتك أي مشكلة أو كان لديك اقتراح أو استفسار حول تطبيق <b>وَحْيُ الرَّحْمَن</b>، فلا تتردد في التواصل معنا وسنرد عليك في أقرب وقت بإذن الله.</p>
+
+    <h2>تواصل معنا</h2>
+
+    <a class="contact" href="mailto:ashrafben2020@gmail.com">
+      <div class="ic">✉︎</div>
+      <div class="txt">
+        <small>البريد الإلكتروني</small>
+        <b>ashrafben2020@gmail.com</b>
+      </div>
+    </a>
+
+    <div class="divider"></div>
+
+    <h2>الأسئلة الشائعة</h2>
+    <div class="faq">
+      <details>
+        <summary>كيف أغيّر لغة التطبيق؟</summary>
+        <p>من داخل التطبيق، افتح <b>الإعدادات</b> ثم اختر <b>اللغة</b> وبدّل بين العربية والإنجليزية في أي وقت.</p>
+      </details>
+      <details>
+        <summary>كيف أضبط أوقات الصلاة والأذان؟</summary>
+        <p>من <b>الإعدادات</b> يمكنك اختيار طريقة الحساب وتفعيل إشعارات الصلاة، كما يمكنك اختيار صوت الأذان من قسم الأذان.</p>
+      </details>
+      <details>
+        <summary>كيف أغيّر حجم خط المصحف؟</summary>
+        <p>من <b>الإعدادات</b> اختر حجم الخط المناسب لك (صغير، متوسط، كبير، كبير جداً)، ونوع الخط أيضاً.</p>
+      </details>
+      <details>
+        <summary>هل التطبيق يجمع بياناتي؟</summary>
+        <p>لا. تطبيق <b>وَحْيُ الرَّحْمَن</b> لا يجمع أي بيانات شخصية. تُحفظ إعداداتك على جهازك فقط. راجع سياسة الخصوصية لمزيد من التفاصيل.</p>
+      </details>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- English -->
+    <div class="en">
+      <h2>Support &amp; Help</h2>
+      <p class="lead">We're happy to help. If you have any question, suggestion, or issue with the <b>Wahio Arr'ahmaan</b> app, please reach out and we'll respond as soon as possible, insha'Allah.</p>
+      <a class="contact" href="mailto:ashrafben2020@gmail.com">
+        <div class="ic">✉︎</div>
+        <div class="txt">
+          <small>Email</small>
+          <b>ashrafben2020@gmail.com</b>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <span class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+    © 2026 وَحْيُ الرَّحْمَن — Wahio Arr'ahmaan · جميع الحقوق محفوظة
+  </footer>
+
+</body>
+</html>
