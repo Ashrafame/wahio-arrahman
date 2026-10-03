@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>سياسة الخصوصية — وَحْيُ الرَّحْمَن</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --emerald-deep:#07332b;
+    --emerald:#0d5c4d;
+    --gold:#d4af37;
+    --gold-light:#ffe9a3;
+    --gold-deep:#8a6d1b;
+    --cream:#fff8e7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Cairo',sans-serif;
+    min-height:100vh;
+    color:var(--cream);
+    background:
+      radial-gradient(1100px 500px at 50% -8%, #1de9b6 0%, transparent 60%),
+      radial-gradient(800px 500px at 90% 30%, #38bdf833 0%, transparent 60%),
+      linear-gradient(170deg, #04241d 0%, #07332b 35%, #0d5c4d 70%, #0a4a6b 100%);
+    background-attachment:fixed;
+    position:relative;
+    padding-bottom:140px;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    opacity:.2;
+    pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffe9a3' stroke-width='1.2' opacity='0.9'%3E%3Crect x='30' y='30' width='60' height='60'/%3E%3Crect x='30' y='30' width='60' height='60' transform='rotate(45 60 60)'/%3E%3Ccircle cx='60' cy='60' r='12'/%3E%3Ccircle cx='0' cy='0' r='12'/%3E%3Ccircle cx='120' cy='0' r='12'/%3E%3Ccircle cx='0' cy='120' r='12'/%3E%3Ccircle cx='120' cy='120' r='12'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:120px 120px;
+  }
+
+  .wrap{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:0 22px}
+
+  /* الترويسة: الشعار فقط في الأعلى والمنتصف */
+  .hero{text-align:center;padding:48px 0 10px}
+  .hero img{
+    width:92px;height:92px;border-radius:50%;
+    object-fit:cover;background:#fff;
+    border:2px solid var(--gold);
+    box-shadow:0 10px 36px #00000066, 0 0 0 5px #d4af3722;
+  }
+  .hero h1{
+    margin-top:18px;
+    font-size:clamp(26px,5.5vw,40px);
+    font-weight:900;
+  }
+  .hero h1 .gold{
+    background:linear-gradient(90deg,#fff3c4,#d4af37 45%,#ffe9a3 65%,#ff9a3d);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero .app{margin-top:4px;font-weight:800;font-size:17px;color:#fff}
+  .updated{
+    display:inline-block;margin-top:14px;
+    font-size:13px;font-weight:700;color:var(--gold-light);
+    border:1px solid #d4af3755;border-radius:100px;
+    padding:6px 18px;background:#ffffff10;backdrop-filter:blur(6px);
+  }
+  .intro{
+    margin:22px auto 0;max-width:640px;text-align:center;
+    font-size:16px;line-height:2;opacity:.88;
+  }
+
+  /* الأقسام: خط زمني أنيق على اليمين */
+  .sections{position:relative;margin-top:38px;padding-right:6px}
+  .sections::before{
+    content:"";position:absolute;top:8px;bottom:8px;right:27px;width:2px;
+    background:linear-gradient(180deg, transparent, #d4af3766 12%, #d4af3766 88%, transparent);
+  }
+  .sec{position:relative;padding:0 64px 26px 0}
+  .sec:last-child{padding-bottom:0}
+  .num{
+    position:absolute;right:0;top:0;
+    width:56px;height:56px;border-radius:50%;
+    display:grid;place-items:center;
+    font-weight:900;font-size:18px;color:var(--gold-light);
+    background:#04241d;
+    border:1px solid #d4af3766;
+    box-shadow:0 6px 18px #00000055;
+    z-index:1;
+  }
+  .card{
+    background:rgba(4,32,25,.55);
+    border:1px solid #ffffff17;
+    border-right:2px solid var(--gold);
+    border-radius:14px;
+    padding:18px 20px;
+    backdrop-filter:blur(8px);
+    transition:.25s;
+  }
+  .card:hover{border-color:#d4af3766;border-right-color:var(--gold);background:rgba(7,51,43,.65)}
+  .card h2{font-size:17px;font-weight:800;color:#fff;margin-bottom:8px}
+  .card p{font-size:14.5px;line-height:2.05;opacity:.85}
+  .card a{color:var(--gold-light);font-weight:700;text-decoration:none;border-bottom:1px solid #d4af3766}
+  .card a:hover{color:#fff}
+
+  .foot{text-align:center;margin-top:34px;font-size:13px;opacity:.6}
+
+  /* زر عائم يتحرك مع التمرير */
+  .back-zone{
+    position:fixed;left:0;right:0;bottom:0;z-index:10;
+    display:flex;justify-content:center;
+    padding:18px 20px 22px;
+    background:linear-gradient(180deg, transparent, #04241dee 60%);
+  }
+  .back-btn{
+    font-family:'Cairo',sans-serif;
+    font-size:16px;font-weight:700;
+    color:#ffe9a3;text-decoration:none;
+    background:rgba(4,32,25,.75);
+    border:1px solid #d4af3780;
+    outline:1px solid #d4af3726;outline-offset:4px;
+    border-radius:12px;padding:13px 44px;
+    backdrop-filter:blur(10px);
+    transition:.25s;
+    box-shadow:0 10px 30px #00000066;
+  }
+  .back-btn:hover{border-color:var(--gold);color:#fff6d6;box-shadow:0 0 28px #d4af3744}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <img src="logo.png" alt="شعار وحي الرحمن" />
+    <h1>سياسة <span class="gold">الخصوصية</span></h1>
+    <div class="app">تطبيق وَحْيُ الرَّحْمَن</div>
+    <div><span class="updated">آخر تحديث: 15 سبتمبر 2026</span></div>
+    <p class="intro">يحترم تطبيق «وَحْيُ الرَّحْمَن» خصوصيتك، وهذه السياسة توضّح كيف يتعامل مع بياناتك.</p>
+  </header>
+
+  <div class="sections">
+    <div class="sec"><div class="num">01</div><div class="card"><h2>لا نجمع بيانات شخصية</h2><p>التطبيق لا يتطلّب إنشاء حساب، ولا يجمع اسمك أو بريدك أو أي بيانات تعريف شخصية.</p></div></div>
+    <div class="sec"><div class="num">02</div><div class="card"><h2>الموقع الجغرافي</h2><p>يطلب التطبيق إذن الموقع لغرض واحد فقط: حساب مواقيت الصلاة واتجاه القبلة على جهازك. يُستخدم محليًا على الجهاز فقط، ولا يُرسَل إلى خوادمنا ولا يُشارَك مع أي جهة.</p></div></div>
+    <div class="sec"><div class="num">03</div><div class="card"><h2>التخزين المحلي</h2><p>تُحفظ إعداداتك (اللغة، حجم الخط، تفضيلات الإشعارات، موضع القراءة) على جهازك فقط.</p></div></div>
+    <div class="sec"><div class="num">04</div><div class="card"><h2>الإشعارات</h2><p>إشعارات مواقيت الصلاة والتذكيرات تُجدوَل وتُعرَض محليًا على جهازك.</p></div></div>
+    <div class="sec"><div class="num">05</div><div class="card"><h2>المحتوى والإنترنت</h2><p>يجلب التطبيق نصوص القرآن والتفسير والترجمة والتلاوات من مزوّدي محتوى خارجيين، وقد تُسجّل خوادمهم معلومات تقنية اعتيادية (مثل عنوان IP).</p></div></div>
+    <div class="sec"><div class="num">06</div><div class="card"><h2>التحديثات</h2><p>يستخدم التطبيق خدمة Expo لتوصيل التحديثات، وتُجرى طلبات تقنية اعتيادية لهذا الغرض.</p></div></div>
+    <div class="sec"><div class="num">07</div><div class="card"><h2>لا إعلانات ولا تتبّع</h2><p>التطبيق لا يحتوي على إعلانات، ولا يستخدم أدوات تتبّع أو تحليلات لجهات خارجية.</p></div></div>
+    <div class="sec"><div class="num">08</div><div class="card"><h2>الأطفال</h2><p>التطبيق مناسب لجميع الأعمار ولا يجمع أي بيانات من الأطفال.</p></div></div>
+    <div class="sec"><div class="num">09</div><div class="card"><h2>تغييرات هذه السياسة</h2><p>قد نُحدّث هذه السياسة، وسيظهر تاريخ آخر تحديث في الأعلى.</p></div></div>
+    <div class="sec"><div class="num">10</div><div class="card"><h2>التواصل</h2><p>لأي استفسار: <a href="mailto:me@ashrafbenlashher.com">✉️ me@ashrafbenlashher.com</a></p></div></div>
+  </div>
+
+  <p class="foot">وَحْيُ الرَّحْمَن • Wahio Arrahmaan</p>
+</div>
+
+<div class="back-zone">
+  <a class="back-btn" href="index.html">→ العودة إلى الصفحة الرئيسية</a>
+</div>
+
+</body>
+</html>
