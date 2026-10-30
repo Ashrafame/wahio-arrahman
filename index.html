@@ -219,45 +219,6 @@
   .store-btn .txt small{font-size:11px;font-weight:400;opacity:.9;letter-spacing:.3px}
   .store-btn .txt strong{font-size:19px;font-weight:700;letter-spacing:.2px}
 
-  /* نافذة نسخة الأندرويد */
-  .gp-modal{
-    position:fixed;inset:0;z-index:30;
-    display:none;place-items:center;
-    background:#02120ed9;
-    backdrop-filter:blur(8px);
-    padding:22px;
-  }
-  .gp-modal.open{display:grid}
-  .gp-card{
-    width:min(420px,100%);
-    text-align:center;
-    background:linear-gradient(170deg, #07332b, #04241d);
-    border:1px solid #d4af3780;
-    outline:1px solid #d4af3726;outline-offset:4px;
-    border-radius:16px;
-    padding:34px 28px 28px;
-    box-shadow:0 24px 70px #00000088;
-    animation:pop .3s ease;
-  }
-  @keyframes pop{from{transform:scale(.92);opacity:0}}
-  .gp-card .orn{color:var(--gold);font-size:26px;letter-spacing:8px}
-  .gp-card p{
-    margin:14px 0 22px;
-    font-size:17px;font-weight:700;line-height:2;color:#fff6d6;
-  }
-  .gp-close{
-    font-family:'Cairo',sans-serif;
-    font-size:15px;font-weight:700;
-    color:#ffe9a3;
-    background:transparent;
-    border:1px solid #d4af3755;
-    border-radius:10px;
-    padding:10px 48px;
-    cursor:pointer;
-    transition:.2s;
-  }
-  .gp-close:hover{border-color:var(--gold);color:#fff;background:#ffffff10}
-
   /* الزر الوحيد - في الربع السفلي منتصف الشاشة */
   .cta-zone{
     position:fixed;
@@ -299,17 +260,6 @@
     background:rgba(7,51,43,.75);
   }
   .btn-start:active{transform:translateY(1px);}
-  .privacy-link{
-    margin-top:12px;
-    font-family:'Cairo',sans-serif;
-    font-size:13px;
-    font-weight:600;
-    color:#ffe9a3cc;
-    background:none;border:none;cursor:pointer;
-    text-decoration:underline;
-    text-underline-offset:4px;
-  }
-  .privacy-link:hover{color:#fff}
 
 </style>
 </head>
@@ -336,7 +286,7 @@
   <div class="latin-sub">Wahio Arrahmaan</div>
   <p class="sub">نسخة التطبيق للـIOS تم اطلاقها يوم 20 سبتمبر 2026 و الحمد لله و نسخة الـAndroid قريبا بإذن الله.</p>
   <div class="store-btns">
-    <button class="store-btn" type="button" id="gpBtn">
+    <button class="store-btn" type="button" id="gpBtn" onclick="window.open('https://play.google.com/store/apps/details?id=com.wahioarrahman.app','_blank')">
       <span class="icon">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#00D2FF" d="M4 3.5v17c0 .4.43.65.78.45l8.5-5.42 2.12-2.1 2.1-1.43L6.6 3.1 4.78 3.05c-.35-.02-.78.05-.78.45z" opacity=".9"/><path fill="#FFCE00" d="M12.5 13.53 4.78 20.95c.2.18.5.2.82.02l11.9-6.76-5-2.68v2z"/><path fill="#FF3A44" d="M12.5 10.47l5 2.68 3.13-1.78c.7-.4.7-1.34 0-1.74l-8.13-4.6v5.44z"/><path fill="#00F076" d="M4 3.5c0-.35.43-.47.78-.45L12.5 10.47l-2.1 1.53L4 4.5v-1z"/></svg>
       </span>
@@ -352,23 +302,8 @@
 </main>
 
 <div class="cta-zone">
-  <a class="btn-start" href="privacy.html">سياسة الخصوصيه</a>
+  <a class="btn-start" href="privacy.html">سياسة الخصوصية</a>
 </div>
-
-<div class="gp-modal" id="gpModal">
-  <div class="gp-card">
-    <div class="orn">✦ ✦ ✦</div>
-    <p>نسخة الأندرويد قريباً إن شاء الله، دعواتكم</p>
-    <button class="gp-close" id="gpClose">إلغاء</button>
-  </div>
-</div>
-
-<script>
-  const gpModal = document.getElementById('gpModal');
-  document.getElementById('gpBtn').onclick = () => gpModal.classList.add('open');
-  document.getElementById('gpClose').onclick = () => gpModal.classList.remove('open');
-  gpModal.onclick = (e) => { if(e.target === gpModal) gpModal.classList.remove('open'); };
-</script>
 
 </body>
 </html>
