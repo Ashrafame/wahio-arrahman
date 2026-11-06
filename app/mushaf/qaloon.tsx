@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { useSettings } from '../../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
+import { QaloonPlayerBar } from '../../src/components/QaloonPlayerBar';
 import { chapters } from '../../src/lib/quranData';
 import {
   PagePaths,
@@ -226,12 +227,19 @@ export default function QaloonMushafScreen() {
       />
 
       {selected ? (
-        <View style={[styles.ayahBar, { backgroundColor: palette.surface, borderColor: palette.border, bottom: insets.bottom + 12 }]}>
+        <View style={[styles.ayahBar, { backgroundColor: palette.surface, borderColor: palette.border, bottom: insets.bottom + 92 }]}>
           <Text style={{ color: palette.text, fontWeight: '700' }}>
             {surahName(selected.surah)} · الآية {selected.ayah}
           </Text>
         </View>
       ) : null}
+
+      <QaloonPlayerBar
+        surahToPlay={selected?.surah ?? pageSurahs(page)[0]}
+        onStartSurah={(s) => {
+          if (!pageSurahs(page).includes(s)) goTo(surahStartPage(s));
+        }}
+      />
 
       <IndexModal
         visible={indexOpen}
