@@ -44,6 +44,7 @@ export const STRINGS = {
   showTranslation: { ar: 'إظهار الترجمة الإنجليزية', en: 'Show English translation' },
   englishQuran: { ar: 'القرآن بالإنجليزية', en: 'English Quran' },
   showEnglishQuran: { ar: 'إظهار القرآن بالإنجليزية كنص أساسي', en: 'Show English Quran as primary text' },
+  waqfMarksRed: { ar: 'تلوين علامات الوقف بالأحمر', en: 'Colour waqf (pause) marks red' },
   tafsir: { ar: 'التفسير', en: 'Tafsir' },
   selectTafsir: { ar: 'اختر التفسير', en: 'Select Tafsir' },
   asbabNuzul: { ar: 'سبب النزول', en: 'Reason for Revelation' },

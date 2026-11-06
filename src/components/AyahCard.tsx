@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import { Ayah, ayahEndMarker, displayAyahText } from '../lib/quranData';
+import { Ayah, ayahEndMarker, displayAyahSegments, displayAyahText } from '../lib/quranData';
 import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
 
 interface Props {
@@ -43,11 +43,12 @@ export function AyahCard({
   isPlaying,
   onPlayAudio,
 }: Props) {
-  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, showEnglishQuran, scaleFont, palette } = useSettings();
+  const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, showEnglishQuran, waqfMarksRed, scaleFont, palette } = useSettings();
   // Copy uses the verbatim bundled text. Display only attaches waqf marks to
   // their words (see displayAyahText); letters and diacritics are never altered.
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
   const arabicDisplay = qiraah === 'hafs' ? displayAyahText(arabicText) : arabicText;
+  const waqfColor = theme === 'dark' ? '#EF5350' : '#C62828';
   const englishMode = !isRTL && showEnglishQuran;
 
   // Warm text shadow that matches the Islamic pattern color — gives the floating depth
@@ -143,7 +144,15 @@ export function AyahCard({
             },
           ]}
         >
-          {arabicDisplay}
+          {waqfMarksRed && qiraah === 'hafs'
+            ? displayAyahSegments(arabicText).map((seg, i) =>
+                seg.waqf ? (
+                  <Text key={i} style={{ color: waqfColor }}>{seg.text}</Text>
+                ) : (
+                  seg.text
+                ),
+              )
+            : arabicDisplay}
           {'\u00A0'}
           <Text style={{ color: isPlaying ? palette.accent : palette.primary }}>
             {ayahEndMarker(ayah.verse)}

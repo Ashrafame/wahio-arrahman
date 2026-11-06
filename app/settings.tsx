@@ -261,6 +261,8 @@ export default function SettingsScreen() {
     setLanguage,
     qiraah,
     setQiraah,
+    waqfMarksRed,
+    setWaqfMarksRed,
     fontFamily,
     setFontFamily,
     fontSize,
@@ -370,6 +372,17 @@ export default function SettingsScreen() {
             palette={palette}
             isRTL={isRTL}
           />
+          <Pressable
+            onPress={() => setWaqfMarksRed(!waqfMarksRed)}
+            style={[styles.switchRow, { flexDirection: isRTL ? 'row-reverse' : 'row', borderColor: palette.border, marginTop: 10 }]}
+          >
+            <Text style={{ color: palette.text, flex: 1, textAlign: isRTL ? 'right' : 'left' }}>{t('waqfMarksRed')}</Text>
+            <Ionicons
+              name={waqfMarksRed ? 'checkbox' : 'square-outline'}
+              size={22}
+              color={waqfMarksRed ? palette.primary : palette.textMuted}
+            />
+          </Pressable>
         </Section>
 
         <Section title={t('fontSize')} palette={palette} isRTL={isRTL}>

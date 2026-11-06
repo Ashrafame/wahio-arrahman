@@ -80,6 +80,31 @@ export function displayAyahText(text: string): string {
   return text.replace(SPACE_BEFORE_WAQF, '');
 }
 
+export interface AyahSegment {
+  text: string;
+  /** True for a waqf mark at a stopping point (one Tanzil writes after a space). */
+  waqf: boolean;
+}
+
+/**
+ * displayAyahText() split into plain runs and waqf marks, so the reader can
+ * colour the marks. Only marks at stopping points count: the same codepoint
+ * also serves as the small seen over a sad (يَبْصُۜطُ), which is not a waqf mark
+ * and is never written after a space.
+ */
+export function displayAyahSegments(text: string): AyahSegment[] {
+  const segments: AyahSegment[] = [];
+  let last = 0;
+  for (const m of text.matchAll(/ ([ۖ-ۜ])/g)) {
+    const start = m.index ?? 0;
+    if (start > last) segments.push({ text: text.slice(last, start), waqf: false });
+    segments.push({ text: m[1], waqf: true });
+    last = start + m[0].length;
+  }
+  if (last < text.length) segments.push({ text: text.slice(last), waqf: false });
+  return segments;
+}
+
 /** Ayah-end marker shown after the ayah, as in the Mushaf: ﴿255﴾ */
 export function ayahEndMarker(verse: number): string {
   return `﴿${verse}﴾`;

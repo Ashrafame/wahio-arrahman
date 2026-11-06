@@ -29,6 +29,8 @@ interface Settings {
   uiFontScale: number;
   showTranslation: boolean;
   showEnglishQuran: boolean;
+  /** Colour waqf (pause) marks red in the Mushaf text. */
+  waqfMarksRed: boolean;
   tafsirEdition: string;
   theme: ThemeId;
   hafsReciter: string;
@@ -60,6 +62,7 @@ const DEFAULT_SETTINGS: Settings = {
   uiFontScale: 0.5,
   showTranslation: false,
   showEnglishQuran: false,
+  waqfMarksRed: false,
   tafsirEdition: 'muyassar',
   theme: 'light',
   hafsReciter: DEFAULT_HAFS_RECITER_ID,
@@ -94,6 +97,7 @@ interface SettingsContextValue extends Settings {
   scaleFont: (base: number) => number;
   setShowTranslation: (show: boolean) => void;
   setShowEnglishQuran: (show: boolean) => void;
+  setWaqfMarksRed: (on: boolean) => void;
   setTafsirEdition: (id: string) => void;
   setTheme: (theme: ThemeId) => void;
   setHafsReciter: (id: string) => void;
@@ -196,6 +200,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       scaleFont: (base) => computeScaledFont(base, settings.uiFontScale),
       setShowTranslation: (showTranslation) => setSettings((s) => ({ ...s, showTranslation })),
       setShowEnglishQuran: (showEnglishQuran) => setSettings((s) => ({ ...s, showEnglishQuran })),
+      setWaqfMarksRed: (waqfMarksRed) => setSettings((s) => ({ ...s, waqfMarksRed })),
       setTafsirEdition: (tafsirEdition) => setSettings((s) => ({ ...s, tafsirEdition })),
       setTheme: (theme) => setSettings((s) => ({ ...s, theme })),
       setHafsReciter: (hafsReciter) => setSettings((s) => ({ ...s, hafsReciter })),
