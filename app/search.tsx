@@ -111,7 +111,7 @@ export default function SearchScreen() {
                 style={[
                   styles.resultText,
                   item.matchedIn === 'arabic'
-                    ? { color: palette.text, textAlign: 'right', writingDirection: 'rtl', fontFamily: QURAN_FONT, fontSize: scaleFont(19), lineHeight: scaleFont(19) * 2.5, paddingTop: 6 }
+                    ? { color: palette.text, textAlign: 'right', writingDirection: 'rtl', fontFamily: QURAN_FONT, fontSize: scaleFont(19), lineHeight: scaleFont(19) * 2.5 }
                     : { color: palette.textMuted, textAlign: 'left', fontSize: scaleFont(14) },
                 ]}
                 numberOfLines={3}

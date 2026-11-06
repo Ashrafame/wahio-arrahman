@@ -13,10 +13,10 @@ import {
   buildPalette,
 } from '../theme/colors';
 
-// Only fonts that contain every Quranic mark in the Tanzil text are offered for
-// the Mushaf. (Ruqaa and Diwani lacked ~20 marks, including the small waw/yeh
-// of silah and the waqf signs, so they were removed.)
-export type FontFamilyId = 'amiri' | 'scheherazade';
+// The Mushaf is shown only in Amiri Quran. Ruqaa and Diwani lacked ~20 Quranic
+// marks; Scheherazade New had ~100 places where a waqf mark overlaps a letter.
+// (Scheherazade is still bundled for the Nafl prayer texts, which are not Quran.)
+export type FontFamilyId = 'amiri';
 export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
 export type ThemeId = 'light' | 'dark';
 
@@ -132,26 +132,21 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export const FONT_FAMILY_MAP: Record<FontFamilyId, string> = {
   amiri: 'AmiriQuran-Regular',
-  scheherazade: 'ScheherazadeNew-Regular',
 };
 
 /** Font for Quran text shown outside the reader (search results, previews). */
 export const QURAN_FONT = 'AmiriQuran-Regular';
 
 /**
- * Line height of Mushaf text, as a multiple of the font size. Each font needs
- * room for its tallest stacked marks: Amiri Quran's own metrics are 1.815 em
- * above the baseline and 0.634 em below (2.45 em); Scheherazade New's stacked
- * marks reach about 2 em above the baseline. Less than this and the marks of
- * one line crowd the line above, or are clipped on an ayah's first line.
+ * Line height of Mushaf text, as a multiple of the font size. Amiri Quran's
+ * metrics are 1.815 em above the baseline and 0.634 em below (2.45 em), and the
+ * tallest ink anywhere in the Quran reaches exactly 1.815 em (2:13). At 2.5 em
+ * every mark fits inside its own line: none crowds the line above, and none on
+ * an ayah's first line is clipped, so no extra top padding is needed.
  */
 export const FONT_LINE_HEIGHT: Record<FontFamilyId, number> = {
   amiri: 2.5,
-  scheherazade: 2.4,
 };
-
-/** Extra space above an ayah's first line so its tallest marks are never clipped. */
-export const QURAN_TEXT_TOP_PADDING = 0.35;
 
 export const FONT_SIZE_MAP: Record<FontSizeId, number> = {
   small: 22,

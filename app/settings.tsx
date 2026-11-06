@@ -363,10 +363,7 @@ export default function SettingsScreen() {
 
         <Section title={t('fontFamily')} palette={palette} isRTL={isRTL}>
           <OptionRow
-            options={[
-              { id: 'amiri', label: 'Amiri' },
-              { id: 'scheherazade', label: 'Scheherazade' },
-            ]}
+            options={[{ id: 'amiri', label: 'Amiri Quran' }]}
             value={fontFamily}
             onChange={(v) => setFontFamily(v as FontFamilyId)}
             palette={palette}
