@@ -95,10 +95,13 @@ function verify() {
   const index = JSON.parse(readFileSync(OUTPUT, 'utf8'));
   if (index.commit !== COMMIT) fail('index was built for a different commit');
   check(index);
-  // The source pages are excluded from EAS uploads (.easignore); check them when present.
-  if (existsSync(SOURCE)) {
-    const svgs = readdirSync(SOURCE).filter((f) => f.endsWith('.svg'));
-    if (svgs.length !== PAGE_COUNT) fail(`source has ${svgs.length} pages`);
+  // The source pages are excluded from EAS uploads (.easignore), which can leave
+  // an empty folder behind; check them only when they are actually present.
+  const svgs = existsSync(SOURCE) ? readdirSync(SOURCE).filter((f) => f.endsWith('.svg')) : [];
+  if (svgs.length === 0) {
+    console.log('• source pages not present (EAS upload); checking the bundled index only');
+  } else {
+    if (svgs.length !== PAGE_COUNT) fail(`source has ${svgs.length} of ${PAGE_COUNT} pages`);
     index.pages.forEach((page, i) => {
       if (sha256(readFileSync(join(SOURCE, `${pad3(i + 1)}.svg`))) !== page.h) fail(`page ${i + 1} differs from its recorded hash`);
     });
