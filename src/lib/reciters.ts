@@ -30,14 +30,21 @@ export const HAFS_RECITERS: HafsReciter[] = [
   { id: 'alafasy', nameAr: 'مشاري العفاسي', nameEn: 'Mishary Alafasy', folder: 'Alafasy_128kbps' },
 ];
 
+// Qaloon recitations from mp3quran (one file per surah, 114 surahs each). URLs
+// are their current CDN paths from https://mp3quran.net/api/v3/reciters (the old
+// serverN.mp3quran.net paths now answer with a 301 redirect to these).
 export const QALOON_RECITERS: QaloonReciter[] = [
-  { id: 'dokali', nameAr: 'الدوكالي محمد العالم', nameEn: 'Al-Dukali Muhammad Al-Alim', base: 'https://server7.mp3quran.net/dokali' },
-  { id: 'deban', nameAr: 'أحمد ديبان', nameEn: 'Ahmad Deban', base: 'https://server16.mp3quran.net/deban/Rewayat-Qalon-A-n-Nafi' },
-  { id: 'husary_qaloon', nameAr: 'محمود خليل الحصري', nameEn: 'Mahmoud Al-Husary', base: 'https://server13.mp3quran.net/husr/Rewayat-Qalon-A-n-Nafi' },
-  { id: 'trablsi', nameAr: 'أحمد الطرابلسي', nameEn: 'Ahmed Al-Trabulsi', base: 'https://server10.mp3quran.net/trablsi' },
-  { id: 'kshidan', nameAr: 'إبراهيم قشيدان', nameEn: 'Ibrahim Qushaydan', base: 'https://server16.mp3quran.net/i_kshidan/Rewayat-Qalon-A-n-Nafi' },
-  { id: 'daawob', nameAr: 'طارق ضعوب', nameEn: 'Tareq Daawob', base: 'https://server10.mp3quran.net/tareq' },
-  { id: 'hudhaifi_qaloon', nameAr: 'علي الحذيفي', nameEn: 'Ali Al-Hudhaifi', base: 'https://server9.mp3quran.net/huthifi_qalon' },
+  { id: 'dokali', nameAr: 'الدوكالي محمد العالم', nameEn: 'Al-Dukali Muhammad Al-Alim', base: 'https://cdn.mp3quran.net/audio/dokali-alim/r1' },
+  { id: 'abusnaina', nameAr: 'محمد أبو سنينة', nameEn: 'Muhammad Abu Sneina', base: 'https://cdn.mp3quran.net/audio/muhammad-abusnaina/r1' },
+  { id: 'qeniwa', nameAr: 'محمد الأمين قنيوة', nameEn: 'Mohammed Al-Amin Qeniwa', base: 'https://cdn.mp3quran.net/audio/muhammad-qeniwa/r1' },
+  { id: 'kshidan', nameAr: 'إبراهيم كشيدان', nameEn: 'Ibrahim Kshidan', base: 'https://cdn.mp3quran.net/audio/ibrahim-kshidan/r1' },
+  { id: 'daawob', nameAr: 'طارق عبدالغني دعوب', nameEn: 'Tareq Abdulgani Daawob', base: 'https://cdn.mp3quran.net/audio/tareq-daawob/r1' },
+  { id: 'akri', nameAr: 'مروان العكري', nameEn: 'Marwan Alakri', base: 'https://cdn.mp3quran.net/audio/marwan-akri/r1' },
+  { id: 'naehi', nameAr: 'وليد النائحي (طريق أبي نشيط)', nameEn: 'Waleed Alnaehi (Abu Nashit)', base: 'https://cdn.mp3quran.net/audio/waleed-naehi/r1' },
+  { id: 'trablsi', nameAr: 'أحمد الطرابلسي', nameEn: 'Ahmed Al-Trabulsi', base: 'https://cdn.mp3quran.net/audio/ahmad-tarabulsi/r1' },
+  { id: 'deban', nameAr: 'أحمد ديبان', nameEn: 'Ahmad Deban', base: 'https://cdn.mp3quran.net/audio/ahmad-deeban/r5' },
+  { id: 'husary_qaloon', nameAr: 'محمود خليل الحصري', nameEn: 'Mahmoud Al-Husary', base: 'https://cdn.mp3quran.net/audio/mahmoud-husary/r5' },
+  { id: 'hudhaifi_qaloon', nameAr: 'علي الحذيفي', nameEn: 'Ali Al-Hudhaifi', base: 'https://cdn.mp3quran.net/audio/ali-hudhaifi/r2' },
 ];
 
 export const DEFAULT_HAFS_RECITER_ID = HAFS_RECITERS[0].id;
