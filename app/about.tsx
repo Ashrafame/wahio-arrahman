@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { useSettings } from '../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 import { Palette } from '../src/theme/colors';
 import { currentAppVersion } from '../src/lib/appUpdate';
+import { QURAN_TEXT_SOURCE } from '../src/lib/quranData';
 
 // Read from app.json (via expo-constants) so it always matches the real build.
 const APP_VERSION = currentAppVersion();
@@ -94,7 +95,7 @@ export default function AboutScreen() {
           ar={ar}
         >
           {[
-            { icon: 'book-outline',          ar: 'القرآن الكريم كاملاً — روايتا حفص وقالون',         en: 'Complete Quran — Hafs & Qaloon narrations' },
+            { icon: 'book-outline',          ar: 'القرآن الكريم كاملاً — برواية حفص عن عاصم',        en: 'Complete Quran — Hafs narration' },
             { icon: 'language-outline',      ar: 'ترجمة إنجليزية واضحة وأمينة',                     en: 'Clear and faithful English translation' },
             { icon: 'reader-outline',        ar: 'تفاسير من مصادر علمية موثوقة',                     en: 'Tafsir from trusted scholarly sources' },
             { icon: 'musical-notes-outline', ar: 'تلاوات صوتية بأصوات كبار القراء',                 en: 'Audio recitations by renowned reciters' },
@@ -167,13 +168,16 @@ export default function AboutScreen() {
           {[
             {
               label: ar ? 'نص القرآن الكريم' : 'Quran Text',
-              value: 'Tanzil.net',
-              sub: ar ? 'روايتا حفص وقالون' : 'Hafs & Qaloon narrations',
+              value: ar ? QURAN_TEXT_SOURCE.nameAr : QURAN_TEXT_SOURCE.nameEn,
+              sub: ar
+                ? 'رواية حفص عن عاصم — منقول حرفياً دون أي تعديل — tanzil.net'
+                : 'Hafs narration — reproduced verbatim, unmodified — tanzil.net',
+              url: QURAN_TEXT_SOURCE.url,
             },
             {
               label: ar ? 'الترجمة الإنجليزية' : 'English Translation',
-              value: ar ? 'القرآن الواضح' : 'The Clear Quran',
-              sub: ar ? 'د. مصطفى خطاب' : 'Dr. Mustafa Khattab',
+              value: ar ? 'ترجمة عبد الله يوسف علي' : 'Abdullah Yusuf Ali',
+              sub: '',
             },
             {
               label: ar ? 'التفسير الميسّر' : 'Al-Muyassar Tafsir',
@@ -185,9 +189,11 @@ export default function AboutScreen() {
               value: ar ? 'عبر واجهة برمجية مفتوحة' : 'Via open API',
               sub: '',
             },
-          ].map((item, i) => (
-            <View
+          ].map((item: { label: string; value: string; sub: string; url?: string }, i) => (
+            <Pressable
               key={i}
+              disabled={!item.url}
+              onPress={() => item.url && Linking.openURL(item.url)}
               style={[styles.sourceRow, { borderColor: palette.border, flexDirection: ar ? 'row-reverse' : 'row' }]}
             >
               <View style={[styles.sourceDot, { backgroundColor: palette.accent }]} />
@@ -204,7 +210,7 @@ export default function AboutScreen() {
                   </Text>
                 ) : null}
               </View>
-            </View>
+            </Pressable>
           ))}
         </AboutSection>
 

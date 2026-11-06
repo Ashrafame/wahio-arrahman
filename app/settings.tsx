@@ -11,7 +11,7 @@ import {
   ThemeId,
   useSettings,
 } from '../src/store/SettingsContext';
-import { Qiraah } from '../src/lib/quranData';
+import { Qiraah, QALOON_ENABLED } from '../src/lib/quranData';
 import { MUEZZINS } from '../src/lib/notifications';
 import { toggleAthanPreview, onAthanPreviewChange, currentAthanPreview, stopAthanPreview } from '../src/lib/athanAudio';
 import {
@@ -344,26 +344,26 @@ export default function SettingsScreen() {
           />
         </Section>
 
-        <Section title={t('qiraah')} palette={palette} isRTL={isRTL}>
-          <OptionRow
-            options={[
-              { id: 'hafs', label: t('qiraahHafs') },
-              { id: 'qaloon', label: t('qiraahQaloon') },
-            ]}
-            value={qiraah}
-            onChange={(v) => setQiraah(v as Qiraah)}
-            palette={palette}
-            isRTL={isRTL}
-          />
-        </Section>
+        {QALOON_ENABLED ? (
+          <Section title={t('qiraah')} palette={palette} isRTL={isRTL}>
+            <OptionRow
+              options={[
+                { id: 'hafs', label: t('qiraahHafs') },
+                { id: 'qaloon', label: t('qiraahQaloon') },
+              ]}
+              value={qiraah}
+              onChange={(v) => setQiraah(v as Qiraah)}
+              palette={palette}
+              isRTL={isRTL}
+            />
+          </Section>
+        ) : null}
 
         <Section title={t('fontFamily')} palette={palette} isRTL={isRTL}>
           <OptionRow
             options={[
               { id: 'amiri', label: 'Amiri' },
               { id: 'scheherazade', label: 'Scheherazade' },
-              { id: 'diwan', label: 'الديواني' },
-              { id: 'ruqa', label: 'الرقعة' },
             ]}
             value={fontFamily}
             onChange={(v) => setFontFamily(v as FontFamilyId)}

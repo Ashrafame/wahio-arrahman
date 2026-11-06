@@ -6,6 +6,17 @@ import muyassarRaw from '../../assets/data/tafsir_muyassar.json';
 
 export type Qiraah = 'hafs' | 'qaloon';
 
+// The Qaloon text has no verified source yet, so it is hidden from the UI until
+// an authenticated text (e.g. from the King Fahd Complex) is bundled.
+export const QALOON_ENABLED = false;
+
+// Attribution required by the Tanzil licence (shown on the About screen).
+export const QURAN_TEXT_SOURCE = {
+  nameAr: 'مشروع تنزيل — نص المصحف بالرسم العثماني، الإصدار 1.1',
+  nameEn: 'Tanzil Project — Uthmani Quran text, version 1.1',
+  url: 'https://tanzil.net',
+};
+
 export interface Chapter {
   number: number;
   nameArabic: string;
@@ -27,22 +38,37 @@ export interface Ayah {
 
 export const chapters: Chapter[] = chaptersRaw as Chapter[];
 
-// Tanzil's Uthmani rasm encodes the trailing alef of tanween-fatha/damma/kasra
-// endings (e.g. قَوْمًا) as a separate token, joined by a plain space, to mirror
-// the printed Madinah Mushaf's calligraphy. Generic (non-Uthmanic) fonts render
-// that space as a visible gap, so we join it back for display purposes only —
-// the underlying letters and diacritics are untouched.
-const TANWEEN_ALEF_GAP = /([ًࣰٌࣱٍࣲ]) ا/g;
-function joinTrailingTanweenAlef(map: Record<string, string>): Record<string, string> {
-  const result: Record<string, string> = {};
-  for (const key in map) {
-    result[key] = map[key].replace(TANWEEN_ALEF_GAP, '$1ا');
-  }
-  return result;
+// The Hafs text is the Tanzil Uthmani text, copied verbatim and checked against
+// the source on every build (scripts/quran-text.mjs). It must be displayed
+// exactly as stored: never normalise, replace or strip characters from it.
+const tanzilAyahs = (hafsRaw as { ayahs: Record<string, string> }).ayahs;
+
+// Tanzil prefixes ayah 1 of every surah except Al-Fatiha and At-Tawbah with the
+// basmala (four words). The printed Mushaf shows it above the surah instead, so
+// we cut the text at that word boundary: the reader shows BASMALA as a header and
+// the rest as ayah 1. Both are verbatim substrings of the Tanzil text, and
+// scripts/quran-text.mjs checks that every split rejoins to the original exactly.
+export const BASMALA = tanzilAyahs['1:1'];
+const BASMALA_WORDS = BASMALA.split(' ').length;
+
+function splitBasmala(chapter: number, text: string): { basmala: string | null; rest: string } {
+  if (chapter === 1 || chapter === 9) return { basmala: null, rest: text };
+  const words = text.split(' ');
+  const expected = BASMALA.split(' ');
+  const isBasmala = expected.every((w, i) => i === 0 || words[i] === w);
+  if (!isBasmala || words.length <= BASMALA_WORDS) return { basmala: null, rest: text };
+  return {
+    basmala: words.slice(0, BASMALA_WORDS).join(' '),
+    rest: words.slice(BASMALA_WORDS).join(' '),
+  };
 }
 
-const hafsMap = joinTrailingTanweenAlef(hafsRaw as Record<string, string>);
-const qaloonMap = joinTrailingTanweenAlef(qaloonRaw as Record<string, string>);
+const hafsMap: Record<string, string> = {};
+for (const key in tanzilAyahs) {
+  const [chapter, verse] = key.split(':').map(Number);
+  hafsMap[key] = verse === 1 ? splitBasmala(chapter, tanzilAyahs[key]).rest : tanzilAyahs[key];
+}
+const qaloonMap = qaloonRaw as Record<string, string>;
 const translationEnMap = translationEnRaw as Record<string, string>;
 const muyassarMap = muyassarRaw as Record<string, string>;
 
@@ -108,6 +134,7 @@ function normalizeArabicExpanded(text: string): string {
     .replace(/ؤ/g, 'و')
     .replace(/ة/g, 'ه')
     .replace(/[‌‍‎]/g, '')
+    .replace(/ـ/g, '') // tatweel (Tanzil uses it before superscript alef)
     .trim()
     .toLowerCase();
 }
@@ -185,6 +212,7 @@ export function normalizeArabic(text: string): string {
     .replace(/ؤ/g, 'و')
     .replace(/ة/g, 'ه')
     .replace(/[‌‍‎]/g, '')
+    .replace(/ـ/g, '') // tatweel (Tanzil uses it before superscript alef)
     .trim()
     .toLowerCase();
 }

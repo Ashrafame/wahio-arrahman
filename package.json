@@ -47,7 +47,10 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "quran:build": "node scripts/quran-text.mjs build",
+    "quran:verify": "node scripts/quran-text.mjs verify",
+    "eas-build-post-install": "node scripts/quran-text.mjs verify"
   },
   "private": true
 }

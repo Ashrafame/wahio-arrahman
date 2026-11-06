@@ -80,8 +80,7 @@ export default function RootLayout() {
     'ScheherazadeNew-Regular': require('../assets/fonts/ScheherazadeNew-Regular.ttf'),
     'ScheherazadeNew-Bold': require('../assets/fonts/ScheherazadeNew-Bold.ttf'),
     'Cairo-Variable': require('../assets/fonts/Cairo-Variable.ttf'),
-    'Rakkas-Regular': require('../assets/fonts/Rakkas-Regular.ttf'),
-    'ArefRuqaa-Regular': require('../assets/fonts/ArefRuqaa-Regular.ttf'),
+    'AmiriQuran-Regular': require('../assets/fonts/AmiriQuran-Regular.ttf'),
   });
 
   // Safety net: never block the whole app on the splash forever if native font

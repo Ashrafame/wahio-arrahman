@@ -11,18 +11,19 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Ayah, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/quranData';
+import { Ayah, BASMALA, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/quranData';
 import { Palette } from '../../src/theme/colors';
 import { JUZ_DATA_HAFS, JUZ_DATA_QALOON } from '../../src/data/juz';
 import { fetchSurahTafsir, TAFSIR_EDITIONS } from '../../src/lib/tafsirRemote';
 import { getAsbabNuzul, hasAsbabNuzul } from '../../src/lib/asbabNuzul';
-import { useSettings } from '../../src/store/SettingsContext';
+import { QURAN_FONT, useSettings } from '../../src/store/SettingsContext';
 import { AyahCard } from '../../src/components/AyahCard';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import { getAyahAudioUrl, getRecitersForQiraah, QALOON_RECITERS } from '../../src/lib/reciters';
 import { getCurrentAudioKey, getCurrentSequenceId, pauseAudio, resumeAudio, playAudio, playSequence, stopAudio, subscribeAudio, subscribePosition } from '../../src/lib/audio';
 
-const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+// The basmala header is the Tanzil text of Al-Fatiha 1:1, verbatim.
+const BISMILLAH = BASMALA;
 const BISMILLAH_EN = 'In the name of Allah, the Most Gracious, the Most Merciful';
 
 export default function SurahScreen() {
@@ -406,7 +407,7 @@ export default function SurahScreen() {
           // For Al-Fatiha in Qaloon, verse 1 is Al-Hamd so we must add the header manually.
           chapterNumber !== 9 && (chapterNumber !== 1 || qiraah === 'qaloon') ? (
             <View style={styles.bismillahBlock}>
-              <Text style={[styles.bismillah, { color: palette.text, fontFamily: 'Amiri-Bold' }]}>
+              <Text style={[styles.bismillah, { color: palette.text, fontFamily: QURAN_FONT }]}>
                 {BISMILLAH}
               </Text>
               {showTranslation ? (
@@ -687,6 +688,7 @@ const styles = StyleSheet.create({
   bismillah: {
     textAlign: 'center',
     fontSize: 26,
+    lineHeight: 52,
   },
   bismillahTranslation: {
     textAlign: 'center',

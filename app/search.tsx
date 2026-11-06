@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getChapter, parseAyahReference, SearchResult, searchQuran } from '../src/lib/quranData';
-import { useSettings } from '../src/store/SettingsContext';
+import { QURAN_FONT, useSettings } from '../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 
 export default function SearchScreen() {
@@ -111,7 +111,7 @@ export default function SearchScreen() {
                 style={[
                   styles.resultText,
                   item.matchedIn === 'arabic'
-                    ? { color: palette.text, textAlign: 'right', writingDirection: 'rtl', fontFamily: 'Amiri-Regular', fontSize: scaleFont(19) }
+                    ? { color: palette.text, textAlign: 'right', writingDirection: 'rtl', fontFamily: QURAN_FONT, fontSize: scaleFont(19) }
                     : { color: palette.textMuted, textAlign: 'left', fontSize: scaleFont(14) },
                 ]}
                 numberOfLines={3}

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getChapter, getAyahText } from '../src/lib/quranData';
 import { getAsbabIndex, getAsbabCount } from '../src/lib/asbabNuzul';
-import { useSettings } from '../src/store/SettingsContext';
+import { QURAN_FONT, useSettings } from '../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 import { AsbabIcon } from '../src/components/AsbabIcon';
 
@@ -95,7 +95,7 @@ export default function AsbabScreen() {
                 </Text>
               </View>
               <Text
-                style={[styles.versePreview, { color: palette.text, fontFamily: 'Amiri-Regular', fontSize: scaleFont(17) }]}
+                style={[styles.versePreview, { color: palette.text, fontFamily: QURAN_FONT, fontSize: scaleFont(17) }]}
                 numberOfLines={1}
               >
                 {preview}

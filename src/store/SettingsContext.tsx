@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language, StringKey, translate } from '../i18n/translations';
-import { Qiraah } from '../lib/quranData';
+import { Qiraah, QALOON_ENABLED } from '../lib/quranData';
 import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
 import { CalculationMethodId, DEFAULT_CALCULATION_METHOD } from '../lib/prayerTimes';
 import { AthanMode } from '../lib/notifications';
@@ -13,7 +13,10 @@ import {
   buildPalette,
 } from '../theme/colors';
 
-export type FontFamilyId = 'amiri' | 'scheherazade' | 'diwan' | 'ruqa';
+// Only fonts that contain every Quranic mark in the Tanzil text are offered for
+// the Mushaf. (Ruqaa and Diwani lacked ~20 marks, including the small waw/yeh
+// of silah and the waqf signs, so they were removed.)
+export type FontFamilyId = 'amiri' | 'scheherazade';
 export type FontSizeId = 'small' | 'medium' | 'large' | 'xlarge';
 export type ThemeId = 'light' | 'dark';
 
@@ -119,11 +122,12 @@ function computeScaledFont(base: number, scale: number): number {
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export const FONT_FAMILY_MAP: Record<FontFamilyId, string> = {
-  amiri: 'Amiri-Regular',
+  amiri: 'AmiriQuran-Regular',
   scheherazade: 'ScheherazadeNew-Regular',
-  diwan: 'Rakkas-Regular',
-  ruqa: 'ArefRuqaa-Regular',
 };
+
+/** Font for Quran text shown outside the reader (search results, previews). */
+export const QURAN_FONT = 'AmiriQuran-Regular';
 
 export const FONT_SIZE_MAP: Record<FontSizeId, number> = {
   small: 22,
@@ -141,7 +145,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
-          setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
+          const loaded: Settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+          // Older versions offered fonts and a narration that are now withdrawn.
+          if (!(loaded.fontFamily in FONT_FAMILY_MAP)) loaded.fontFamily = DEFAULT_SETTINGS.fontFamily;
+          if (loaded.qiraah === 'qaloon' && !QALOON_ENABLED) loaded.qiraah = 'hafs';
+          setSettings(loaded);
         }
         // First launch keeps the defaults (Arabic UI, medium Quran font); the
         // user can switch language/size any time in Settings.
