@@ -154,7 +154,8 @@ export function AyahCard({
               )
             : arabicDisplay}
           {'\u00A0'}
-          <Text style={{ color: isPlaying ? palette.accent : palette.primary }}>
+          {/* Smaller than the ayah text, so the number does not draw the eye. */}
+          <Text style={{ color: isPlaying ? palette.accent : palette.primary, fontSize: FONT_SIZE_MAP[fontSize] * 0.65 }}>
             {ayahEndMarker(ayah.verse)}
           </Text>
         </Text>
