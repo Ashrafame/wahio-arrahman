@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { Ayah, ayahEndMarker, displayAyahSegments, displayAyahText } from '../lib/quranData';
-import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
+import { FONT_FAMILY_MAP, FONT_LINE_HEIGHT, FONT_SIZE_MAP, QURAN_TEXT_TOP_PADDING, useSettings } from '../store/SettingsContext';
 
 interface Props {
   ayah: Ayah;
@@ -139,7 +139,8 @@ export function AyahCard({
               color: palette.text,
               fontFamily: FONT_FAMILY_MAP[fontFamily],
               fontSize: FONT_SIZE_MAP[fontSize],
-              lineHeight: FONT_SIZE_MAP[fontSize] * 2, // room for stacked Quranic marks so none are clipped
+              lineHeight: FONT_SIZE_MAP[fontSize] * FONT_LINE_HEIGHT[fontFamily],
+              paddingTop: FONT_SIZE_MAP[fontSize] * QURAN_TEXT_TOP_PADDING,
               ...arabicTextShadow,
             },
           ]}

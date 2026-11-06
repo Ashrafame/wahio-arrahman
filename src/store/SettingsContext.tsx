@@ -48,16 +48,16 @@ interface Settings {
   notifGratitude: boolean;
   athanMode: AthanMode;
   athanSound: string;
-  /** Set once the one-time move of the Mushaf font to Scheherazade New has run. */
-  mushafFontV2: boolean;
+  /** Set once the one-time move of the Mushaf font to Amiri Quran has run. */
+  mushafFontV3: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
   language: 'ar',
   qiraah: 'hafs',
-  // Scheherazade New keeps waqf marks close to their word; Amiri draws them so
-  // high they touch the line above.
-  fontFamily: 'scheherazade',
+  // Amiri Quran: across all 4,364 waqf marks none touches a letter, and only one
+  // touches another mark; Scheherazade New has ~100 places where they overlap.
+  fontFamily: 'amiri',
   fontSize: 'medium',
   uiFontScale: 0.5,
   showTranslation: false,
@@ -79,7 +79,7 @@ const DEFAULT_SETTINGS: Settings = {
   notifGratitude: true,
   athanMode: 'athan',
   athanSound: 'ash',
-  mushafFontV2: true,
+  mushafFontV3: true,
 };
 
 const STORAGE_KEY = 'wahio-arrahman:settings';
@@ -136,7 +136,22 @@ export const FONT_FAMILY_MAP: Record<FontFamilyId, string> = {
 };
 
 /** Font for Quran text shown outside the reader (search results, previews). */
-export const QURAN_FONT = 'ScheherazadeNew-Regular';
+export const QURAN_FONT = 'AmiriQuran-Regular';
+
+/**
+ * Line height of Mushaf text, as a multiple of the font size. Each font needs
+ * room for its tallest stacked marks: Amiri Quran's own metrics are 1.815 em
+ * above the baseline and 0.634 em below (2.45 em); Scheherazade New's stacked
+ * marks reach about 2 em above the baseline. Less than this and the marks of
+ * one line crowd the line above, or are clipped on an ayah's first line.
+ */
+export const FONT_LINE_HEIGHT: Record<FontFamilyId, number> = {
+  amiri: 2.5,
+  scheherazade: 2.4,
+};
+
+/** Extra space above an ayah's first line so its tallest marks are never clipped. */
+export const QURAN_TEXT_TOP_PADDING = 0.35;
 
 export const FONT_SIZE_MAP: Record<FontSizeId, number> = {
   small: 22,
@@ -157,11 +172,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           const loaded: Settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
           // Older versions offered fonts and a narration that are now withdrawn.
           if (!(loaded.fontFamily in FONT_FAMILY_MAP)) loaded.fontFamily = DEFAULT_SETTINGS.fontFamily;
-          // One-time move to Scheherazade New for existing installs; users can
-          // still pick Amiri again in Settings afterwards.
-          if (!JSON.parse(stored).mushafFontV2) {
-            loaded.fontFamily = 'scheherazade';
-            loaded.mushafFontV2 = true;
+          // One-time move to Amiri Quran for existing installs; users can still
+          // pick Scheherazade again in Settings afterwards.
+          if (!JSON.parse(stored).mushafFontV3) {
+            loaded.fontFamily = 'amiri';
+            loaded.mushafFontV3 = true;
           }
           if (loaded.qiraah === 'qaloon' && !QALOON_ENABLED) loaded.qiraah = 'hafs';
           setSettings(loaded);

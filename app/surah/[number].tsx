@@ -688,7 +688,8 @@ const styles = StyleSheet.create({
   bismillah: {
     textAlign: 'center',
     fontSize: 26,
-    lineHeight: 52,
+    lineHeight: 65, // Amiri Quran needs 2.5 em for its marks
+    paddingTop: 8,
   },
   bismillahTranslation: {
     textAlign: 'center',
