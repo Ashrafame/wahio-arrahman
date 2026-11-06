@@ -93,6 +93,27 @@ export default function HomeScreen() {
             onPress={() => router.push({ pathname: '/surah/[number]', params: { number: String(item.number) } })}
           />
         )}
+        ListHeaderComponent={
+          query.trim() ? null : (
+            <Pressable
+              onPress={() => router.push('/mushaf/qaloon')}
+              style={[styles.mushafCard, { backgroundColor: palette.surface, borderColor: palette.accent, flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+            >
+              <View style={[styles.mushafIcon, { backgroundColor: palette.primary }]}>
+                <Ionicons name="book" size={20} color={palette.primaryText} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: palette.text, fontWeight: '700', fontSize: scaleFont(15), textAlign: isRTL ? 'right' : 'left' }}>
+                  مصحف الأوقاف الليبي
+                </Text>
+                <Text style={{ color: palette.textMuted, fontSize: scaleFont(12), marginTop: 2, textAlign: isRTL ? 'right' : 'left' }}>
+                  رواية قالون عن نافع · صفحات المصحف كما طُبع
+                </Text>
+              </View>
+              <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={palette.textMuted} />
+            </Pressable>
+          )
+        }
         ListEmptyComponent={
           query.trim() ? (
             <Text style={[styles.empty, { color: palette.textMuted }]}>{t('noResults')}</Text>
@@ -151,6 +172,8 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  mushafCard: { alignItems: 'center', gap: 12, marginHorizontal: 12, marginTop: 10, marginBottom: 4, padding: 12, borderRadius: 14, borderWidth: 1 },
+  mushafIcon: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   container: { flex: 1 },
   header: {
     alignItems: 'center',

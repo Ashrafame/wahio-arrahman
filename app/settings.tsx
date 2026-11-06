@@ -11,7 +11,7 @@ import {
   ThemeId,
   useSettings,
 } from '../src/store/SettingsContext';
-import { Qiraah, QALOON_ENABLED } from '../src/lib/quranData';
+import { QaloonMushafCard } from '../src/components/QaloonMushafCard';
 import { MUEZZINS } from '../src/lib/notifications';
 import { toggleAthanPreview, onAthanPreviewChange, currentAthanPreview, stopAthanPreview } from '../src/lib/athanAudio';
 import {
@@ -346,20 +346,10 @@ export default function SettingsScreen() {
           />
         </Section>
 
-        {QALOON_ENABLED ? (
-          <Section title={t('qiraah')} palette={palette} isRTL={isRTL}>
-            <OptionRow
-              options={[
-                { id: 'hafs', label: t('qiraahHafs') },
-                { id: 'qaloon', label: t('qiraahQaloon') },
-              ]}
-              value={qiraah}
-              onChange={(v) => setQiraah(v as Qiraah)}
-              palette={palette}
-              isRTL={isRTL}
-            />
-          </Section>
-        ) : null}
+        {/* Qaloon is read from the page images of the Libyan Awqaf Mushaf. */}
+        <Section title={t('qiraahQaloon')} palette={palette} isRTL={isRTL}>
+          <QaloonMushafCard />
+        </Section>
 
         <Section title={t('fontFamily')} palette={palette} isRTL={isRTL}>
           <OptionRow

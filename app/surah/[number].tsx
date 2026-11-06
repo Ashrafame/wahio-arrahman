@@ -55,13 +55,13 @@ export default function SurahScreen() {
   const qaloonLastScrolledVerse = useRef<number | null>(null);
 
   const chapter = getChapter(chapterNumber);
-  const ayahs = useMemo(() => getSurahAyahs(chapterNumber, qiraah), [chapterNumber, qiraah]);
+  const ayahs = useMemo(() => getSurahAyahs(chapterNumber), [chapterNumber]);
   const qaloonIsPerAyah = !!QALOON_RECITERS.find((r) => r.id === qaloonReciter)?.folder;
 
   // Proportional boundaries for Qaloon — used only for auto-scroll when NOT per-ayah
   const qaloonBoundaries = useMemo(() => {
     if (qiraah !== 'qaloon' || qaloonIsPerAyah) return null;
-    const textWeights = ayahs.map((a) => Math.max(1, (a.textQaloon || '').replace(/\s+/g, '').length));
+    const textWeights = ayahs.map((a) => Math.max(1, (a.textHafs || '').replace(/\s+/g, '').length));
     const totalText = textWeights.reduce((s, w) => s + w, 0);
     const INTRO = (chapterNumber === 1 || chapterNumber === 9) ? 12 : 32;
     const PAUSE = 6;
@@ -289,10 +289,14 @@ export default function SurahScreen() {
   };
 
   const handleQiraahChange = (newQiraah: 'hafs' | 'qaloon') => {
+    // Qaloon is read from the Libyan Awqaf Mushaf pages, opened at this surah.
+    if (newQiraah === 'qaloon') {
+      router.push({ pathname: '/mushaf/qaloon', params: { surah: String(chapterNumber) } });
+      return;
+    }
     setQiraah(newQiraah);
     if (!fromJuz) return;
-    const juzData = newQiraah === 'qaloon' ? JUZ_DATA_QALOON : JUZ_DATA_HAFS;
-    const juz = juzData.find((j) => j.number === fromJuz);
+    const juz = JUZ_DATA_HAFS.find((j) => j.number === fromJuz);
     if (!juz) return;
     if (juz.startSurah === chapterNumber) {
       router.setParams({ verse: juz.startAyah.toString() });
@@ -324,7 +328,7 @@ export default function SurahScreen() {
           <Text style={[styles.headerSubtitle, { color: palette.primaryText }]}>
             {fromJuz ? (isRTL ? `الجزء ${fromJuz} · ` : `Juz ${fromJuz} · `) : ''}
             {(!isRTL || showTranslation) ? `${chapter.nameTranslationEn} · ` : ''}
-            {getVerseCount(chapterNumber, qiraah)} {t('verses')}
+            {getVerseCount(chapterNumber)} {t('verses')}
           </Text>
         </View>
         <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center' }}>

@@ -1,14 +1,12 @@
 import chaptersRaw from '../../assets/data/chapters.json';
 import hafsRaw from '../../assets/data/quran_hafs.json';
-import qaloonRaw from '../../assets/data/quran_qaloon.json';
 import translationEnRaw from '../../assets/data/translation_en_yusufali.json';
 import muyassarRaw from '../../assets/data/tafsir_muyassar.json';
 
+// The text reader is Hafs only (Tanzil). Qaloon is read from the page images of
+// the Libyan Awqaf Mushaf (src/lib/qaloonMushaf.ts); the old, unverified Qaloon
+// text was removed. 'qaloon' remains for the recitation settings.
 export type Qiraah = 'hafs' | 'qaloon';
-
-// The Qaloon text has no verified source yet, so it is hidden from the UI until
-// an authenticated text (e.g. from the King Fahd Complex) is bundled.
-export const QALOON_ENABLED = false;
 
 // Attribution required by the Tanzil licence (shown on the About screen).
 export const QURAN_TEXT_SOURCE = {
@@ -31,7 +29,6 @@ export interface Ayah {
   verse: number;
   key: string;
   textHafs: string;
-  textQaloon: string;
   translationEn: string;
   tafsirMuyassar: string;
 }
@@ -68,7 +65,6 @@ for (const key in tanzilAyahs) {
   const [chapter, verse] = key.split(':').map(Number);
   hafsMap[key] = verse === 1 ? splitBasmala(chapter, tanzilAyahs[key]).rest : tanzilAyahs[key];
 }
-const qaloonMap = qaloonRaw as Record<string, string>;
 
 // Tanzil writes each waqf mark (U+06D6–U+06DC: ۖ ۗ ۘ ۙ ۚ ۛ ۜ) after a space, so
 // it sits on the space and iOS draws it far above the word. For DISPLAY only, we
@@ -123,26 +119,23 @@ export function getAyah(chapter: number, verse: number): Ayah {
     verse,
     key,
     textHafs: hafsMap[key] ?? '',
-    textQaloon: qaloonMap[key] ?? '',
     translationEn: translationEnMap[key] ?? '',
     tafsirMuyassar: muyassarMap[key] ?? '',
   };
 }
 
-export function getAyahText(chapter: number, verse: number, qiraah: Qiraah): string {
-  const key = `${chapter}:${verse}`;
-  return (qiraah === 'hafs' ? hafsMap : qaloonMap)[key] ?? '';
+export function getAyahText(chapter: number, verse: number): string {
+  return hafsMap[`${chapter}:${verse}`] ?? '';
 }
 
-export function getVerseCount(chapter: number, qiraah: Qiraah = 'hafs'): number {
-  const map = qiraah === 'hafs' ? hafsMap : qaloonMap;
+export function getVerseCount(chapter: number): number {
   let count = 0;
-  while (map[`${chapter}:${count + 1}`]) count++;
+  while (hafsMap[`${chapter}:${count + 1}`]) count++;
   return count || (getChapter(chapter)?.versesCount ?? 0);
 }
 
-export function getSurahAyahs(chapter: number, qiraah: Qiraah = 'hafs'): Ayah[] {
-  const count = getVerseCount(chapter, qiraah);
+export function getSurahAyahs(chapter: number): Ayah[] {
+  const count = getVerseCount(chapter);
   const ayahs: Ayah[] = [];
   for (let v = 1; v <= count; v++) {
     ayahs.push(getAyah(chapter, v));
@@ -179,12 +172,12 @@ function normalizeArabicExpanded(text: string): string {
     .toLowerCase();
 }
 
-export function searchQuran(query: string, qiraah: Qiraah, limit = 100): SearchResult[] {
+export function searchQuran(query: string, limit = 100): SearchResult[] {
   const q = query.trim();
   if (!q) return [];
   const qLower = q.toLowerCase();
   const normalizedQuery = normalizeArabic(q);
-  const textMap = qiraah === 'hafs' ? hafsMap : qaloonMap;
+  const textMap = hafsMap;
 
   // First pass: scan all ayahs without limit to compute accurate counts
   const arabicHits: { chapter: number; verse: number; snippet: string }[] = [];

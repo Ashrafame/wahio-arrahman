@@ -8,6 +8,7 @@ import { IslamicPatternBackground } from '../src/components/IslamicPatternBackgr
 import { Palette } from '../src/theme/colors';
 import { currentAppVersion } from '../src/lib/appUpdate';
 import { QURAN_TEXT_SOURCE } from '../src/lib/quranData';
+import { QALOON_MUSHAF_SOURCE } from '../src/lib/qaloonMushaf';
 
 // Read from app.json (via expo-constants) so it always matches the real build.
 const APP_VERSION = currentAppVersion();
@@ -95,7 +96,7 @@ export default function AboutScreen() {
           ar={ar}
         >
           {[
-            { icon: 'book-outline',          ar: 'القرآن الكريم كاملاً — برواية حفص عن عاصم',        en: 'Complete Quran — Hafs narration' },
+            { icon: 'book-outline',          ar: 'القرآن الكريم كاملاً — حفص عن عاصم، ومصحف الأوقاف الليبي برواية قالون', en: 'Complete Quran — Hafs, and the Libyan Awqaf Mushaf in Qaloon' },
             { icon: 'language-outline',      ar: 'ترجمة إنجليزية واضحة وأمينة',                     en: 'Clear and faithful English translation' },
             { icon: 'reader-outline',        ar: 'تفاسير من مصادر علمية موثوقة',                     en: 'Tafsir from trusted scholarly sources' },
             { icon: 'musical-notes-outline', ar: 'تلاوات صوتية بأصوات كبار القراء',                 en: 'Audio recitations by renowned reciters' },
@@ -173,6 +174,11 @@ export default function AboutScreen() {
                 ? 'رواية حفص عن عاصم — منقول حرفياً دون أي تعديل — tanzil.net'
                 : 'Hafs narration — reproduced verbatim, unmodified — tanzil.net',
               url: QURAN_TEXT_SOURCE.url,
+            },
+            {
+              label: ar ? 'مصحف رواية قالون عن نافع' : 'Qaloon Mushaf',
+              value: ar ? QALOON_MUSHAF_SOURCE.nameAr : QALOON_MUSHAF_SOURCE.nameEn,
+              sub: ar ? 'صفحات المصحف المطبوع كما هي' : 'The printed pages, unchanged',
             },
             {
               label: ar ? 'الترجمة الإنجليزية' : 'English Translation',

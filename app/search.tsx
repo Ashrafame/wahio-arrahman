@@ -16,7 +16,7 @@ export default function SearchScreen() {
   const directRef = useMemo(() => parseAyahReference(query), [query]);
   const results = useMemo<SearchResult[]>(() => {
     if (!query.trim() || directRef) return [];
-    return searchQuran(query, qiraah, 200);
+    return searchQuran(query, 200);
   }, [query, qiraah, directRef]);
 
   const firstArabic = results.find(r => r.matchedIn === 'arabic');

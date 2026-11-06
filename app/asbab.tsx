@@ -83,7 +83,7 @@ export default function AsbabScreen() {
           </View>
         )}
         renderItem={({ item }) => {
-          const preview = displayAyahText(getAyahText(item.chapter, item.verse, qiraah));
+          const preview = displayAyahText(getAyahText(item.chapter, item.verse));
           return (
             <Pressable
               onPress={() => goToVerse(item.chapter, item.verse)}

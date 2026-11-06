@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language, StringKey, translate } from '../i18n/translations';
-import { Qiraah, QALOON_ENABLED } from '../lib/quranData';
+import { Qiraah } from '../lib/quranData';
 import { DEFAULT_HAFS_RECITER_ID, DEFAULT_QALOON_RECITER_ID } from '../lib/reciters';
 import { CalculationMethodId, DEFAULT_CALCULATION_METHOD } from '../lib/prayerTimes';
 import { AthanMode } from '../lib/notifications';
@@ -173,7 +173,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             loaded.fontFamily = 'amiri';
             loaded.mushafFontV3 = true;
           }
-          if (loaded.qiraah === 'qaloon' && !QALOON_ENABLED) loaded.qiraah = 'hafs';
+          // The text reader is Hafs only; Qaloon opens the Libyan Awqaf Mushaf pages.
+          if (loaded.qiraah === 'qaloon') loaded.qiraah = 'hafs';
           setSettings(loaded);
         }
         // First launch keeps the defaults (Arabic UI, medium Quran font); the

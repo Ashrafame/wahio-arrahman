@@ -46,8 +46,8 @@ export function AyahCard({
   const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, showEnglishQuran, waqfMarksRed, scaleFont, palette } = useSettings();
   // Copy uses the verbatim bundled text. Display only attaches waqf marks to
   // their words (see displayAyahText); letters and diacritics are never altered.
-  const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
-  const arabicDisplay = qiraah === 'hafs' ? displayAyahText(arabicText) : arabicText;
+  const arabicText = ayah.textHafs;
+  const arabicDisplay = displayAyahText(arabicText);
   const waqfColor = theme === 'dark' ? '#EF5350' : '#C62828';
   const englishMode = !isRTL && showEnglishQuran;
 
@@ -144,7 +144,7 @@ export function AyahCard({
             },
           ]}
         >
-          {waqfMarksRed && qiraah === 'hafs'
+          {waqfMarksRed
             ? displayAyahSegments(arabicText).map((seg, i) =>
                 seg.waqf ? (
                   <Text key={i} style={{ color: waqfColor }}>{seg.text}</Text>
