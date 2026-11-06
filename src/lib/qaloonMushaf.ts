@@ -12,6 +12,8 @@ import indexRaw from '../../assets/data/qaloon_libya.json';
 import { chapters } from './quranData';
 
 interface PageIndex {
+  /** Optional zoom to the page's content (pages 1–2): [x, y, w, h] in page units. */
+  v?: [number, number, number, number];
   /** SHA-256 of the page SVG. */
   h: string;
   /** [surah, ayah, [x, y, w, h, ...]] for every ayah (or part of one) on the page. */
@@ -59,6 +61,11 @@ export interface PageAyah {
 
 export function pageAyahs(page: number): PageAyah[] {
   return (index.pages[page - 1]?.a ?? []).map(([surah, ayah, rects]) => ({ surah, ayah, rects }));
+}
+
+/** The part of the page to show: [x, y, w, h] in page units. */
+export function pageViewBox(page: number): [number, number, number, number] {
+  return index.pages[page - 1]?.v ?? [0, 0, index.width, index.height];
 }
 
 /** The ayah at a point on the page (page units), if any. */

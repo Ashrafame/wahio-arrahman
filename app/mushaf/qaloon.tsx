@@ -4,7 +4,9 @@ import {
   FlatList,
   GestureResponderEvent,
   Modal,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -16,15 +18,15 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { useSettings } from '../../src/store/SettingsContext';
+import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
 import { chapters } from '../../src/lib/quranData';
 import {
   PagePaths,
   QALOON_PAGE_COUNT,
-  QALOON_PAGE_HEIGHT,
-  QALOON_PAGE_WIDTH,
   ayahAt,
   loadPage,
   pageAyahs,
+  pageViewBox,
   pageSurahs,
   surahName,
   surahStartPage,
@@ -32,13 +34,25 @@ import {
 
 const LAST_PAGE_KEY = 'wahio-arrahman:qaloon-libya:last-page';
 const BOOKMARKS_KEY = 'wahio-arrahman:qaloon-libya:bookmarks';
+const WEIGHT_KEY = 'wahio-arrahman:qaloon-libya:weight';
+
+// Line weight added to the printed text, in page units, so it stays legible when
+// a whole page is scaled down to a phone. Drawn in the text colour around the
+// original outlines; the letters and marks themselves are not changed.
+const WEIGHTS = [
+  { stroke: 0, label: 'الأصل' },
+  { stroke: 1.6, label: 'متوسط' },
+  { stroke: 2.6, label: 'عريض' },
+];
+const DEFAULT_WEIGHT = 1;
 const PAGES = Array.from({ length: QALOON_PAGE_COUNT }, (_, i) => i + 1);
 
 interface PageColors {
-  paper: string;
   text: string;
   ornament: string;
   highlight: string;
+  /** Covers hidden ayahs in memorisation mode. */
+  cover: string;
 }
 
 interface Selected {
@@ -49,14 +63,18 @@ interface Selected {
 
 export default function QaloonMushafScreen() {
   const params = useLocalSearchParams<{ page?: string; surah?: string }>();
-  const { palette, theme, isRTL } = useSettings();
+  const { palette, isRTL } = useSettings();
   const insets = useSafeAreaInsets();
-  const { width: screenW, height: screenH } = useWindowDimensions();
+  const { width: screenW } = useWindowDimensions();
   const listRef = useRef<FlatList<number>>(null);
 
-  const colors: PageColors = theme === 'dark'
-    ? { paper: '#14211A', text: '#ECE4CF', ornament: '#C9A24B', highlight: '#C9A24B' }
-    : { paper: '#FBF6EA', text: '#1D1D1D', ornament: '#B8924E', highlight: '#C9A24B' };
+  // The page is drawn on the app's own background and colours, like the Hafs reader.
+  const colors: PageColors = {
+    text: palette.text,
+    ornament: palette.accent,
+    highlight: palette.accent,
+    cover: palette.surfaceAlt,
+  };
 
   const [page, setPage] = useState<number | null>(null);
   const [selected, setSelected] = useState<Selected | null>(null);
@@ -64,6 +82,7 @@ export default function QaloonMushafScreen() {
   const [revealed, setRevealed] = useState<Record<number, number>>({});
   const [indexOpen, setIndexOpen] = useState(false);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
+  const [weight, setWeight] = useState(DEFAULT_WEIGHT);
 
   // Opening page: explicit page › surah start › last read › 1.
   useEffect(() => {
@@ -73,6 +92,8 @@ export default function QaloonMushafScreen() {
       setPage(Math.min(Math.max(start, 1), QALOON_PAGE_COUNT));
       const saved = await AsyncStorage.getItem(BOOKMARKS_KEY).catch(() => null);
       if (saved) setBookmarks(JSON.parse(saved));
+      const w = await AsyncStorage.getItem(WEIGHT_KEY).catch(() => null);
+      if (w !== null && WEIGHTS[Number(w)]) setWeight(Number(w));
     })();
   }, [params.page, params.surah]);
 
@@ -80,11 +101,17 @@ export default function QaloonMushafScreen() {
     if (page) AsyncStorage.setItem(LAST_PAGE_KEY, String(page)).catch(() => {});
   }, [page]);
 
-  // The page fills the space between the bars, keeping the printed proportions.
+  // The page uses the full screen width (the text is already small on a phone);
+  // if that makes it taller than the screen, it scrolls vertically. On iOS it can
+  // also be pinch-zoomed.
   const headerH = 56;
-  const availH = screenH - insets.top - insets.bottom - headerH;
-  const pageH = Math.min(availH, screenW * (QALOON_PAGE_HEIGHT / QALOON_PAGE_WIDTH));
-  const pageW = pageH * (QALOON_PAGE_WIDTH / QALOON_PAGE_HEIGHT);
+  const pageW = screenW - 8;
+
+  const cycleWeight = () => {
+    const next = (weight + 1) % WEIGHTS.length;
+    setWeight(next);
+    AsyncStorage.setItem(WEIGHT_KEY, String(next)).catch(() => {});
+  };
 
   const goTo = useCallback((p: number) => {
     setPage(p);
@@ -115,11 +142,12 @@ export default function QaloonMushafScreen() {
   const title = headerSurahs.map(surahName).join(' — ');
 
   if (!page) {
-    return <View style={[styles.fill, { backgroundColor: colors.paper }]}><ActivityIndicator style={styles.fill} color={palette.primary} /></View>;
+    return <View style={[styles.fill, { backgroundColor: palette.background }]}><ActivityIndicator style={styles.fill} color={palette.primary} /></View>;
   }
 
   return (
     <View style={[styles.fill, { backgroundColor: palette.background, paddingTop: insets.top }]}>
+      <IslamicPatternBackground />
       <View style={[styles.header, { backgroundColor: palette.primary, height: headerH, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable onPress={() => router.back()} hitSlop={10} style={styles.iconBtn}>
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />
@@ -130,6 +158,9 @@ export default function QaloonMushafScreen() {
             صفحة {page} · مصحف الأوقاف الليبي · قالون
           </Text>
         </View>
+        <Pressable onPress={cycleWeight} hitSlop={8} style={styles.iconBtn} accessibilityLabel={`سُمك الخط: ${WEIGHTS[weight].label}`}>
+          <Text style={{ color: palette.primaryText, fontSize: 17, fontWeight: weight === 0 ? '400' : weight === 1 ? '700' : '900' }}>أ</Text>
+        </Pressable>
         <Pressable onPress={() => { setHifz(!hifz); setSelected(null); }} hitSlop={8} style={styles.iconBtn}>
           <Ionicons name={hifz ? 'eye-off' : 'eye-off-outline'} size={22} color={palette.primaryText} />
         </Pressable>
@@ -171,17 +202,26 @@ export default function QaloonMushafScreen() {
           }
         }}
         renderItem={({ item }) => (
-          <View style={{ width: screenW, alignItems: 'center', justifyContent: 'center' }}>
+          <ScrollView
+            style={{ width: screenW }}
+            contentContainerStyle={{ alignItems: 'center', paddingVertical: 6 }}
+            showsVerticalScrollIndicator={false}
+            maximumZoomScale={Platform.OS === 'ios' ? 3 : 1}
+            minimumZoomScale={1}
+            bouncesZoom
+            centerContent
+          >
             <MushafPage
               page={item}
               width={pageW}
-              height={pageH}
+              height={pageW * (pageViewBox(item)[3] / pageViewBox(item)[2])}
+              stroke={WEIGHTS[weight].stroke}
               colors={colors}
               selected={selected && selected.page === item ? selected : null}
               hiddenFrom={hifz ? revealed[item] ?? 0 : null}
               onTap={onTap}
             />
-          </View>
+          </ScrollView>
         )}
       />
 
@@ -205,11 +245,13 @@ export default function QaloonMushafScreen() {
 }
 
 const MushafPage = memo(function MushafPage({
-  page, width, height, colors, selected, hiddenFrom, onTap,
+  page, width, height, stroke, colors, selected, hiddenFrom, onTap,
 }: {
   page: number;
   width: number;
   height: number;
+  /** Extra line weight for the text, in page units (0 = as printed). */
+  stroke: number;
   colors: PageColors;
   selected: Selected | null;
   /** In memorisation mode: how many ayahs on this page are shown; the rest are covered. */
@@ -232,33 +274,43 @@ const MushafPage = memo(function MushafPage({
   }, [page, attempt]);
 
   const ayahs = useMemo(() => pageAyahs(page), [page]);
-  const scale = width / QALOON_PAGE_WIDTH;
+  const [vx, vy, vw, vh] = pageViewBox(page);
+  const scale = width / vw;
 
   const handlePress = (e: GestureResponderEvent) => {
-    onTap(page, e.nativeEvent.locationX / scale, e.nativeEvent.locationY / scale);
+    onTap(page, vx + e.nativeEvent.locationX / scale, vy + e.nativeEvent.locationY / scale);
   };
 
-  const rectsOf = (r: number[], fill: string, opacity: number, key: string) => {
+  const rectsOf = (r: number[], fill: string, opacity: number, key: string, radius = 0) => {
     const out = [];
     for (let i = 0; i < r.length; i += 4) {
-      out.push(<Rect key={`${key}-${i}`} x={r[i]} y={r[i + 1]} width={r[i + 2]} height={r[i + 3]} fill={fill} fillOpacity={opacity} />);
+      out.push(
+        <Rect key={`${key}-${i}`} x={r[i]} y={r[i + 1]} width={r[i + 2]} height={r[i + 3]} rx={radius} fill={fill} fillOpacity={opacity} />,
+      );
     }
     return out;
   };
 
   return (
-    <Pressable onPress={handlePress} style={{ width, height, backgroundColor: colors.paper, borderRadius: 6 }}>
+    <Pressable onPress={handlePress} style={{ width, height }}>
       {paths ? (
-        <Svg width={width} height={height} viewBox={`0 0 ${QALOON_PAGE_WIDTH} ${QALOON_PAGE_HEIGHT}`}>
+        <Svg width={width} height={height} viewBox={`${vx} ${vy} ${vw} ${vh}`}>
           {selected
             ? ayahs
                 .filter((a) => a.surah === selected.surah && a.ayah === selected.ayah)
-                .flatMap((a, i) => rectsOf(a.rects, colors.highlight, 0.28, `h${i}`))
+                .flatMap((a, i) => rectsOf(a.rects, colors.highlight, 0.25, `h${i}`, 14))
             : null}
           <Path d={paths.ornament} fill={colors.ornament} fillRule="evenodd" />
-          <Path d={paths.text} fill={colors.text} fillRule="evenodd" />
+          <Path
+            d={paths.text}
+            fill={colors.text}
+            fillRule="evenodd"
+            stroke={stroke ? colors.text : undefined}
+            strokeWidth={stroke || undefined}
+            strokeLinejoin="round"
+          />
           {hiddenFrom !== null
-            ? ayahs.slice(hiddenFrom).flatMap((a, i) => rectsOf(a.rects, colors.paper, 1, `c${i}`))
+            ? ayahs.slice(hiddenFrom).flatMap((a, i) => rectsOf(a.rects, colors.cover, 1, `c${i}`, 14))
             : null}
         </Svg>
       ) : failed ? (

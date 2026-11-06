@@ -22,6 +22,12 @@ const OUTPUT = join(ROOT, 'assets/data/qaloon_libya.json');
 // Commit that added the source pages. Pages are served from exactly this commit.
 const COMMIT = '855092b0e219c19cd6b59170db1c6c0fd638e02f';
 const PAGE_COUNT = 612;
+
+// Pages 1 and 2 (Al-Fatiha, start of Al-Baqara) print short lines in the middle
+// of the page, so on a phone they are shown zoomed to their content: x, y, w, h
+// in page units. Checked by rendering: the surah header and every ayah stay
+// inside; only a few scattered ornament dots at the far edges fall outside.
+const CROPS = { 1: [170, 470, 780, 1360], 2: [170, 470, 780, 1360] };
 const AYAH_COUNT = 6214; // Qaloon count
 const SURAH_COUNT = 114;
 
@@ -55,6 +61,7 @@ function build() {
     const svg = readFileSync(join(SOURCE, `${pad3(p)}.svg`));
     if (meta.page !== p || meta.width !== 1120 || meta.height !== 2250) fail(`unexpected metadata on page ${p}`);
     pages.push({
+      ...(CROPS[p] ? { v: CROPS[p] } : {}),
       h: sha256(svg),
       a: meta.polygons.map((poly) => [poly.surah, poly.ayah, rects(poly.path, `page ${p} ayah ${poly.number}`)]),
     });
@@ -76,6 +83,9 @@ function check(index) {
   const seen = new Map();
   index.pages.forEach((page, i) => {
     if (!/^[0-9a-f]{64}$/.test(page.h)) fail(`bad hash on page ${i + 1}`);
+    if (page.v && (page.v.length !== 4 || page.v[0] < 0 || page.v[1] < 0 || page.v[0] + page.v[2] > 1120 || page.v[1] + page.v[3] > 2250)) {
+      fail(`bad crop on page ${i + 1}`);
+    }
     for (const [s, a, r] of page.a) {
       if (!r.length || r.length % 4) fail(`bad ayah shape ${s}:${a} on page ${i + 1}`);
       seen.set(`${s}:${a}`, true);
