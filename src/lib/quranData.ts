@@ -80,10 +80,9 @@ export function displayAyahText(text: string): string {
   return text.replace(SPACE_BEFORE_WAQF, '');
 }
 
-/** Ayah-end marker shown after the ayah, as in the Mushaf: ﴿٢٥٥﴾ */
+/** Ayah-end marker shown after the ayah, as in the Mushaf: ﴿255﴾ */
 export function ayahEndMarker(verse: number): string {
-  const digits = String(verse).replace(/[0-9]/g, (d) => String.fromCharCode(0x0660 + Number(d)));
-  return `﴿${digits}﴾`;
+  return `﴿${verse}﴾`;
 }
 const translationEnMap = translationEnRaw as Record<string, string>;
 const muyassarMap = muyassarRaw as Record<string, string>;
