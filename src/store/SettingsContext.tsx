@@ -46,12 +46,16 @@ interface Settings {
   notifGratitude: boolean;
   athanMode: AthanMode;
   athanSound: string;
+  /** Set once the one-time move of the Mushaf font to Scheherazade New has run. */
+  mushafFontV2: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
   language: 'ar',
   qiraah: 'hafs',
-  fontFamily: 'amiri',
+  // Scheherazade New keeps waqf marks close to their word; Amiri draws them so
+  // high they touch the line above.
+  fontFamily: 'scheherazade',
   fontSize: 'medium',
   uiFontScale: 0.5,
   showTranslation: false,
@@ -72,6 +76,7 @@ const DEFAULT_SETTINGS: Settings = {
   notifGratitude: true,
   athanMode: 'athan',
   athanSound: 'ash',
+  mushafFontV2: true,
 };
 
 const STORAGE_KEY = 'wahio-arrahman:settings';
@@ -127,7 +132,7 @@ export const FONT_FAMILY_MAP: Record<FontFamilyId, string> = {
 };
 
 /** Font for Quran text shown outside the reader (search results, previews). */
-export const QURAN_FONT = 'AmiriQuran-Regular';
+export const QURAN_FONT = 'ScheherazadeNew-Regular';
 
 export const FONT_SIZE_MAP: Record<FontSizeId, number> = {
   small: 22,
@@ -148,6 +153,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           const loaded: Settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
           // Older versions offered fonts and a narration that are now withdrawn.
           if (!(loaded.fontFamily in FONT_FAMILY_MAP)) loaded.fontFamily = DEFAULT_SETTINGS.fontFamily;
+          // One-time move to Scheherazade New for existing installs; users can
+          // still pick Amiri again in Settings afterwards.
+          if (!JSON.parse(stored).mushafFontV2) {
+            loaded.fontFamily = 'scheherazade';
+            loaded.mushafFontV2 = true;
+          }
           if (loaded.qiraah === 'qaloon' && !QALOON_ENABLED) loaded.qiraah = 'hafs';
           setSettings(loaded);
         }

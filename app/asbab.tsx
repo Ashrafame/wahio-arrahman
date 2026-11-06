@@ -3,7 +3,7 @@ import { SectionList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getChapter, getAyahText } from '../src/lib/quranData';
+import { displayAyahText, getChapter, getAyahText } from '../src/lib/quranData';
 import { getAsbabIndex, getAsbabCount } from '../src/lib/asbabNuzul';
 import { QURAN_FONT, useSettings } from '../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
@@ -83,7 +83,7 @@ export default function AsbabScreen() {
           </View>
         )}
         renderItem={({ item }) => {
-          const preview = getAyahText(item.chapter, item.verse, qiraah);
+          const preview = displayAyahText(getAyahText(item.chapter, item.verse, qiraah));
           return (
             <Pressable
               onPress={() => goToVerse(item.chapter, item.verse)}

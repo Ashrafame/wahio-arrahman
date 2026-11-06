@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import { Ayah } from '../lib/quranData';
+import { Ayah, ayahEndMarker, displayAyahText } from '../lib/quranData';
 import { FONT_FAMILY_MAP, FONT_SIZE_MAP, useSettings } from '../store/SettingsContext';
 
 interface Props {
@@ -44,8 +44,10 @@ export function AyahCard({
   onPlayAudio,
 }: Props) {
   const { isRTL, t, theme, qiraah, fontFamily, fontSize, showTranslation, showEnglishQuran, scaleFont, palette } = useSettings();
-  // Quran text is displayed exactly as bundled — never altered for display.
+  // Copy uses the verbatim bundled text. Display only attaches waqf marks to
+  // their words (see displayAyahText); letters and diacritics are never altered.
   const arabicText = qiraah === 'hafs' ? ayah.textHafs : ayah.textQaloon;
+  const arabicDisplay = qiraah === 'hafs' ? displayAyahText(arabicText) : arabicText;
   const englishMode = !isRTL && showEnglishQuran;
 
   // Warm text shadow that matches the Islamic pattern color — gives the floating depth
@@ -71,16 +73,21 @@ export function AyahCard({
       ]}
     >
       <View style={[styles.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <View
-          style={[
-            styles.numberBadge,
-            { backgroundColor: isPlaying ? palette.accent : palette.primary },
-          ]}
-        >
-          <Text style={{ color: palette.primaryText, fontSize: 12, fontWeight: '700' }}>
-            {ayah.verse}
-          </Text>
-        </View>
+        {/* In Arabic the number is shown at the END of the ayah, as in the Mushaf. */}
+        {englishMode ? (
+          <View
+            style={[
+              styles.numberBadge,
+              { backgroundColor: isPlaying ? palette.accent : palette.primary },
+            ]}
+          >
+            <Text style={{ color: palette.primaryText, fontSize: 12, fontWeight: '700' }}>
+              {ayah.verse}
+            </Text>
+          </View>
+        ) : (
+          <View />
+        )}
         <View style={[styles.actionsRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           {onPlayAudio ? (
             <Pressable onPress={onPlayAudio} style={styles.actionButton} hitSlop={8}>
@@ -136,7 +143,11 @@ export function AyahCard({
             },
           ]}
         >
-          {arabicText}
+          {arabicDisplay}
+          {'\u00A0'}
+          <Text style={{ color: isPlaying ? palette.accent : palette.primary }}>
+            {ayahEndMarker(ayah.verse)}
+          </Text>
         </Text>
       )}
 

@@ -101,6 +101,22 @@ function verify() {
   console.log(`✓ all ${AYAH_COUNT} ayahs match the Tanzil source exactly (sha256 ${SOURCE_SHA256.slice(0, 12)}…)`);
 
   verifyBasmalaSplit(ayahs);
+  verifyWaqfDisplay(ayahs);
+}
+
+// Mirrors displayAyahText() in src/lib/quranData.ts, which drops the space
+// before each waqf mark so the mark sits on its word. Prove that it removes
+// nothing but spaces: with all spaces stripped, both texts must be identical.
+function verifyWaqfDisplay(ayahs) {
+  let removed = 0;
+  for (const [key, text] of Object.entries(ayahs)) {
+    const display = text.replace(/ (?=[ۖ-ۜ])/g, '');
+    removed += text.length - display.length;
+    if (display.replace(/ /g, '') !== text.replace(/ /g, '')) {
+      fail(`waqf display transform changed more than spaces in ayah ${key}`);
+    }
+  }
+  console.log(`✓ waqf marks attached to their words for display (${removed} spaces dropped, no other character touched)`);
 }
 
 // Mirrors splitBasmala() in src/lib/quranData.ts: ayah 1 of every surah except

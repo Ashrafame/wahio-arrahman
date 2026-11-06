@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getChapter, parseAyahReference, SearchResult, searchQuran } from '../src/lib/quranData';
+import { displayAyahText, getChapter, parseAyahReference, SearchResult, searchQuran } from '../src/lib/quranData';
 import { QURAN_FONT, useSettings } from '../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../src/components/IslamicPatternBackground';
 
@@ -116,7 +116,7 @@ export default function SearchScreen() {
                 ]}
                 numberOfLines={3}
               >
-                {item.snippet}
+                {item.matchedIn === 'arabic' ? displayAyahText(item.snippet) : item.snippet}
               </Text>
             </Pressable>
           )}

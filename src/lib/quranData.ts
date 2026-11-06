@@ -69,6 +69,22 @@ for (const key in tanzilAyahs) {
   hafsMap[key] = verse === 1 ? splitBasmala(chapter, tanzilAyahs[key]).rest : tanzilAyahs[key];
 }
 const qaloonMap = qaloonRaw as Record<string, string>;
+
+// Tanzil writes each waqf mark (U+06D6–U+06DC: ۖ ۗ ۘ ۙ ۚ ۛ ۜ) after a space, so
+// it sits on the space and iOS draws it far above the word. For DISPLAY only, we
+// drop that one space so the mark sits on the last letter of its word, as in the
+// printed Mushaf. Nothing else changes: scripts/quran-text.mjs verifies that this
+// removes only spaces. Copying an ayah still gives the verbatim Tanzil text.
+const SPACE_BEFORE_WAQF = / (?=[ۖ-ۜ])/g;
+export function displayAyahText(text: string): string {
+  return text.replace(SPACE_BEFORE_WAQF, '');
+}
+
+/** Ayah-end marker shown after the ayah, as in the Mushaf: ﴿٢٥٥﴾ */
+export function ayahEndMarker(verse: number): string {
+  const digits = String(verse).replace(/[0-9]/g, (d) => String.fromCharCode(0x0660 + Number(d)));
+  return `﴿${digits}﴾`;
+}
 const translationEnMap = translationEnRaw as Record<string, string>;
 const muyassarMap = muyassarRaw as Record<string, string>;
 
