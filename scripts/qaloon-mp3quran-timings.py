@@ -19,13 +19,13 @@ A surah that fails is left out (the player then offers no page turning for it).
 
 Writes assets/data/qaloon_page_turns/<reciter>.json (same format as
 qaloon-page-turns.py) and keeps the raw timings in
-~/qaloon-audio-cache/<reciter>/timings/. Uses only the Python standard library.
+~/qaloon-audio-cache/<reciter>/timings/. Needs curl; otherwise only the
+Python standard library.
 """
 import json
 import os
+import subprocess
 import sys
-import time
-import urllib.request
 from datetime import date
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
@@ -35,15 +35,12 @@ API = 'https://mp3quran.net/api/v3/ayat_timing'
 
 
 def fetch_json(url):
-    req = urllib.request.Request(url, headers={'User-Agent': 'wahio-arrahman-timing-check/1.0'})
-    for attempt in range(4):
-        try:
-            with urllib.request.urlopen(req, timeout=30) as res:
-                return json.loads(res.read().decode('utf-8'))
-        except Exception:
-            if attempt == 3:
-                raise
-            time.sleep(2 ** attempt)
+    # curl, not urllib: the python.org builds of Python on macOS ship without
+    # root certificates, while curl uses the system's.
+    out = subprocess.run(['curl', '-sfL', '--retry', '3', '--max-time', '60',
+                          '-A', 'wahio-arrahman-timing-check/1.0', url],
+                         capture_output=True, text=True, check=True).stdout
+    return json.loads(out)
 
 
 def libyan_ayahs(index, surah):
