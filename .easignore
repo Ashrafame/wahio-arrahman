@@ -54,3 +54,6 @@ assets/source/qaloon-libyan-awqaf/
 /Vercel Web/
 /web and Privacy/
 /quran-uthmani.txt
+
+# Python bytecode (from running scripts/*.py)
+__pycache__/

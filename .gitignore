@@ -45,3 +45,6 @@ refresh-wahio.sh
 # generated native folders
 /ios
 /android
+
+# Python bytecode (from running scripts/*.py)
+__pycache__/
