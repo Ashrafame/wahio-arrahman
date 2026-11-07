@@ -20,12 +20,15 @@ import { NotificationsManager } from '../src/components/NotificationsManager';
 import { AthanPlayer } from '../src/components/AthanPlayer';
 import { UpdatePrompt } from '../src/components/UpdatePrompt';
 import { ensureAudioMode } from '../src/lib/audio';
+import { useAndroidNavBarInset } from '../src/lib/insets';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function RootStack() {
   const { theme, ready } = useSettings();
   const palette = getPalette(theme);
+  // Android draws the app behind its navigation bar: keep every screen above it.
+  const navBarInset = useAndroidNavBarInset();
 
   // Configure the audio session for background + silent-mode playback once at
   // startup, so the session category is already 'playback' before any tap —
@@ -44,7 +47,7 @@ function RootStack() {
           headerStyle: { backgroundColor: palette.primary },
           headerTintColor: palette.primaryText,
           headerTitleStyle: { fontWeight: '700' },
-          contentStyle: { backgroundColor: palette.background },
+          contentStyle: { backgroundColor: palette.background, paddingBottom: navBarInset },
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />

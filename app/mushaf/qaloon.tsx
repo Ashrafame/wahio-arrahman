@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
   GestureResponderEvent,
   Modal,
@@ -19,7 +20,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { useSettings } from '../../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
-import { QaloonPlayerBar } from '../../src/components/QaloonPlayerBar';
+import { QaloonPlayerBar, wakePlayerBar } from '../../src/components/QaloonPlayerBar';
+import { useScreenBottomInset } from '../../src/lib/insets';
 import { chapters } from '../../src/lib/quranData';
 import {
   PagePaths,
@@ -30,6 +32,7 @@ import {
   pageViewBox,
   pageSurahs,
   surahName,
+  surahShortName,
   surahStartPage,
 } from '../../src/lib/qaloonMushaf';
 
@@ -46,7 +49,12 @@ const WEIGHTS = [
   { stroke: 2.6, label: 'عريض' },
 ];
 const DEFAULT_WEIGHT = 1;
-const PAGES = Array.from({ length: QALOON_PAGE_COUNT }, (_, i) => i + 1);
+// Pages in list order: last page first, so page 1 sits on the far right and the
+// next page is always to the left, as in a printed Mushaf. (Listing them this way
+// rather than using an inverted list also draws each page above the one after
+// it, which the page-turn animation needs.)
+const PAGES = Array.from({ length: QALOON_PAGE_COUNT }, (_, i) => QALOON_PAGE_COUNT - i);
+const indexOfPage = (p: number) => QALOON_PAGE_COUNT - p;
 
 interface PageColors {
   text: string;
@@ -86,19 +94,33 @@ export default function QaloonMushafScreen() {
   const [weight, setWeight] = useState(DEFAULT_WEIGHT);
   // Turn pages with the recitation; paused when the reader swipes by hand.
   const [follow, setFollow] = useState(true);
+  // The surah the reader chose (from the home screen, the index, or by playing
+  // it). A page often holds the end of one surah and the start of the next; the
+  // play button must play the one that was chosen, not the first on the page.
+  const [chosenSurah, setChosenSurah] = useState<number | null>(params.surah ? Number(params.surah) : null);
+  const bottomInset = useScreenBottomInset();
+  // Horizontal scroll position, drives the page-turn animation (native thread).
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const onScroll = useMemo(
+    () => Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: true }),
+    [scrollX],
+  );
 
   // Opening page: explicit page › surah start › last read › 1.
   useEffect(() => {
     (async () => {
       let start = Number(params.page) || (params.surah ? surahStartPage(Number(params.surah)) : 0);
       if (!start) start = Number(await AsyncStorage.getItem(LAST_PAGE_KEY).catch(() => null)) || 1;
-      setPage(Math.min(Math.max(start, 1), QALOON_PAGE_COUNT));
+      const first = Math.min(Math.max(start, 1), QALOON_PAGE_COUNT);
+      scrollX.setValue(indexOfPage(first) * screenW); // the list opens there without scrolling
+      setPage(first);
+      setChosenSurah(params.surah ? Number(params.surah) : null);
       const saved = await AsyncStorage.getItem(BOOKMARKS_KEY).catch(() => null);
       if (saved) setBookmarks(JSON.parse(saved));
       const w = await AsyncStorage.getItem(WEIGHT_KEY).catch(() => null);
       if (w !== null && WEIGHTS[Number(w)]) setWeight(Number(w));
     })();
-  }, [params.page, params.surah]);
+  }, [params.page, params.surah]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (page) AsyncStorage.setItem(LAST_PAGE_KEY, String(page)).catch(() => {});
@@ -107,7 +129,6 @@ export default function QaloonMushafScreen() {
   // The page uses the full screen width (the text is already small on a phone);
   // if that makes it taller than the screen, it scrolls vertically. On iOS it can
   // also be pinch-zoomed.
-  const headerH = 56;
   const pageW = screenW - 8;
 
   const cycleWeight = () => {
@@ -119,8 +140,15 @@ export default function QaloonMushafScreen() {
   const goTo = useCallback((p: number) => {
     setPage(p);
     setSelected(null);
-    listRef.current?.scrollToIndex({ index: p - 1, animated: false });
-  }, []);
+    scrollX.setValue(indexOfPage(p) * screenW);
+    listRef.current?.scrollToIndex({ index: indexOfPage(p), animated: false });
+  }, [scrollX, screenW]);
+
+  // Play: the selected ayah's surah › the chosen surah, if it is on this page ›
+  // the first surah on the page.
+  const surahsHere = page ? pageSurahs(page) : [];
+  const surahToPlay = selected?.surah
+    ?? (chosenSurah && surahsHere.includes(chosenSurah) ? chosenSurah : surahsHere[0]);
 
   const toggleBookmark = () => {
     if (!page) return;
@@ -141,24 +169,26 @@ export default function QaloonMushafScreen() {
       : null));
   }, [hifz]);
 
-  const headerSurahs = page ? pageSurahs(page) : [];
-  const title = headerSurahs.map(surahName).join(' — ');
+  const title = surahsHere.map(surahShortName).join(' — ');
 
   if (!page) {
     return <View style={[styles.fill, { backgroundColor: palette.background }]}><ActivityIndicator style={styles.fill} color={palette.primary} /></View>;
   }
 
   return (
-    <View style={[styles.fill, { backgroundColor: palette.background, paddingTop: insets.top }]}>
+    <View
+      style={[styles.fill, { backgroundColor: palette.background, paddingTop: insets.top }]}
+      onTouchStart={wakePlayerBar}
+    >
       <IslamicPatternBackground />
-      <View style={[styles.header, { backgroundColor: palette.primary, height: headerH, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={{ backgroundColor: palette.primary, paddingBottom: 6 }}>
+      <View style={[styles.header, { height: 48, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable onPress={() => router.back()} hitSlop={10} style={styles.iconBtn}>
           <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={palette.primaryText} />
         </Pressable>
         <View style={styles.titleBox}>
-          <Text numberOfLines={1} style={[styles.title, { color: palette.primaryText }]}>{title}</Text>
-          <Text style={[styles.subtitle, { color: palette.primaryText }]}>
-            صفحة {page} · مصحف الأوقاف الليبي · قالون
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={[styles.title, { color: palette.primaryText }]}>
+            {title}
           </Text>
         </View>
         <Pressable onPress={cycleWeight} hitSlop={8} style={styles.iconBtn} accessibilityLabel={`سُمك الخط: ${WEIGHTS[weight].label}`}>
@@ -174,6 +204,10 @@ export default function QaloonMushafScreen() {
           <Ionicons name="list" size={24} color={palette.primaryText} />
         </Pressable>
       </View>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={[styles.subtitle, { color: palette.primaryText }]}>
+        صفحة {page} · مصحف الأوقاف الليبي · قالون
+      </Text>
+      </View>
 
       {hifz ? (
         <View style={[styles.hifzBar, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
@@ -184,53 +218,58 @@ export default function QaloonMushafScreen() {
         </View>
       ) : null}
 
-      <FlatList
+      <Animated.FlatList
         ref={listRef}
         data={PAGES}
         horizontal
-        inverted // page 1 on the right; next pages to the left, as in a printed Mushaf
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         keyExtractor={(p) => String(p)}
-        initialScrollIndex={page - 1}
+        initialScrollIndex={indexOfPage(page)}
         getItemLayout={(_, i) => ({ length: screenW, offset: screenW * i, index: i })}
         windowSize={3}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
+        // The turning page is drawn over its neighbour, outside its own slot.
+        removeClippedSubviews={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         onScrollBeginDrag={() => setFollow(false)}
         onMomentumScrollEnd={(e) => {
-          const p = Math.round(e.nativeEvent.contentOffset.x / screenW) + 1;
+          const p = QALOON_PAGE_COUNT - Math.round(e.nativeEvent.contentOffset.x / screenW);
           if (p !== page) {
             setPage(p);
             setSelected(null);
           }
         }}
-        renderItem={({ item }) => (
-          <ScrollView
-            style={{ width: screenW }}
-            contentContainerStyle={{ alignItems: 'center', paddingVertical: 6 }}
-            showsVerticalScrollIndicator={false}
-            maximumZoomScale={Platform.OS === 'ios' ? 3 : 1}
-            minimumZoomScale={1}
-            bouncesZoom
-            centerContent
-          >
-            <MushafPage
-              page={item}
-              width={pageW}
-              height={pageW * (pageViewBox(item)[3] / pageViewBox(item)[2])}
-              stroke={WEIGHTS[weight].stroke}
-              colors={colors}
-              selected={selected && selected.page === item ? selected : null}
-              hiddenFrom={hifz ? revealed[item] ?? 0 : null}
-              onTap={onTap}
-            />
-          </ScrollView>
+        renderItem={({ item, index }) => (
+          <TurningPage index={index} scrollX={scrollX} width={screenW} background={palette.background}>
+            <ScrollView
+              style={{ width: screenW }}
+              contentContainerStyle={{ alignItems: 'center', paddingTop: 6, paddingBottom: 6 + bottomInset }}
+              showsVerticalScrollIndicator={false}
+              maximumZoomScale={Platform.OS === 'ios' ? 3 : 1}
+              minimumZoomScale={1}
+              bouncesZoom
+              centerContent
+            >
+              <MushafPage
+                page={item}
+                width={pageW}
+                height={pageW * (pageViewBox(item)[3] / pageViewBox(item)[2])}
+                stroke={WEIGHTS[weight].stroke}
+                colors={colors}
+                selected={selected && selected.page === item ? selected : null}
+                hiddenFrom={hifz ? revealed[item] ?? 0 : null}
+                onTap={onTap}
+              />
+            </ScrollView>
+          </TurningPage>
         )}
       />
 
       {selected ? (
-        <View style={[styles.ayahBar, { backgroundColor: palette.surface, borderColor: palette.border, bottom: insets.bottom + 92 }]}>
+        <View style={[styles.ayahBar, { backgroundColor: palette.surface, borderColor: palette.border, bottom: bottomInset + 92 }]}>
           <Text style={{ color: palette.text, fontWeight: '700' }}>
             {surahName(selected.surah)} · الآية {selected.ayah}
           </Text>
@@ -238,9 +277,10 @@ export default function QaloonMushafScreen() {
       ) : null}
 
       <QaloonPlayerBar
-        surahToPlay={selected?.surah ?? pageSurahs(page)[0]}
+        surahToPlay={surahToPlay}
         onStartSurah={(s) => {
           setFollow(true);
+          setChosenSurah(s);
           if (!pageSurahs(page).includes(s)) goTo(surahStartPage(s));
         }}
         follow={follow}
@@ -249,7 +289,7 @@ export default function QaloonMushafScreen() {
           if (p !== page) {
             setPage(p);
             setSelected(null);
-            listRef.current?.scrollToIndex({ index: p - 1, animated: true });
+            listRef.current?.scrollToIndex({ index: indexOfPage(p), animated: true });
           }
         }}
       />
@@ -257,13 +297,82 @@ export default function QaloonMushafScreen() {
       <IndexModal
         visible={indexOpen}
         onClose={() => setIndexOpen(false)}
-        onPick={(p) => { setIndexOpen(false); goTo(p); }}
+        onPick={(p, surah) => { setIndexOpen(false); setChosenSurah(surah ?? null); goTo(p); }}
         bookmarks={bookmarks}
         currentPage={page}
       />
     </View>
   );
 }
+
+// ── Page turning ─────────────────────────────────────────────────────────────
+// Page 1 is on the right, as in a printed Mushaf. Turning forward, the current
+// page lifts by its left edge and swings over its right edge, the spine of an
+// Arabic book, uncovering the next page beneath it; turning back lays the
+// previous page down again. A lower page is always drawn above a higher one
+// (see PAGES).
+//
+// For each page, d = its list index − the scroll position (in pages):
+//   d = 0       at rest, on screen
+//   0 < d < 1   this page is turning away
+//   −1 < d < 0  this page lies beneath the turning one, being uncovered
+// Everything runs on the native thread from the scroll position.
+
+const TURN_EDGE = 0.999;
+
+const TurningPage = memo(function TurningPage({
+  index, scrollX, width, background, children,
+}: {
+  index: number;
+  scrollX: Animated.Value;
+  width: number;
+  background: string;
+  children: React.ReactNode;
+}) {
+  const anim = useMemo(() => {
+    const d = Animated.subtract(index, Animated.divide(scrollX, width));
+    return {
+      // Hold the page in place (cancel the scroll) while it turns or is being
+      // uncovered; at rest beside the screen it stays in its own slot, off screen.
+      translateX: d.interpolate({
+        inputRange: [-2, -1, -TURN_EDGE, 0, TURN_EDGE, 1, 2],
+        outputRange: [0, 0, TURN_EDGE * width, 0, -TURN_EDGE * width, 0, 0],
+      }),
+      rotateY: d.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '90deg'], extrapolate: 'clamp' }),
+      // Pages are transparent at rest (the background pattern shows through);
+      // while turning they are solid, so one page never shows through another.
+      solid: d.interpolate({
+        inputRange: [-1, -0.97, -0.03, 0, 0.03, 0.97, 1],
+        outputRange: [1, 1, 1, 0, 1, 1, 1],
+        extrapolate: 'clamp',
+      }),
+      // The lifting page darkens as it turns; the page beneath brightens.
+      shade: d.interpolate({ inputRange: [-1, 0, 1], outputRange: [0.35, 0, 0.3], extrapolate: 'clamp' }),
+    };
+  }, [scrollX, width, index]);
+
+  return (
+    <Animated.View
+      renderToHardwareTextureAndroid
+      style={{
+        width,
+        flex: 1,
+        transform: [
+          { perspective: 1800 },
+          { translateX: anim.translateX },
+          // rotate about the right edge (the spine)
+          { translateX: width / 2 },
+          { rotateY: anim.rotateY },
+          { translateX: -width / 2 },
+        ],
+      }}
+    >
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: background, opacity: anim.solid }]} />
+      {children}
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#000', opacity: anim.shade }]} />
+    </Animated.View>
+  );
+});
 
 const MushafPage = memo(function MushafPage({
   page, width, height, stroke, colors, selected, hiddenFrom, onTap,
@@ -358,7 +467,8 @@ function IndexModal({
 }: {
   visible: boolean;
   onClose: () => void;
-  onPick: (page: number) => void;
+  /** A page (bookmark), or the first page of a surah (with that surah). */
+  onPick: (page: number, surah?: number) => void;
   bookmarks: number[];
   currentPage: number;
 }) {
@@ -401,7 +511,7 @@ function IndexModal({
             const here = currentPage >= start && pageSurahs(currentPage).includes(item.number);
             return (
               <Pressable
-                onPress={() => onPick(start)}
+                onPress={() => onPick(start, item.number)}
                 style={[styles.row, { backgroundColor: here ? palette.surfaceAlt : palette.surface, borderColor: palette.border }]}
               >
                 <Text style={{ color: palette.textMuted, width: 64, textAlign: 'left' }}>ص {start}</Text>
@@ -423,8 +533,8 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8 },
   iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   titleBox: { flex: 1, alignItems: 'center' },
-  title: { fontSize: 16, fontWeight: '700' },
-  subtitle: { fontSize: 11, opacity: 0.85, marginTop: 2 },
+  title: { fontSize: 20, fontWeight: '700' },
+  subtitle: { fontSize: 15, fontWeight: '600', opacity: 0.92, textAlign: 'center', paddingHorizontal: 12 },
   hifzBar: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 8, borderBottomWidth: 1 },
   ayahBar: { position: 'absolute', alignSelf: 'center', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20, borderWidth: 1 },
   retry: { marginTop: 14, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },

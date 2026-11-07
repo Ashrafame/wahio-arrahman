@@ -102,6 +102,13 @@ export function surahName(surah: number): string {
   return chapters.find((c) => c.number === surah)?.nameArabic ?? '';
 }
 
+/** The surah's name without the word «سورة» (for tight places like the page header). */
+export function surahShortName(surah: number): string {
+  const name = surahName(surah);
+  const [first, ...rest] = name.split(' ');
+  return rest.length && first.replace(/[\u064B-\u0652\u0670]/g, '') === 'سورة' ? rest.join(' ') : name;
+}
+
 // ── Page files ───────────────────────────────────────────────────────────────
 
 export interface PagePaths {

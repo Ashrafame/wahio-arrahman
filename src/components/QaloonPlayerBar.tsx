@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSettings } from '../store/SettingsContext';
@@ -13,6 +13,7 @@ import {
   subscribeAudio,
   subscribePosition,
 } from '../lib/audio';
+import { useScreenBottomInset } from '../lib/insets';
 import { surahName } from '../lib/qaloonMushaf';
 import { hasPageTurns, pageAtTime } from '../data/qaloonPageTurns';
 
@@ -28,12 +29,29 @@ const fmt = (ms: number) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 };
 
+/** '#RRGGBB' + opacity -> '#RRGGBBAA' (other formats are returned unchanged). */
+const withAlpha = (color: string, alpha: number) =>
+  /^#[0-9a-f]{6}$/i.test(color) ? color + Math.round(alpha * 255).toString(16).padStart(2, '0') : color;
+
+/** While playing, the bar slides away after this long without a touch. */
+const AUTO_HIDE_MS = 10_000;
+
+// Any touch on the reader brings the bar back (the reader calls wakePlayerBar
+// from its root view, so a tap does not re-render the whole page).
+const wakeListeners = new Set<() => void>();
+export function wakePlayerBar() {
+  wakeListeners.forEach((l) => l());
+}
+
 /**
  * Recitation player for the Libyan Awqaf Mushaf. The Qaloon recordings are one
- * file per surah, so playback always starts at the beginning of a surah. (Ayah
- * highlighting and automatic page turns need per-ayah timings, which these
- * recordings don't have yet.) Reciters with page-turn timings
- * (src/data/qaloonPageTurns.ts) turn the pages automatically while `follow` is on.
+ * file per surah, so playback always starts at the beginning of a surah.
+ * Reciters with page-turn timings (src/data/qaloonPageTurns.ts) turn the pages
+ * automatically while `follow` is on.
+ *
+ * While a recitation plays, the bar is translucent and slides out of the way
+ * after AUTO_HIDE_MS so it does not cover the text; a thin progress line stays.
+ * Touching the screen brings it back. It stays visible while paused.
  */
 export function QaloonPlayerBar({
   surahToPlay,
@@ -42,7 +60,7 @@ export function QaloonPlayerBar({
   onFollowChange,
   onFollowPage,
 }: {
-  /** Surah played by the play button: the selected ayah's, else the current page's. */
+  /** Surah played by the play button: the selected ayah's, else the chosen surah, else the page's. */
   surahToPlay: number;
   /** Called when a surah starts, so the reader can open its first page. */
   onStartSurah: (surah: number) => void;
@@ -54,14 +72,25 @@ export function QaloonPlayerBar({
 }) {
   const { palette, qaloonReciter, setQaloonReciter } = useSettings();
   const insets = useSafeAreaInsets();
+  const bottomInset = useScreenBottomInset();
   const reciter = QALOON_RECITERS.find((r) => r.id === qaloonReciter) ?? QALOON_RECITERS[0];
 
   const [now, setNow] = useState(() => ({ key: getCurrentAudioKey(), playing: false }));
   const [pos, setPos] = useState({ at: 0, dur: 0 });
   const [picking, setPicking] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [wake, setWake] = useState(0);
+  const shown = useRef(new Animated.Value(1)).current;
 
   useEffect(() => subscribeAudio((key, playing) => setNow({ key, playing })), []);
   useEffect(() => subscribePosition((at, dur) => setPos({ at, dur })), []);
+  useEffect(() => {
+    const l = () => setWake((w) => w + 1);
+    wakeListeners.add(l);
+    return () => {
+      wakeListeners.delete(l);
+    };
+  }, []);
 
   // The single-file player does not report the end of a file; close the bar
   // when the surah has played to its end.
@@ -72,6 +101,23 @@ export function QaloonPlayerBar({
   const current = parseKey(now.key);
   const active = !!current;
   const canFollow = !!current && hasPageTurns(current.reciterId, current.surah);
+
+  // Show on a touch, and whenever playback is paused or the reciter list is open;
+  // hide again after AUTO_HIDE_MS of playing untouched.
+  useEffect(() => {
+    setHidden(false);
+    if (!active || !now.playing || picking) return;
+    const t = setTimeout(() => setHidden(true), AUTO_HIDE_MS);
+    return () => clearTimeout(t);
+  }, [wake, active, now.playing, picking]);
+
+  useEffect(() => {
+    Animated.timing(shown, {
+      toValue: hidden ? 0 : 1,
+      duration: hidden ? 450 : 220,
+      useNativeDriver: true,
+    }).start();
+  }, [hidden, shown]);
 
   // Automatic page turning: show the page the reciter has reached.
   useEffect(() => {
@@ -101,13 +147,18 @@ export function QaloonPlayerBar({
   };
 
   if (!active) {
+    // The button says which surah it will play, so a page shared by two surahs
+    // is never ambiguous.
     return (
       <Pressable
         onPress={togglePlay}
-        style={[styles.fab, { backgroundColor: palette.primary, bottom: insets.bottom + 16 }]}
+        style={[styles.fab, { backgroundColor: palette.primary, bottom: bottomInset + 16 }]}
         accessibilityLabel={`تلاوة ${surahName(surahToPlay)} بصوت ${reciter.nameAr}`}
       >
-        <Ionicons name="play" size={26} color={palette.primaryText} />
+        <Ionicons name="play" size={22} color={palette.primaryText} />
+        <Text numberOfLines={1} style={[styles.fabText, { color: palette.primaryText }]}>
+          {surahName(surahToPlay)}
+        </Text>
       </Pressable>
     );
   }
@@ -116,12 +167,36 @@ export function QaloonPlayerBar({
 
   return (
     <>
-      <View style={[styles.bar, { backgroundColor: palette.surface, borderColor: palette.border, bottom: insets.bottom + 10 }]}>
-        <View style={[styles.track, { backgroundColor: palette.surfaceAlt }]}>
+      {/* Thin progress line left on screen while the bar is hidden. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.miniTrack,
+          { bottom: bottomInset, backgroundColor: withAlpha(palette.surfaceAlt, 0.7) },
+          { opacity: shown.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }) },
+        ]}
+      >
+        <View style={[styles.fill, { width: `${progress * 100}%`, backgroundColor: palette.accent }]} />
+      </Animated.View>
+
+      <Animated.View
+        pointerEvents={hidden ? 'none' : 'auto'}
+        style={[
+          styles.bar,
+          {
+            backgroundColor: withAlpha(palette.surface, 0.82),
+            borderColor: withAlpha(palette.border, 0.8),
+            bottom: bottomInset + 10,
+            opacity: shown,
+            transform: [{ translateY: shown.interpolate({ inputRange: [0, 1], outputRange: [120, 0] }) }],
+          },
+        ]}
+      >
+        <View style={[styles.track, { backgroundColor: withAlpha(palette.surfaceAlt, 0.8) }]}>
           <View style={[styles.fill, { width: `${progress * 100}%`, backgroundColor: palette.accent }]} />
         </View>
         <View style={styles.row}>
-          <Pressable onPress={stopAudio} hitSlop={10} style={styles.btn}>
+          <Pressable onPress={stopAudio} hitSlop={10} style={styles.btn} accessibilityLabel="إيقاف التلاوة">
             <Ionicons name="close" size={22} color={palette.textMuted} />
           </Pressable>
           {canFollow ? (
@@ -146,7 +221,7 @@ export function QaloonPlayerBar({
             </Text>
           </Pressable>
         </View>
-      </View>
+      </Animated.View>
 
       <Modal visible={picking} transparent animationType="fade" onRequestClose={() => setPicking(false)}>
         <Pressable style={styles.backdrop} onPress={() => setPicking(false)}>
@@ -173,14 +248,16 @@ export function QaloonPlayerBar({
 
 const styles = StyleSheet.create({
   fab: {
-    position: 'absolute', left: 18, width: 56, height: 56, borderRadius: 28,
-    alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', left: 18, height: 52, maxWidth: 220, borderRadius: 26, paddingHorizontal: 18,
+    flexDirection: 'row', alignItems: 'center', gap: 8,
     shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 5,
   },
+  fabText: { fontSize: 16, fontWeight: '700' },
   bar: {
     position: 'absolute', left: 12, right: 12, borderRadius: 16, borderWidth: 1, overflow: 'hidden',
-    shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 4,
+    shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 3,
   },
+  miniTrack: { position: 'absolute', left: 0, right: 0, height: 3 },
   track: { height: 3 },
   fill: { height: 3 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10 },

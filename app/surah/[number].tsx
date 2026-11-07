@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAndroidNavBarInset } from '../../src/lib/insets';
 import { Ionicons } from '@expo/vector-icons';
 import { Ayah, BASMALA, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/quranData';
 import { Palette } from '../../src/theme/colors';
@@ -51,6 +52,7 @@ export default function SurahScreen() {
     palette,
   } = useSettings();
   const insets = useSafeAreaInsets();
+  const navBarInset = useAndroidNavBarInset(); // full-screen modals sit behind Android's navigation bar
   const listRef = useRef<FlatList<Ayah>>(null);
   const qaloonLastScrolledVerse = useRef<number | null>(null);
 
@@ -529,7 +531,7 @@ export default function SurahScreen() {
             </Text>
             <View style={{ width: 32 }} />
           </View>
-          <ScrollView contentContainerStyle={{ padding: 12, gap: 10 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ padding: 12, gap: 10, paddingBottom: 12 + navBarInset }} showsVerticalScrollIndicator={false}>
             {(qiraah === 'qaloon' ? JUZ_DATA_QALOON : JUZ_DATA_HAFS).map((juz) => (
               <Pressable
                 key={juz.number}

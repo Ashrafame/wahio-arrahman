@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAndroidNavBarInset } from '../src/lib/insets';
 import { Ionicons } from '@expo/vector-icons';
 import { chapters, normalizeArabic, normalizeArabicNumerals, getChapter } from '../src/lib/quranData';
 import { useSettings } from '../src/store/SettingsContext';
@@ -22,6 +23,7 @@ import { BookSearchIcon } from '../src/components/BookSearchIcon';
 export default function HomeScreen() {
   const { language, isRTL, t, scaleFont, qiraah, palette } = useSettings();
   const insets = useSafeAreaInsets();
+  const navBarInset = useAndroidNavBarInset(); // full-screen modals sit behind Android's navigation bar
   const [query, setQuery] = useState('');
   const [juzOpen, setJuzOpen] = useState(false);
 
@@ -133,7 +135,7 @@ export default function HomeScreen() {
             </Text>
             <View style={{ width: 32 }} />
           </View>
-          <ScrollView contentContainerStyle={{ padding: 12, gap: 10 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ padding: 12, gap: 10, paddingBottom: 12 + navBarInset }} showsVerticalScrollIndicator={false}>
             {(qiraah === 'qaloon' ? JUZ_DATA_QALOON : JUZ_DATA_HAFS).map((juz) => (
                 <Pressable
                   key={juz.number}
