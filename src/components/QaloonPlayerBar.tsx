@@ -24,6 +24,11 @@ function parseKey(key: string | null): { surah: number; reciterId: string } | nu
   return m ? { surah: Number(m[1]), reciterId: m[2] } : null;
 }
 
+/** The surah of the Libyan Mushaf recitation that is loaded now (playing or paused), if any. */
+export function loadedQaloonSurah(): number | null {
+  return parseKey(getCurrentAudioKey())?.surah ?? null;
+}
+
 const fmt = (ms: number) => {
   const s = Math.max(0, Math.round(ms / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;

@@ -20,7 +20,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { useSettings } from '../../src/store/SettingsContext';
 import { IslamicPatternBackground } from '../../src/components/IslamicPatternBackground';
-import { QaloonPlayerBar, wakePlayerBar } from '../../src/components/QaloonPlayerBar';
+import { QaloonPlayerBar, loadedQaloonSurah, wakePlayerBar } from '../../src/components/QaloonPlayerBar';
+import { stopAudio } from '../../src/lib/audio';
 import { useScreenBottomInset } from '../../src/lib/insets';
 import { chapters } from '../../src/lib/quranData';
 import {
@@ -302,7 +303,15 @@ export default function QaloonMushafScreen() {
       <IndexModal
         visible={indexOpen}
         onClose={() => setIndexOpen(false)}
-        onPick={(p, surah) => { setIndexOpen(false); setChosenSurah(surah ?? null); goTo(p); }}
+        onPick={(p, surah) => {
+          setIndexOpen(false);
+          // Going to another surah stops the recitation of the one playing, so
+          // the play button offers the new surah straight away.
+          const playing = loadedQaloonSurah();
+          if (playing && (surah ? surah !== playing : !pageSurahs(p).includes(playing))) stopAudio();
+          setChosenSurah(surah ?? null);
+          goTo(p);
+        }}
         bookmarks={bookmarks}
         currentPage={page}
       />
