@@ -11,6 +11,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAndroidNavBarInset } from '../../src/lib/insets';
+import { SurahHeaderOrnament } from '../../src/components/SurahHeaderOrnament';
 import { Ionicons } from '@expo/vector-icons';
 import { Ayah, BASMALA, getChapter, getSurahAyahs, getVerseCount } from '../../src/lib/quranData';
 import { Palette } from '../../src/theme/colors';
@@ -408,10 +409,13 @@ export default function SurahScreen() {
         keyExtractor={(item) => item.key}
         initialNumToRender={targetVerse ? Math.max(15, (ayahs.findIndex(a => a.verse === targetVerse) ?? 0) + 5) : 15}
         ListHeaderComponent={
-          // Show Bismillah header for all surahs except At-Tawbah (9).
-          // For Al-Fatiha in Hafs, verse 1 already IS the Bismillah so skip the header.
-          // For Al-Fatiha in Qaloon, verse 1 is Al-Hamd so we must add the header manually.
-          chapterNumber !== 9 && (chapterNumber !== 1 || qiraah === 'qaloon') ? (
+          <>
+          {/* Ornamental header: the surah's name, ayah count and order. */}
+          <SurahHeaderOrnament surah={chapterNumber} />
+          {/* Show Bismillah header for all surahs except At-Tawbah (9).
+              For Al-Fatiha in Hafs, verse 1 already IS the Bismillah so skip the header.
+              For Al-Fatiha in Qaloon, verse 1 is Al-Hamd so we must add the header manually. */}
+          {chapterNumber !== 9 && (chapterNumber !== 1 || qiraah === 'qaloon') ? (
             <View style={styles.bismillahBlock}>
               <Text style={[styles.bismillah, { color: palette.text, fontFamily: QURAN_FONT }]}>
                 {BISMILLAH}
@@ -422,7 +426,8 @@ export default function SurahScreen() {
                 </Text>
               ) : null}
             </View>
-          ) : null
+          ) : null}
+          </>
         }
         renderItem={({ item }) => (
           <AyahCard
