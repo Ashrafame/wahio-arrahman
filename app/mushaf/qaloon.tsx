@@ -84,6 +84,8 @@ export default function QaloonMushafScreen() {
   const [indexOpen, setIndexOpen] = useState(false);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [weight, setWeight] = useState(DEFAULT_WEIGHT);
+  // Turn pages with the recitation; paused when the reader swipes by hand.
+  const [follow, setFollow] = useState(true);
 
   // Opening page: explicit page › surah start › last read › 1.
   useEffect(() => {
@@ -195,6 +197,7 @@ export default function QaloonMushafScreen() {
         windowSize={3}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
+        onScrollBeginDrag={() => setFollow(false)}
         onMomentumScrollEnd={(e) => {
           const p = Math.round(e.nativeEvent.contentOffset.x / screenW) + 1;
           if (p !== page) {
@@ -237,7 +240,17 @@ export default function QaloonMushafScreen() {
       <QaloonPlayerBar
         surahToPlay={selected?.surah ?? pageSurahs(page)[0]}
         onStartSurah={(s) => {
+          setFollow(true);
           if (!pageSurahs(page).includes(s)) goTo(surahStartPage(s));
+        }}
+        follow={follow}
+        onFollowChange={setFollow}
+        onFollowPage={(p) => {
+          if (p !== page) {
+            setPage(p);
+            setSelected(null);
+            listRef.current?.scrollToIndex({ index: p - 1, animated: true });
+          }
         }}
       />
 

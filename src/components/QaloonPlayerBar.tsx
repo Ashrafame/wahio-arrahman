@@ -14,6 +14,7 @@ import {
   subscribePosition,
 } from '../lib/audio';
 import { surahName } from '../lib/qaloonMushaf';
+import { hasPageTurns, pageAtTime } from '../data/qaloonPageTurns';
 
 const keyFor = (surah: number, reciterId: string) => `qaloon-libya:${surah}:${reciterId}`;
 
@@ -31,16 +32,25 @@ const fmt = (ms: number) => {
  * Recitation player for the Libyan Awqaf Mushaf. The Qaloon recordings are one
  * file per surah, so playback always starts at the beginning of a surah. (Ayah
  * highlighting and automatic page turns need per-ayah timings, which these
- * recordings don't have yet.)
+ * recordings don't have yet.) Reciters with page-turn timings
+ * (src/data/qaloonPageTurns.ts) turn the pages automatically while `follow` is on.
  */
 export function QaloonPlayerBar({
   surahToPlay,
   onStartSurah,
+  follow,
+  onFollowChange,
+  onFollowPage,
 }: {
   /** Surah played by the play button: the selected ayah's, else the current page's. */
   surahToPlay: number;
   /** Called when a surah starts, so the reader can open its first page. */
   onStartSurah: (surah: number) => void;
+  /** Turn pages automatically with the recitation (when the reciter has timings). */
+  follow: boolean;
+  onFollowChange: (follow: boolean) => void;
+  /** Called with the page the reciter has reached. */
+  onFollowPage: (page: number) => void;
 }) {
   const { palette, qaloonReciter, setQaloonReciter } = useSettings();
   const insets = useSafeAreaInsets();
@@ -61,6 +71,14 @@ export function QaloonPlayerBar({
 
   const current = parseKey(now.key);
   const active = !!current;
+  const canFollow = !!current && hasPageTurns(current.reciterId);
+
+  // Automatic page turning: show the page the reciter has reached.
+  useEffect(() => {
+    if (!current || !follow || !now.playing) return;
+    const page = pageAtTime(current.reciterId, current.surah, pos.at);
+    if (page) onFollowPage(page);
+  }, [pos.at, follow, now.playing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const start = (surah: number, reciterId: string) => {
     const audio = getAyahAudioUrl(surah, 1, 'qaloon', reciterId);
@@ -106,6 +124,16 @@ export function QaloonPlayerBar({
           <Pressable onPress={stopAudio} hitSlop={10} style={styles.btn}>
             <Ionicons name="close" size={22} color={palette.textMuted} />
           </Pressable>
+          {canFollow ? (
+            <Pressable
+              onPress={() => onFollowChange(!follow)}
+              hitSlop={8}
+              style={styles.btn}
+              accessibilityLabel={follow ? 'إيقاف قلب الصفحات تلقائياً' : 'قلب الصفحات تلقائياً مع التلاوة'}
+            >
+              <Ionicons name={follow ? 'book' : 'book-outline'} size={20} color={follow ? palette.accent : palette.textMuted} />
+            </Pressable>
+          ) : null}
           <Pressable onPress={togglePlay} hitSlop={10} style={[styles.playBtn, { backgroundColor: palette.primary }]}>
             <Ionicons name={now.playing ? 'pause' : 'play'} size={22} color={palette.primaryText} />
           </Pressable>
