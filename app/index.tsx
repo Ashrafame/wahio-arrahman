@@ -87,6 +87,10 @@ export default function HomeScreen() {
         />
       </View>
 
+      {/* Fixed above the list: the Libyan Mushaf stays one tap away however far
+          the surah list is scrolled. */}
+      <MushafHomeCard onPress={() => router.push('/mushaf/qaloon')} />
+
       <FlatList
         data={filteredChapters}
         keyExtractor={(item) => String(item.number)}
@@ -96,11 +100,6 @@ export default function HomeScreen() {
             onPress={() => router.push({ pathname: '/surah/[number]', params: { number: String(item.number) } })}
           />
         )}
-        ListHeaderComponent={
-          query.trim() ? null : (
-            <MushafHomeCard onPress={() => router.push('/mushaf/qaloon')} />
-          )
-        }
         ListEmptyComponent={
           query.trim() ? (
             <Text style={[styles.empty, { color: palette.textMuted }]}>{t('noResults')}</Text>

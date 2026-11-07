@@ -107,7 +107,7 @@ export function MushafHomeCard({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   card: {
-    alignItems: 'center', gap: 12, marginHorizontal: 12, marginTop: 10, marginBottom: 4,
+    alignItems: 'center', gap: 12, marginHorizontal: 12, marginTop: 10, marginBottom: 8,
     padding: 12, borderRadius: 14, borderWidth: 1, overflow: 'hidden',
   },
   icon: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
