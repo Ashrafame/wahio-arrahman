@@ -96,7 +96,7 @@ export default function AboutScreen() {
           ar={ar}
         >
           {[
-            { icon: 'book-outline',          ar: 'القرآن الكريم كاملاً — حفص عن عاصم، ومصحف الأوقاف الليبي برواية قالون', en: 'Complete Quran — Hafs, and the Libyan Awqaf Mushaf in Qaloon' },
+            { icon: 'book-outline',          ar: 'القرآن الكريم كاملاً — حفص عن عاصم، ومصحف الأوقاف الليبية برواية قالون', en: 'Complete Quran — Hafs, and the Libyan Awqaf Mushaf in Qaloon' },
             { icon: 'language-outline',      ar: 'ترجمة إنجليزية واضحة وأمينة',                     en: 'Clear and faithful English translation' },
             { icon: 'reader-outline',        ar: 'تفاسير من مصادر علمية موثوقة',                     en: 'Tafsir from trusted scholarly sources' },
             { icon: 'musical-notes-outline', ar: 'تلاوات صوتية بأصوات كبار القراء',                 en: 'Audio recitations by renowned reciters' },

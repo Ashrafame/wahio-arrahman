@@ -10,6 +10,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import { sha256 } from 'js-sha256';
 import indexRaw from '../../assets/data/qaloon_libya.json';
 import { chapters } from './quranData';
+import { JUZ_DATA_QALOON } from '../data/juz';
 
 interface PageIndex {
   /** Optional zoom to the page's content (pages 1–2): [x, y, w, h] in page units. */
@@ -36,7 +37,7 @@ export const QALOON_PAGE_HEIGHT = index.height; // 2250
 export const QALOON_DOWNLOAD_MB = 90;
 
 export const QALOON_MUSHAF_SOURCE = {
-  nameAr: 'مصحف الأوقاف الليبي — رواية قالون عن نافع',
+  nameAr: 'مصحف الأوقاف الليبية — رواية قالون عن نافع',
   nameEn: 'Libyan Awqaf Mushaf — Qaloon from Nafi',
 };
 
@@ -89,6 +90,20 @@ index.pages.forEach((p, i) => {
 
 export function surahStartPage(surah: number): number {
   return surahStart[surah] ?? 1;
+}
+
+/** First page on which an ayah appears. */
+const ayahPage = new Map<string, number>();
+index.pages.forEach((p, i) => {
+  for (const [surah, ayah] of p.a) if (!ayahPage.has(`${surah}:${ayah}`)) ayahPage.set(`${surah}:${ayah}`, i + 1);
+});
+
+export const QALOON_JUZ_COUNT = 30;
+
+/** Where juz n (1–30) starts in this Mushaf: its page and first ayah. */
+export function juzStart(juz: number): { page: number; surah: number; ayah: number } {
+  const j = JUZ_DATA_QALOON[Math.min(Math.max(juz, 1), QALOON_JUZ_COUNT) - 1];
+  return { page: ayahPage.get(`${j.startSurah}:${j.startAyah}`) ?? 1, surah: j.startSurah, ayah: j.startAyah };
 }
 
 /** Number of ayahs in a surah, in this Mushaf's own (Qaloon) count. */

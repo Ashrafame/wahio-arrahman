@@ -39,6 +39,11 @@ export const JUZ_DATA_HAFS: JuzInfo[] = [
   { number: 30, nameAr: 'عم',              nameEn: "'Amma",                  startSurah: 78, startAyah: 1   },
 ];
 
+// Qaloon, in the Libyan Awqaf Mushaf's own ayah numbering and its (Maghrebi)
+// division. Checked against the printed Mushaf: every eighth of a hizb starts
+// with the ✺ mark (479 marks + the opening = 60 hizbs × 8), so juz n starts at
+// mark 16 × (n − 1). All 30 starts below are those marks; juz 11, 20 and 22
+// differ from the Mashriqi (Hafs) division.
 export const JUZ_DATA_QALOON: JuzInfo[] = [
   { number: 1,  nameAr: 'آلم',              nameEn: 'Alif Lam Meem',          startSurah: 1,  startAyah: 1   },
   { number: 2,  nameAr: 'سيقول',           nameEn: 'Sayaqul',                startSurah: 2,  startAyah: 141 },
@@ -50,7 +55,7 @@ export const JUZ_DATA_QALOON: JuzInfo[] = [
   { number: 8,  nameAr: 'ولو أننا',        nameEn: 'Wa Law Annana',          startSurah: 6,  startAyah: 112 },
   { number: 9,  nameAr: 'قال الملأ',       nameEn: 'Qala al-Mala',           startSurah: 7,  startAyah: 87  },
   { number: 10, nameAr: 'واعلموا',         nameEn: "Wa'lamu",                startSurah: 8,  startAyah: 41  },
-  { number: 11, nameAr: 'وممن حولكم',      nameEn: 'Wa Mimman Hawlakum',     startSurah: 9,  startAyah: 102 },
+  { number: 11, nameAr: 'إنما السبيل',      nameEn: 'Innama as-Sabil',        startSurah: 9,  startAyah: 94  },
   { number: 12, nameAr: 'وما من دابة',     nameEn: 'Wa Ma Min Dabbah',       startSurah: 11, startAyah: 6   },
   { number: 13, nameAr: 'وما أبرئ',       nameEn: 'Wa Ma Ubari',             startSurah: 12, startAyah: 53  },
   { number: 14, nameAr: 'ألر تلك',         nameEn: 'Alif Lam Ra Tilka',      startSurah: 15, startAyah: 1   },
@@ -59,9 +64,9 @@ export const JUZ_DATA_QALOON: JuzInfo[] = [
   { number: 17, nameAr: 'اقترب للناس',    nameEn: 'Iqtaraba lil-Nas',       startSurah: 21, startAyah: 1   },
   { number: 18, nameAr: 'قد أفلح',        nameEn: 'Qad Aflaha',             startSurah: 23, startAyah: 1   },
   { number: 19, nameAr: 'وقال الذين',     nameEn: 'Wa Qala alladhin',       startSurah: 25, startAyah: 21  },
-  { number: 20, nameAr: 'فما كان',         nameEn: 'Fa Ma Kana',             startSurah: 27, startAyah: 58  },
+  { number: 20, nameAr: 'قل الحمد لله',    nameEn: 'Qul al-Hamdu lillah',    startSurah: 27, startAyah: 61  },
   { number: 21, nameAr: 'ولا تجادلوا',    nameEn: 'Wa La Tujadilu',         startSurah: 29, startAyah: 46  },
-  { number: 22, nameAr: 'ومن يقنت',       nameEn: 'Wa Man Yaqnut',          startSurah: 33, startAyah: 31  },
+  { number: 22, nameAr: 'إن المسلمين',     nameEn: 'Inna al-Muslimin',       startSurah: 33, startAyah: 35  },
   { number: 23, nameAr: 'وما أنزلنا',     nameEn: 'Wa Ma Anzalna',          startSurah: 36, startAyah: 27  },
   { number: 24, nameAr: 'فمن أظلم',       nameEn: 'Fa Man Azlam',           startSurah: 39, startAyah: 31  },
   { number: 25, nameAr: 'إليه يرد',       nameEn: 'Ilayhi Yuradu',          startSurah: 41, startAyah: 46  },

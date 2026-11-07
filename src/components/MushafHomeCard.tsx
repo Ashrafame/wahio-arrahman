@@ -1,4 +1,4 @@
-// The home screen's «مصحف الأوقاف الليبي» card: the lightest shade of the
+// The home screen's «مصحف الأوقاف الليبية» card: the lightest shade of the
 // app's colour (it follows the colour chosen in Settings), with a band of light
 // that sweeps across it every few seconds so it catches the eye.
 
@@ -60,14 +60,14 @@ export function MushafHomeCard({ onPress }: { onPress: () => void }) {
         { backgroundColor: bg, borderColor: border, flexDirection: isRTL ? 'row-reverse' : 'row', opacity: pressed ? 0.85 : 1 },
       ]}
       accessibilityRole="button"
-      accessibilityLabel="مصحف الأوقاف الليبي، رواية قالون عن نافع"
+      accessibilityLabel="مصحف الأوقاف الليبية، رواية قالون عن نافع"
     >
       <View style={[styles.icon, { backgroundColor: palette.primary }]}>
         <Ionicons name="book" size={20} color={palette.primaryText} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{ color: ink, fontWeight: '700', fontSize: scaleFont(16), textAlign: isRTL ? 'right' : 'left' }}>
-          مصحف الأوقاف الليبي
+          مصحف الأوقاف الليبية
         </Text>
         <Text style={{ color: inkSoft, fontSize: scaleFont(12), marginTop: 2, textAlign: isRTL ? 'right' : 'left' }}>
           رواية قالون عن نافع · صفحات المصحف كما طُبع

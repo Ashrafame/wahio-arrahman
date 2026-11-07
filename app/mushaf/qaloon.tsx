@@ -34,12 +34,14 @@ import {
   pageViewBox,
   pageSurahs,
   surahName,
+  juzStart,
   surahAyahCount,
   surahShortName,
   surahStartPage,
 } from '../../src/lib/qaloonMushaf';
 import { ORNAMENT_ASPECT, SurahHeaderOrnament } from '../../src/components/SurahHeaderOrnament';
 import { SurahNumberBadge } from '../../src/components/SurahNumberBadge';
+import { JuzJumper } from '../../src/components/JuzJumper';
 
 const LAST_PAGE_KEY = 'wahio-arrahman:qaloon-libya:last-page';
 const BOOKMARKS_KEY = 'wahio-arrahman:qaloon-libya:bookmarks';
@@ -105,6 +107,8 @@ export default function QaloonMushafScreen() {
   // play button must play the one that was chosen, not the first on the page.
   const [chosenSurah, setChosenSurah] = useState<number | null>(params.surah ? Number(params.surah) : null);
   const bottomInset = useScreenBottomInset();
+  // Top of the page list (below the header and the memorisation bar), for the juz bubble.
+  const [listTop, setListTop] = useState(0);
   // Horizontal scroll position, drives the page-turn animation (native thread).
   const scrollX = useRef(new Animated.Value(0)).current;
   const onScroll = useMemo(
@@ -149,6 +153,17 @@ export default function QaloonMushafScreen() {
     scrollX.setValue(indexOfPage(p) * screenW);
     listRef.current?.scrollToIndex({ index: indexOfPage(p), animated: false });
   }, [scrollX, screenW]);
+
+  // Juz picker: open the page where the juz starts and mark its first ayah.
+  const goToJuz = (juz: number) => {
+    const start = juzStart(juz);
+    const playing = loadedQaloonSurah();
+    if (playing && !pageSurahs(start.page).includes(playing)) stopAudio();
+    setFollow(false);
+    setChosenSurah(start.surah);
+    goTo(start.page);
+    setSelected({ page: start.page, surah: start.surah, ayah: start.ayah });
+  };
 
   // Play: the selected ayah's surah › the chosen surah, if it is on this page ›
   // the first surah on the page.
@@ -211,7 +226,7 @@ export default function QaloonMushafScreen() {
         </Pressable>
       </View>
       <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={[styles.subtitle, { color: palette.primaryText }]}>
-        صفحة {page} · مصحف الأوقاف الليبي · قالون
+        صفحة {page} · مصحف الأوقاف الليبية · قالون
       </Text>
       </View>
 
@@ -226,6 +241,7 @@ export default function QaloonMushafScreen() {
 
       <Animated.FlatList
         ref={listRef}
+        onLayout={(e) => setListTop(e.nativeEvent.layout.y)}
         data={PAGES}
         horizontal
         pagingEnabled
@@ -299,6 +315,8 @@ export default function QaloonMushafScreen() {
           }
         }}
       />
+
+      {listTop ? <JuzJumper top={listTop + 12} onGo={goToJuz} /> : null}
 
       <IndexModal
         visible={indexOpen}
@@ -525,7 +543,7 @@ function IndexModal({
             <Ionicons name="close" size={24} color={palette.primaryText} />
           </Pressable>
           <View style={styles.titleBox}>
-            <Text style={[styles.title, { color: palette.primaryText }]}>فهرس مصحف الأوقاف الليبي</Text>
+            <Text style={[styles.title, { color: palette.primaryText }]}>فهرس مصحف الأوقاف الليبية</Text>
           </View>
           <View style={styles.iconBtn} />
         </View>
