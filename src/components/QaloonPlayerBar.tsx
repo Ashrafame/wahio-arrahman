@@ -71,7 +71,7 @@ export function QaloonPlayerBar({
 
   const current = parseKey(now.key);
   const active = !!current;
-  const canFollow = !!current && hasPageTurns(current.reciterId);
+  const canFollow = !!current && hasPageTurns(current.reciterId, current.surah);
 
   // Automatic page turning: show the page the reciter has reached.
   useEffect(() => {

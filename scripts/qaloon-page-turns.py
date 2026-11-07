@@ -89,39 +89,49 @@ def hms(text):
 
 
 def run_silencedetect(path, db):
-    """(decoded duration, header duration, [(start, end)]) for one threshold."""
+    """(decoded duration, header duration, [(start, end)], ffmpeg errors) for one threshold."""
     out = subprocess.run(
-        ['ffmpeg', '-hide_banner', '-i', path, '-af',
+        ['ffmpeg', '-hide_banner', '-nostdin', '-i', path, '-map', '0:a:0', '-af',
          f'silencedetect=noise={db}dB:d={SILENCE_MIN}', '-f', 'null', '-'],
-        capture_output=True, text=True).stderr
+        capture_output=True, text=True, errors='replace').stderr
     header = re.search(r'Duration: (\d+:\d+:[\d.]+)', out)
     header = hms(header[1]) if header else 0.0
-    times = re.findall(r'time=(\d+:\d+:[\d.]+)', out)  # progress; the last one is the end
-    duration = hms(times[-1]) if times else header
+    times = [hms(t) for t in re.findall(r'time=(\d+:\d+:[\d.]+)', out)]  # progress
+    duration = max(times) if times else 0.0
     starts = [float(x) for x in re.findall(r'silence_start: (-?[\d.]+)', out)]
     ends = [float(x) for x in re.findall(r'silence_end: ([\d.]+)', out)]
     if len(ends) < len(starts):  # file ends in silence
         ends.append(duration)
-    return duration, header, [(max(0.0, s0), s1) for s0, s1 in zip(starts, ends)]
+    errors = [l.strip() for l in out.splitlines()
+              if re.search(r'error|invalid|could not|failed|not supported|truncat', l, re.I)]
+    return duration, header, [(max(0.0, s0), s1) for s0, s1 in zip(starts, ends)], errors
+
+
+def decoded_fully(duration, header):
+    return duration > 0 and (header == 0 or duration >= 0.9 * header)
 
 
 def detect_silences(path):
-    """(threshold dB, duration, header duration, pauses), cached next to the audio."""
+    """(threshold dB, duration, header duration, pauses, errors), cached next to the
+    audio. A file ffmpeg cannot decode to its end is reported, never cached."""
     cache = path + '.pauses.json'
     stamp = os.path.getsize(path)
     if os.path.exists(cache):
         with open(cache, encoding='utf-8') as f:
             saved = json.load(f)
-        if saved.get('size') == stamp and saved.get('version') == 2:
-            return saved['db'], saved['duration'], saved['header'], [tuple(p) for p in saved['pauses']]
+        if (saved.get('size') == stamp and saved.get('version') in (2, 3)
+                and decoded_fully(saved['duration'], saved['header'])):
+            return saved['db'], saved['duration'], saved['header'], [tuple(p) for p in saved['pauses']], []
     for db in THRESHOLDS_DB:
-        duration, header, pauses = run_silencedetect(path, db)
+        duration, header, pauses, errors = run_silencedetect(path, db)
+        if not decoded_fully(duration, header):
+            return db, duration, header, [], errors or ['ffmpeg stopped early, without an error message']
         if len(pauses) >= MIN_PAUSES_PER_MIN * duration / 60:
             break
     with open(cache, 'w', encoding='utf-8') as f:
-        json.dump({'version': 2, 'size': stamp, 'db': db, 'duration': duration,
+        json.dump({'version': 3, 'size': stamp, 'db': db, 'duration': duration,
                    'header': header, 'pauses': pauses}, f)
-    return db, duration, header, pauses
+    return db, duration, header, pauses, []
 
 
 def speech_span(duration, silences):
@@ -292,11 +302,19 @@ def main(reciter, base):
     result = {}
     turns_total = snapped_total = 0
     flagged_surahs = []
+    failed = []
     for surah in range(1, 115):
         path = os.path.join(cache, f'{surah:03d}.mp3')
         if not os.path.exists(path) or os.path.getsize(path) < 10_000:
             subprocess.run(['curl', '-sfL', '--retry', '3', f'{base}/{surah:03d}.mp3', '-o', path], check=True)
-        db, duration, header, silences = detect_silences(path)
+        db, duration, header, silences, errors = detect_silences(path)
+        if errors:
+            failed.append(surah)
+            print(f'✗ surah {surah:3d}: ffmpeg decoded only {duration / 60:.1f} of {header / 60:.1f} min '
+                  f'({os.path.getsize(path) / 1e6:.1f} MB) — left out. ffmpeg said:', flush=True)
+            for line in errors[:5]:
+                print(f'      {line}', flush=True)
+            continue
         turns, st = page_turns(surah, duration, silences, index)
         result[str(surah)] = turns
         turns_total += len(turns) - 1
@@ -326,6 +344,8 @@ def main(reciter, base):
     print(f'\nwrote {path}: {turns_total} page turns, {snapped_total} on a pause '
           f'({100 * snapped_total / max(1, turns_total):.0f}%)')
     print(f'surahs to check (⚠): {flagged_surahs or "none"}')
+    if failed:
+        print(f'surahs left out, audio could not be decoded (✗): {failed}')
 
 
 if __name__ == '__main__':

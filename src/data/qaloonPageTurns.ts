@@ -21,6 +21,8 @@ export function pageAtTime(reciterId: string, surah: number, ms: number): number
   return page;
 }
 
-export function hasPageTurns(reciterId: string): boolean {
-  return !!QALOON_PAGE_TURNS[reciterId];
+/** Whether this reciter's recording of `surah` has page turns (a surah whose
+ * audio could not be analysed is left out of the file). */
+export function hasPageTurns(reciterId: string, surah: number): boolean {
+  return !!QALOON_PAGE_TURNS[reciterId]?.[String(surah)]?.length;
 }
