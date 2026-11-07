@@ -89,15 +89,35 @@ function textOn(rgb: [number, number, number]) {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export const SurahHeaderOrnament = memo(function SurahHeaderOrnament({ surah }: { surah: number }) {
+/** Width ÷ height of the artwork. */
+export const ORNAMENT_ASPECT = ART_W / ART_H;
+
+export const SurahHeaderOrnament = memo(function SurahHeaderOrnament({
+  surah,
+  width,
+  ayahCount,
+  arabic,
+  embedded,
+}: {
+  surah: number;
+  /** Width in points (default: the screen width, up to 680). */
+  width?: number;
+  /** Ayah count to show (default: the Hafs count). The Libyan Mushaf passes its own (Qaloon) count. */
+  ayahCount?: number;
+  /** Arabic labels whatever the app language (the Libyan Mushaf is Arabic). */
+  arabic?: boolean;
+  /** Drawn inside a Mushaf page: no margins, touches pass through to the page. */
+  embedded?: boolean;
+}) {
   const { palette, isRTL } = useSettings();
   const { width: screenW } = useWindowDimensions();
-  const w = Math.min(screenW - 20, 680);
+  const w = width ?? Math.min(screenW - 20, 680);
   const h = w * (ART_H / ART_W);
+  const ar = arabic || isRTL;
 
   const chapter = chapters.find((c) => c.number === surah);
   const name = chapter?.nameArabic ?? '';
-  const count = getVerseCount(surah);
+  const count = ayahCount ?? getVerseCount(surah);
   const { tint, rgb } = ornamentColour(palette.primary);
   const circleText = textOn(rgb);
 
@@ -122,9 +142,10 @@ export const SurahHeaderOrnament = memo(function SurahHeaderOrnament({ surah }: 
 
   return (
     <View
-      style={[styles.wrap, { width: w, height: h }]}
+      style={[embedded ? null : styles.wrap, { width: w, height: h }]}
+      pointerEvents={embedded ? 'none' : 'auto'}
       accessible
-      accessibilityLabel={isRTL ? `${name}، آياتها ${count}، ترتيبها ${surah}` : `Surah ${surah}, ${count} verses`}
+      accessibilityLabel={ar ? `${name}، آياتها ${count}، ترتيبها ${surah}` : `Surah ${surah}, ${count} verses`}
     >
       <Image source={LAYERS.mask} style={[styles.layer, { tintColor: tint }]} resizeMode="stretch" />
       <Image source={LAYERS.dark} style={styles.layer} resizeMode="stretch" />
@@ -153,8 +174,8 @@ export const SurahHeaderOrnament = memo(function SurahHeaderOrnament({ surah }: 
       </View>
 
       {/* As in the artwork: ayah count on the left, the surah's order on the right. */}
-      {circle(CIRCLE_AYAT, isRTL ? 'آياتها' : 'Verses', count)}
-      {circle(CIRCLE_ORDER, isRTL ? 'ترتيبها' : 'Surah', surah)}
+      {circle(CIRCLE_AYAT, ar ? 'آياتها' : 'Verses', count)}
+      {circle(CIRCLE_ORDER, ar ? 'ترتيبها' : 'Surah', surah)}
     </View>
   );
 });

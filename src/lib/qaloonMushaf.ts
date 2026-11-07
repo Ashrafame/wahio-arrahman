@@ -91,6 +91,51 @@ export function surahStartPage(surah: number): number {
   return surahStart[surah] ?? 1;
 }
 
+/** Number of ayahs in a surah, in this Mushaf's own (Qaloon) count. */
+const ayahCounts: number[] = [];
+index.pages.forEach((p) => {
+  for (const [surah, ayah] of p.a) ayahCounts[surah] = Math.max(ayahCounts[surah] ?? 0, ayah);
+});
+export function surahAyahCount(surah: number): number {
+  return ayahCounts[surah] ?? 0;
+}
+
+// ── Surah headers ────────────────────────────────────────────────────────────
+// Each page has 15 lines of 150 units. A surah's printed header (its name,
+// ayah count and order, as plain text) takes the line two above its first ayah
+// (the line between is the basmala; At-Tawbah has none, so its header is the
+// line just above). Pages 1 and 2 are laid out differently: their header sits
+// higher, around y = 525. Checked against the rendered pages for all 114 surahs.
+
+export interface SurahHeaderSlot {
+  surah: number;
+  /** Where the ornament goes, in page units: centre and width. It stays inside
+   *  the header line and covers the printed header completely. */
+  cx: number;
+  cy: number;
+  width: number;
+}
+
+const LINE = 150;
+const headerSlots = new Map<number, SurahHeaderSlot[]>();
+index.pages.forEach((p, i) => {
+  const page = i + 1;
+  for (const [surah, ayah, rects] of p.a) {
+    if (ayah !== 1 || surahStart[surah] !== page) continue;
+    let top = Infinity;
+    for (let k = 1; k < rects.length; k += 4) top = Math.min(top, rects[k]);
+    const slot: SurahHeaderSlot = page <= 2
+      ? { surah, cx: 560, cy: 525, width: 680 }
+      : { surah, cx: 560, cy: top - (surah === 9 ? LINE : 2 * LINE) + LINE / 2, width: 878 };
+    headerSlots.set(page, [...(headerSlots.get(page) ?? []), slot]);
+  }
+});
+
+/** The surah headers printed on a page (most pages have none). */
+export function pageSurahHeaders(page: number): SurahHeaderSlot[] {
+  return headerSlots.get(page) ?? [];
+}
+
 /** Surahs that appear on a page, in order (for the page header). */
 export function pageSurahs(page: number): number[] {
   const seen: number[] = [];
@@ -172,15 +217,20 @@ export async function loadPage(page: number): Promise<PagePaths> {
   if (cached) return cached;
 
   let svg: string | null = null;
-  const file = pageFile(page);
-  if (file.exists) {
-    const local = await file.text();
-    if (isVerified(page, local)) svg = local;
-    else file.delete(); // damaged copy: fetch it again
+  let canStore = true;
+  try {
+    const file = pageFile(page);
+    if (file.exists) {
+      const local = await file.text();
+      if (isVerified(page, local)) svg = local;
+      else file.delete(); // damaged copy: fetch it again
+    }
+  } catch {
+    canStore = false; // no file system (the web version): fetch every time
   }
   if (!svg) {
     svg = await fetchVerified(page);
-    save(page, svg);
+    if (canStore) save(page, svg);
   }
 
   const paths = parsePage(svg);

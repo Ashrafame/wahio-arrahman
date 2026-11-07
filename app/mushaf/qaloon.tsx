@@ -29,12 +29,15 @@ import {
   ayahAt,
   loadPage,
   pageAyahs,
+  pageSurahHeaders,
   pageViewBox,
   pageSurahs,
   surahName,
+  surahAyahCount,
   surahShortName,
   surahStartPage,
 } from '../../src/lib/qaloonMushaf';
+import { ORNAMENT_ASPECT, SurahHeaderOrnament } from '../../src/components/SurahHeaderOrnament';
 
 const LAST_PAGE_KEY = 'wahio-arrahman:qaloon-libya:last-page';
 const BOOKMARKS_KEY = 'wahio-arrahman:qaloon-libya:bookmarks';
@@ -404,6 +407,7 @@ const MushafPage = memo(function MushafPage({
   }, [page, attempt]);
 
   const ayahs = useMemo(() => pageAyahs(page), [page]);
+  const headers = useMemo(() => pageSurahHeaders(page), [page]);
   const [vx, vy, vw, vh] = pageViewBox(page);
   const scale = width / vw;
 
@@ -443,7 +447,35 @@ const MushafPage = memo(function MushafPage({
             ? ayahs.slice(hiddenFrom).flatMap((a, i) => rectsOf(a.rects, colors.cover, 1, `c${i}`, 14))
             : null}
         </Svg>
-      ) : failed ? (
+      ) : null}
+      {/* Each surah's printed header (plain text) is covered by the decorated
+          header, with the same name, ayah count and order. It stays inside the
+          header line; the basmala and the ayahs are never covered. */}
+      {paths
+        ? headers.map((hd) => {
+            const unitsH = hd.width / ORNAMENT_ASPECT;
+            return (
+              <View
+                key={hd.surah}
+                pointerEvents="none"
+                style={{
+                  position: 'absolute',
+                  left: (hd.cx - hd.width / 2 - vx) * scale,
+                  top: (hd.cy - unitsH / 2 - vy) * scale,
+                }}
+              >
+                <SurahHeaderOrnament
+                  surah={hd.surah}
+                  width={hd.width * scale}
+                  ayahCount={surahAyahCount(hd.surah)}
+                  arabic
+                  embedded
+                />
+              </View>
+            );
+          })
+        : null}
+      {paths ? null : failed ? (
         <View style={styles.center}>
           <Ionicons name="cloud-offline-outline" size={40} color={colors.ornament} />
           <Text style={{ color: colors.text, marginTop: 10, textAlign: 'center' }}>
