@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Chapter } from '../lib/quranData';
 import { useSettings } from '../store/SettingsContext';
+import { SurahNumberBadge } from './SurahNumberBadge';
 
 interface Props {
   chapter: Chapter;
@@ -23,11 +24,14 @@ export function SurahListItem({ chapter, onPress }: Props) {
         },
       ]}
     >
-      <View style={[styles.badge, { backgroundColor: palette.primary }]}>
-        <Text style={[styles.badgeText, { color: palette.primaryText, fontSize: scaleFont(13) }]}>
-          {chapter.number}
-        </Text>
-      </View>
+      <SurahNumberBadge
+        number={chapter.number}
+        size={44}
+        fill={palette.primary}
+        gold={palette.accent}
+        textColor={palette.primaryText}
+        fontSize={scaleFont(chapter.number > 99 ? 12 : 13)}
+      />
       <View style={[styles.info, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
         <Text style={[styles.nameArabic, { color: palette.text, fontFamily: 'Amiri-Bold', fontSize: scaleFont(20) }]}>
           {chapter.nameArabic}
@@ -51,16 +55,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderBottomWidth: 1,
     gap: 12,
-  },
-  badge: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    fontWeight: '700',
   },
   info: {
     flex: 1,

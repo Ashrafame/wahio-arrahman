@@ -81,6 +81,11 @@ export function QaloonPlayerBar({
   const [hidden, setHidden] = useState(false);
   const [wake, setWake] = useState(0);
   const shown = useRef(new Animated.Value(1)).current;
+  // The play button (before any recitation) slides to the left edge after
+  // AUTO_HIDE_MS untouched, leaving a small tab; tapping the tab brings it back.
+  const [fabOpen, setFabOpen] = useState(true);
+  const [fabW, setFabW] = useState(200);
+  const fabSlide = useRef(new Animated.Value(1)).current;
 
   useEffect(() => subscribeAudio((key, playing) => setNow({ key, playing })), []);
   useEffect(() => subscribePosition((at, dur) => setPos({ at, dur })), []);
@@ -119,6 +124,20 @@ export function QaloonPlayerBar({
     }).start();
   }, [hidden, shown]);
 
+  // Show the play button again when the surah it would play changes (a new
+  // page or a tapped ayah) or when a recitation ends; tuck it away after a while.
+  useEffect(() => {
+    if (!active) setFabOpen(true);
+  }, [surahToPlay, active]);
+  useEffect(() => {
+    if (active || !fabOpen) return;
+    const t = setTimeout(() => setFabOpen(false), AUTO_HIDE_MS);
+    return () => clearTimeout(t);
+  }, [active, fabOpen, surahToPlay]);
+  useEffect(() => {
+    Animated.spring(fabSlide, { toValue: fabOpen ? 1 : 0, friction: 9, tension: 55, useNativeDriver: true }).start();
+  }, [fabOpen, fabSlide]);
+
   // Automatic page turning: show the page the reciter has reached.
   useEffect(() => {
     if (!current || !follow || !now.playing) return;
@@ -150,16 +169,53 @@ export function QaloonPlayerBar({
     // The button says which surah it will play, so a page shared by two surahs
     // is never ambiguous.
     return (
-      <Pressable
-        onPress={togglePlay}
-        style={[styles.fab, { backgroundColor: palette.primary, bottom: bottomInset + 16 }]}
-        accessibilityLabel={`تلاوة ${surahName(surahToPlay)} بصوت ${reciter.nameAr}`}
-      >
-        <Ionicons name="play" size={22} color={palette.primaryText} />
-        <Text numberOfLines={1} style={[styles.fabText, { color: palette.primaryText }]}>
-          {surahName(surahToPlay)}
-        </Text>
-      </Pressable>
+      <>
+        <Animated.View
+          pointerEvents={fabOpen ? 'auto' : 'none'}
+          onLayout={(e) => setFabW(e.nativeEvent.layout.width)}
+          style={[
+            styles.fabWrap,
+            {
+              bottom: bottomInset + 16,
+              transform: [{ translateX: fabSlide.interpolate({ inputRange: [0, 1], outputRange: [-(fabW + 30), 0] }) }],
+            },
+          ]}
+        >
+          <Pressable
+            onPress={togglePlay}
+            style={[styles.fab, { backgroundColor: palette.primary }]}
+            accessibilityLabel={`تلاوة ${surahName(surahToPlay)} بصوت ${reciter.nameAr}`}
+          >
+            <Ionicons name="play" size={22} color={palette.primaryText} />
+            <Text numberOfLines={1} style={[styles.fabText, { color: palette.primaryText }]}>
+              {surahName(surahToPlay)}
+            </Text>
+          </Pressable>
+        </Animated.View>
+
+        {/* The tab left at the screen edge while the button is tucked away. */}
+        <Animated.View
+          pointerEvents={fabOpen ? 'none' : 'auto'}
+          style={[
+            styles.tabWrap,
+            {
+              bottom: bottomInset + 16,
+              opacity: fabSlide.interpolate({ inputRange: [0, 0.6, 1], outputRange: [1, 0, 0] }),
+              transform: [{ translateX: fabSlide.interpolate({ inputRange: [0, 1], outputRange: [0, -40] }) }],
+            },
+          ]}
+        >
+          <Pressable
+            onPress={() => setFabOpen(true)}
+            hitSlop={{ top: 10, bottom: 10, right: 14 }}
+            style={[styles.tab, { backgroundColor: palette.primary, borderColor: palette.accent }]}
+            accessibilityLabel={`إظهار زر تلاوة ${surahName(surahToPlay)}`}
+          >
+            <Ionicons name="play" size={15} color={palette.primaryText} />
+            <Ionicons name="chevron-forward" size={13} color={palette.primaryText} style={{ marginTop: -2 }} />
+          </Pressable>
+        </Animated.View>
+      </>
     );
   }
 
@@ -247,8 +303,15 @@ export function QaloonPlayerBar({
 }
 
 const styles = StyleSheet.create({
+  fabWrap: { position: 'absolute', left: 18 },
+  tabWrap: { position: 'absolute', left: 0 },
+  tab: {
+    width: 30, height: 52, borderTopRightRadius: 16, borderBottomRightRadius: 16,
+    borderWidth: 1, borderLeftWidth: 0, alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 1, height: 2 }, elevation: 5,
+  },
   fab: {
-    position: 'absolute', left: 18, height: 52, maxWidth: 220, borderRadius: 26, paddingHorizontal: 18,
+    height: 52, maxWidth: 220, borderRadius: 26, paddingHorizontal: 18,
     flexDirection: 'row', alignItems: 'center', gap: 8,
     shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 5,
   },

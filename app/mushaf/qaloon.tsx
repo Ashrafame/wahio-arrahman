@@ -38,6 +38,7 @@ import {
   surahStartPage,
 } from '../../src/lib/qaloonMushaf';
 import { ORNAMENT_ASPECT, SurahHeaderOrnament } from '../../src/components/SurahHeaderOrnament';
+import { SurahNumberBadge } from '../../src/components/SurahNumberBadge';
 
 const LAST_PAGE_KEY = 'wahio-arrahman:qaloon-libya:last-page';
 const BOOKMARKS_KEY = 'wahio-arrahman:qaloon-libya:bookmarks';
@@ -74,7 +75,8 @@ interface Selected {
 }
 
 export default function QaloonMushafScreen() {
-  const params = useLocalSearchParams<{ page?: string; surah?: string }>();
+  // index=1: open with the surah index showing (from the Hafs/Qaloon switch).
+  const params = useLocalSearchParams<{ page?: string; surah?: string; index?: string }>();
   const { palette, isRTL } = useSettings();
   const insets = useSafeAreaInsets();
   const { width: screenW } = useWindowDimensions();
@@ -92,7 +94,7 @@ export default function QaloonMushafScreen() {
   const [selected, setSelected] = useState<Selected | null>(null);
   const [hifz, setHifz] = useState(false);
   const [revealed, setRevealed] = useState<Record<number, number>>({});
-  const [indexOpen, setIndexOpen] = useState(false);
+  const [indexOpen, setIndexOpen] = useState(params.index === '1');
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [weight, setWeight] = useState(DEFAULT_WEIGHT);
   // Turn pages with the recitation; paused when the reader swipes by hand.
@@ -530,8 +532,8 @@ function IndexModal({
                 {bookmarks.map((b) => (
                   <Pressable key={b} onPress={() => onPick(b)} style={[styles.row, { backgroundColor: palette.surface, borderColor: palette.border }]}>
                     <Ionicons name="bookmark" size={18} color={palette.accent} />
-                    <Text style={{ color: palette.text, flex: 1, textAlign: 'right' }}>
-                      صفحة {b} · {pageSurahs(b).map(surahName).join(' — ')}
+                    <Text style={{ color: palette.text, flex: 1, textAlign: 'right', fontSize: 17, fontWeight: '600' }}>
+                      صفحة {b} · {pageSurahs(b).map(surahShortName).join(' — ')}
                     </Text>
                   </Pressable>
                 ))}
@@ -546,10 +548,16 @@ function IndexModal({
                 onPress={() => onPick(start, item.number)}
                 style={[styles.row, { backgroundColor: here ? palette.surfaceAlt : palette.surface, borderColor: palette.border }]}
               >
-                <Text style={{ color: palette.textMuted, width: 64, textAlign: 'left' }}>ص {start}</Text>
-                <Text style={{ color: palette.text, flex: 1, textAlign: 'right', fontWeight: '600' }}>
-                  {item.number}. {item.nameArabic}
-                </Text>
+                <Text style={{ color: palette.textMuted, width: 70, textAlign: 'left', fontSize: 15 }}>ص {start}</Text>
+                <Text style={[styles.indexName, { color: palette.text }]}>{item.nameArabic}</Text>
+                <SurahNumberBadge
+                  number={item.number}
+                  size={38}
+                  fill={palette.primary}
+                  gold={palette.accent}
+                  textColor={palette.primaryText}
+                  fontSize={item.number > 99 ? 11 : 12}
+                />
               </Pressable>
             );
           }}
@@ -570,6 +578,7 @@ const styles = StyleSheet.create({
   hifzBar: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 8, borderBottomWidth: 1 },
   ayahBar: { position: 'absolute', alignSelf: 'center', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20, borderWidth: 1 },
   retry: { marginTop: 14, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },
+  indexName: { flex: 1, textAlign: 'right', fontFamily: 'Amiri-Bold', fontSize: 21, includeFontPadding: false },
   sectionTitle: { fontSize: 13, fontWeight: '700', marginBottom: 6, textAlign: 'right' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 12, borderWidth: 1, marginBottom: 8 },
 });

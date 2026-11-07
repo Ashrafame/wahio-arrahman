@@ -19,6 +19,7 @@ import { KeepAwakeWhilePlaying } from '../src/components/KeepAwakeWhilePlaying';
 import { NotificationsManager } from '../src/components/NotificationsManager';
 import { AthanPlayer } from '../src/components/AthanPlayer';
 import { UpdatePrompt } from '../src/components/UpdatePrompt';
+import { NowPlayingStop } from '../src/components/NowPlayingStop';
 import { ensureAudioMode } from '../src/lib/audio';
 import { useAndroidNavBarInset } from '../src/lib/insets';
 
@@ -68,6 +69,7 @@ function RootStack() {
         <Stack.Screen name="tools/riwayat" options={{ headerShown: false }} />
         <Stack.Screen name="about" options={{ headerShown: false }} />
       </Stack>
+      <NowPlayingStop />
       <KeepAwakeWhilePlaying />
       <NotificationsManager />
       <AthanPlayer />

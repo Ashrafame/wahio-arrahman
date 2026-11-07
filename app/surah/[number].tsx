@@ -292,9 +292,10 @@ export default function SurahScreen() {
   };
 
   const handleQiraahChange = (newQiraah: 'hafs' | 'qaloon') => {
-    // Qaloon is read from the Libyan Awqaf Mushaf pages, opened at this surah.
+    // Qaloon is read from the Libyan Awqaf Mushaf: open its index (over this
+    // surah's page), so the reader picks where to go.
     if (newQiraah === 'qaloon') {
-      router.push({ pathname: '/mushaf/qaloon', params: { surah: String(chapterNumber) } });
+      router.push({ pathname: '/mushaf/qaloon', params: { surah: String(chapterNumber), index: '1' } });
       return;
     }
     setQiraah(newQiraah);
