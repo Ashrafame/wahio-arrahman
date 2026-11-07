@@ -181,6 +181,12 @@ export default function AboutScreen() {
               sub: ar ? 'صفحات المصحف المطبوع كما هي' : 'The printed pages, unchanged',
             },
             {
+              label: ar ? 'تلاوات قالون وتوقيت الآيات' : 'Qaloon recitations & ayah timings',
+              value: 'mp3quran.net',
+              sub: ar ? 'لقلب صفحات المصحف تلقائياً مع التلاوة' : 'Used to turn the Mushaf pages with the recitation',
+              url: 'https://mp3quran.net',
+            },
+            {
               label: ar ? 'الترجمة الإنجليزية' : 'English Translation',
               value: ar ? 'ترجمة عبد الله يوسف علي' : 'Abdullah Yusuf Ali',
               sub: '',

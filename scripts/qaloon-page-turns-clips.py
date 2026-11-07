@@ -43,10 +43,12 @@ def main(reciter, picks):
         beep_ms = round((at - start) * 1000)
         out = os.path.join(out_dir, f'{reciter}-{surah:03d}-{page:03d}.mp3')
         subprocess.run(
-            ['ffmpeg', '-v', 'error', '-y', '-nostdin', '-ss', f'{start:.3f}', '-t', f'{LENGTH_S}',
-             '-i', os.path.join(audio, f'{surah:03d}.mp3'), '-f', 'lavfi', '-i', 'sine=f=1000:d=0.15',
+            # Trim after decoding (atrim): slower than seeking, but exact on long MP3s.
+            ['ffmpeg', '-v', 'error', '-y', '-nostdin',
+             '-i', os.path.join(audio, f'{surah:03d}.mp3'), '-f', 'lavfi', '-i', 'sine=f=1000:d=0.25',
              '-filter_complex',
-             f'[1]adelay={beep_ms}:all=1,volume=0.3[b];[0:a:0][b]amix=inputs=2:duration=first:normalize=0',
+             f'[0:a:0]atrim=start={start:.3f}:duration={LENGTH_S},asetpts=PTS-STARTPTS[r];'
+             f'[1]adelay={beep_ms}:all=1,volume=0.9[b];[r][b]amix=inputs=2:duration=first:normalize=0',
              '-ac', '2', out], check=True)
         before = [a for s, a, _ in index['pages'][page - 2]['a'] if s == surah]
         after = [a for s, a, _ in index['pages'][page - 1]['a'] if s == surah]
