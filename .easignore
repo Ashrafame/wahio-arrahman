@@ -1,0 +1,59 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+
+# stray / nested project copies and dev-only files (never ship to builds)
+/wahio-arrahman/
+Wahio Arrahmaan Screens/
+app copy.json
+refresh-wahio.sh
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
+
+# ── EAS uploads only (EAS uses this file INSTEAD of .gitignore, so everything above is repeated) ──
+# Libyan Awqaf Qaloon pages (240 MB): the app downloads them from GitHub; only the index is bundled.
+assets/source/qaloon-libyan-awqaf/
+
+# Local, untracked folders on the developer Mac (not part of the app)
+/Vercel Web/
+/web and Privacy/
+/quran-uthmani.txt
+
+# Python bytecode (from running scripts/*.py)
+__pycache__/

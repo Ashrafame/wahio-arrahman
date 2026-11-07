@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "وَحْيُ الرَّحْمَن",
+    "slug": "wahio-arrahman",
+    "version": "1.0.0",
+    "scheme": "wahioarrahman",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-router",
+      "expo-localization",
+      [
+        
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#303c25",
+          "image": "./assets/splash.png",
+          "resizeMode": "cover"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "يستخدم التطبيق موقعك الحالي لتحديد اتجاه القبلة ومواقيت الصلاة بدقة."
+        }
+      ],
+      "./plugins/withAndroidAudioNoCapture"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wahioarrahman.app"
+    },
+    "android": {
+      "package": "com.wahioarrahman.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F4C3A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    }
+  }
+}
